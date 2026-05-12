@@ -67,13 +67,13 @@ class WeddingPlanningApp {
     try {
       [this.guests, this.tasks, this.budget, this.vendors, this.venues, this.foods, this.timeline] =
         await Promise.all([
-          this.apiCall('/api/guests', 'GET'),
-          this.apiCall('/api/tasks', 'GET'),
-          this.apiCall('/api/budget/items', 'GET'),
-          this.apiCall('/api/vendors', 'GET'),
-          this.apiCall('/api/venues', 'GET'),
-          this.apiCall('/api/food', 'GET'),
-          this.apiCall('/api/timeline', 'GET'),
+          this.apiCall('/api/guests', 'GET').catch(e => []),
+          this.apiCall('/api/tasks', 'GET').catch(e => []),
+          this.apiCall('/api/budget/items', 'GET').catch(e => []),
+          this.apiCall('/api/vendors', 'GET').catch(e => []),
+          this.apiCall('/api/venues', 'GET').catch(e => []),
+          this.apiCall('/api/food', 'GET').catch(e => []),
+          this.apiCall('/api/timeline', 'GET').catch(e => []),
         ]);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -120,6 +120,8 @@ class WeddingPlanningApp {
         window.taskListPage?.init?.();
       } else if (page === 'budget') {
         window.budgetPage?.init?.();
+      } else if (page === 'vendors') {
+        window.vendorPage?.init?.();
       }
     }
   }
@@ -356,6 +358,35 @@ class WeddingPlanningApp {
         form.querySelector('[name="notes"]').value = expense.notes || '';
       }
       modal.dataset.expenseId = expense.id;
+      modal.style.display = 'flex';
+    }
+  }
+
+  openAddVendorModal() {
+    const modal = document.querySelector('[data-modal="addVendor"]');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  openEditVendorModal(vendor) {
+    const modal = document.querySelector('[data-modal="editVendor"]');
+    if (modal) {
+      const form = modal.querySelector('form');
+      if (form) {
+        form.querySelector('[name="name"]').value = vendor.name;
+        form.querySelector('[name="category"]').value = vendor.category || '';
+        form.querySelector('[name="contactName"]').value = vendor.contactName || '';
+        form.querySelector('[name="email"]').value = vendor.email || '';
+        form.querySelector('[name="phone"]').value = vendor.phone || '';
+        form.querySelector('[name="website"]').value = vendor.website || '';
+        form.querySelector('[name="eventType"]').value = vendor.eventType || '';
+        form.querySelector('[name="status"]').value = vendor.status;
+        form.querySelector('[name="bookedDate"]').value = vendor.bookedDate || '';
+        form.querySelector('[name="serviceDate"]').value = vendor.serviceDate || '';
+        form.querySelector('[name="costEstimate"]').value = vendor.costEstimate || '';
+        form.querySelector('[name="costActual"]').value = vendor.costActual || '';
+        form.querySelector('[name="notes"]').value = vendor.notes || '';
+      }
+      modal.dataset.vendorId = vendor.id;
       modal.style.display = 'flex';
     }
   }

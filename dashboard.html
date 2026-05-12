@@ -200,11 +200,46 @@
             <div data-view="vendors">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Vendor Management</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddVendorModal?.()">+ Add Vendor</button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm vendor-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-primary btn-sm vendor-add-btn">+ Add Vendor</button>
+                    </div>
                 </div>
 
-                <div class="grid grid-3" id="vendorGrid">
-                    <!-- Vendor cards will be populated here -->
+                <!-- Stats -->
+                <div class="vendor-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="vendor-category-filter" style="margin-bottom: 0;">
+                            <option value="">All Categories</option>
+                            <option value="Photography">Photography</option>
+                            <option value="Catering">Catering</option>
+                            <option value="Florist">Florist</option>
+                            <option value="Music/DJ">Music/DJ</option>
+                            <option value="Decor">Decor</option>
+                            <option value="Venue">Venue</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Makeup/Hair">Makeup/Hair</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <select class="vendor-status-filter" style="margin-bottom: 0;">
+                            <option value="">All Status</option>
+                            <option value="inquiry">Inquiry</option>
+                            <option value="negotiating">Negotiating</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div class="vendor-grid-container">
+                    <!-- Vendor cards will be rendered here -->
                 </div>
             </div>
 
@@ -624,6 +659,160 @@
         </div>
     </div>
 
+    <!-- Add Vendor Modal -->
+    <div data-modal="addVendor" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Vendor</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Vendor Name *</label>
+                <input type="text" name="name" placeholder="e.g., Decorators Plus" required>
+
+                <label>Category *</label>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Catering">Catering</option>
+                    <option value="Florist">Florist</option>
+                    <option value="Music/DJ">Music/DJ</option>
+                    <option value="Decor">Decor</option>
+                    <option value="Venue">Venue</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Makeup/Hair">Makeup/Hair</option>
+                    <option value="Invitations">Invitations</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label>Contact Name</label>
+                <input type="text" name="contactName" placeholder="Contact person name">
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="vendor@example.com">
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
+
+                <label>Website</label>
+                <input type="url" name="website" placeholder="https://vendor.com">
+
+                <label>Event Type</label>
+                <select name="eventType">
+                    <option value="">Select Event</option>
+                    <option value="Ceremony">Ceremony</option>
+                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
+                    <option value="Pre-Wedding">Pre-Wedding</option>
+                    <option value="Sangeet">Sangeet</option>
+                    <option value="Mehendi">Mehendi</option>
+                    <option value="Reception">Reception</option>
+                </select>
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="inquiry">Inquiry</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Cost Estimate (₹ in Lakhs)</label>
+                <input type="number" name="costEstimate" placeholder="e.g., 5" step="0.1" min="0">
+
+                <label>Service Date</label>
+                <input type="date" name="serviceDate">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Vendor</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Vendor Modal -->
+    <div data-modal="editVendor" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Vendor</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Vendor Name *</label>
+                <input type="text" name="name" placeholder="Vendor name" required>
+
+                <label>Category *</label>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Catering">Catering</option>
+                    <option value="Florist">Florist</option>
+                    <option value="Music/DJ">Music/DJ</option>
+                    <option value="Decor">Decor</option>
+                    <option value="Venue">Venue</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Makeup/Hair">Makeup/Hair</option>
+                    <option value="Invitations">Invitations</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label>Contact Name</label>
+                <input type="text" name="contactName" placeholder="Contact person name">
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="vendor@example.com">
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
+
+                <label>Website</label>
+                <input type="url" name="website" placeholder="https://vendor.com">
+
+                <label>Event Type</label>
+                <select name="eventType">
+                    <option value="">Select Event</option>
+                    <option value="Ceremony">Ceremony</option>
+                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
+                    <option value="Pre-Wedding">Pre-Wedding</option>
+                    <option value="Sangeet">Sangeet</option>
+                    <option value="Mehendi">Mehendi</option>
+                    <option value="Reception">Reception</option>
+                </select>
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="inquiry">Inquiry</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Booked Date</label>
+                <input type="date" name="bookedDate">
+
+                <label>Service Date</label>
+                <input type="date" name="serviceDate">
+
+                <label>Cost Estimate (₹ in Lakhs)</label>
+                <input type="number" name="costEstimate" placeholder="e.g., 5" step="0.1" min="0">
+
+                <label>Amount Paid (₹ in Lakhs)</label>
+                <input type="number" name="costActual" placeholder="e.g., 2.5" step="0.1" min="0">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="modules/api.js"></script>
     <script src="app.js"></script>
@@ -632,6 +821,8 @@
     <script src="modules/tasks.js"></script>
     <script src="pages/tasks.js"></script>
     <script src="modules/budget.js"></script>
+    <script src="modules/vendors.js"></script>
+    <script src="pages/vendors.js"></script>
     <script src="pages/budget.js"></script>
     <script src="modules/vendors.js"></script>
     <script src="modules/venues.js"></script>

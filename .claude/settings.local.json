@@ -29,7 +29,9 @@
       "Bash(curl -s https://api.github.com/repos/balrajparsi/wedding-planning)",
       "Bash(git fetch *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'Phase 3: Task Board and Budget Tracker implementation *)"
+      "Bash(git commit -m 'Phase 3: Task Board and Budget Tracker implementation *)",
+      "Bash(git push *)",
+      "Bash(grep -n \"data-modal\" \"C:\\\\\\\\Users\\\\\\\\balra\\\\\\\\Claude local\\\\\\\\dashboard.html\")"
     ]
   }
 }
