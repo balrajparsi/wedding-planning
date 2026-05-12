@@ -1,1282 +1,1217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akhila & Akshay - Wedding Planning Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="dashboard-additions.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akhila & Akshay — August 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold:      #b8860b;
+  --gold-lt:   #d4a017;
+  --gold-pale: #e8c84a;
+  --sand:      #c9a96e;
+  --parchment: #f5e6c8;
+  --parchment-dk: #e8d5a8;
+  --ink:       #1a0f00;
+  --crimson:   #7a1a1a;
+  --rust:      #8b3a1a;
+  --navy:      #1a3a52;
+  --serif:     'IM Fell English', 'Cormorant Garamond', Georgia, serif;
+  --display:   'Cormorant Garamond', Georgia, serif;
+  --sans:      'Poppins', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--display);
+  background: #0a0600;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+   ROLLING BACKGROUND ENGINE
+   The fort panorama travels left-to-right
+   as you scroll top-to-bottom.
+═══════════════════════════════════════ */
+#rolling-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The panoramic fort image — 3× wider than viewport */
+#rolling-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* wide enough to travel across: starts left, ends right */
+  width: 280vw;
+  height: 100%;
+  background:
+    url('https://images.unsplash.com/photo-1477587458883-47145ed94245?w=3000&q=85&fit=crop&crop=center')
+    left center / cover no-repeat;
+  will-change: transform;
+  transform: translateX(0);
+  transition: transform 0.05s linear;
+}
+
+/* Dark cinematic overlay — thinner at middle to show more image */
+#rolling-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%);
+  /* Vignette edges */
+  box-shadow: inset 0 0 140px rgba(0,0,0,0.55);
+}
+
+/* Film grain */
+#rolling-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+/* All page content sits above */
+.page-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* ═══════════════════════════════════════
+   NAV DOTS (right side)
+═══════════════════════════════════════ */
+.nav-dots {
+  position: fixed;
+  right: 1.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(184,134,11,0.5);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  background: transparent;
+}
+
+.nav-dot.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  transform: scale(1.5);
+}
+
+/* ═══════════════════════════════════════
+   SECTION 1 — HERO
+═══════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+}
+
+/* Gold horizontal rule divider */
+.gold-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin: 1rem 0;
+}
+
+.rule-bar {
+  flex: 1;
+  max-width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.8));
+}
+
+.rule-bar.r { background: linear-gradient(90deg, rgba(212,160,23,0.8), transparent); }
+.rule-gem { color: var(--gold-lt); font-size: 0.65rem; letter-spacing: 6px; }
+
+/* Ornate border frame around hero text */
+.hero-frame {
+  max-width: 800px;
+  width: 100%;
+  border: 1px solid rgba(184,134,11,0.45);
+  padding: 3.5rem 4rem;
+  position: relative;
+  background: rgba(0,0,0,0.18);
+  backdrop-filter: blur(1px);
+}
+
+.hero-frame::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(184,134,11,0.15);
+  pointer-events: none;
+}
+
+.frame-corner {
+  position: absolute;
+  font-size: 1.2rem;
+  color: var(--gold-lt);
+  line-height: 1;
+}
+
+.fc-tl { top: -4px; left: -4px; }
+.fc-tr { top: -4px; right: -4px; }
+.fc-bl { bottom: -4px; left: -4px; }
+.fc-br { bottom: -4px; right: -4px; }
+
+.hero-eyebrow {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(212,160,23,0.8);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: riseIn 1s 0.2s ease forwards;
+}
+
+.hero-names {
+  font-family: var(--serif);
+  font-size: clamp(3.2rem, 9vw, 6.5rem);
+  font-weight: 400;
+  color: white;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.6), 0 0 80px rgba(184,134,11,0.1);
+  margin: 0.2rem 0;
+  opacity: 0;
+  animation: riseIn 1.2s 0.5s ease forwards;
+}
+
+.hero-names .amp {
+  font-style: italic;
+  color: var(--gold-pale);
+}
+
+.hero-date {
+  display: inline-block;
+  padding: 0.45rem 1.8rem;
+  border: 1px solid rgba(184,134,11,0.35);
+  background: rgba(184,134,11,0.08);
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(212,160,23,0.9);
+  margin: 0.8rem 0 1.8rem;
+  opacity: 0;
+  animation: riseIn 1s 0.8s ease forwards;
+}
+
+/* Countdown */
+.countdown-wrap {
+  opacity: 0;
+  animation: riseIn 1s 1s ease forwards;
+  margin-bottom: 2rem;
+}
+
+.cd-pre {
+  font-family: var(--sans);
+  font-size: 0.5rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 1rem;
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+}
+
+.cd-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-right: 1px solid rgba(184,134,11,0.2);
+}
+
+.cd-block:last-child { border-right: none; }
+
+.cd-num {
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  font-weight: 300;
+  color: white;
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(212,160,23,0.35);
+  letter-spacing: -0.02em;
+  min-width: 2.5ch;
+  text-align: center;
+}
+
+.cd-lbl {
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-lt);
+  margin-top: 0.5rem;
+  opacity: 0.75;
+}
+
+/* CTA */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.95rem 2.8rem;
+  border: 1px solid rgba(184,134,11,0.7);
+  color: var(--gold-pale);
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.5s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: riseIn 1s 1.2s ease forwards;
+}
+
+.hero-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--gold), var(--rust));
+  transform: translateX(-101%);
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.hero-cta:hover { color: white; border-color: transparent; letter-spacing: 5px; }
+.hero-cta:hover::before { transform: translateX(0); }
+.hero-cta span { position: relative; z-index: 1; }
+.hero-cta .arr { transition: transform 0.3s; }
+.hero-cta:hover .arr { transform: translateX(5px); }
+
+/* Petals */
+.petal {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+  font-size: 1rem;
+  animation: petalFall linear infinite;
+  opacity: 0;
+}
+
+@keyframes petalFall {
+  0%   { top: -50px; opacity: 0; transform: rotate(0deg) translateX(0); }
+  5%   { opacity: 0.55; }
+  88%  { opacity: 0.3; }
+  100% { top: 105vh; opacity: 0; transform: rotate(600deg) translateX(60px); }
+}
+
+.p1  { left:3%;  animation-duration:9s;   animation-delay:0s;    font-size:0.85rem; }
+.p2  { left:12%; animation-duration:12s;  animation-delay:1.5s; }
+.p3  { left:22%; animation-duration:8.5s; animation-delay:0.8s;  font-size:1.1rem; }
+.p4  { left:34%; animation-duration:11s;  animation-delay:2.8s;  font-size:0.75rem; }
+.p5  { left:48%; animation-duration:9.5s; animation-delay:0.4s; }
+.p6  { left:61%; animation-duration:13s;  animation-delay:1.9s;  font-size:0.9rem; }
+.p7  { left:73%; animation-duration:8s;   animation-delay:0.6s; }
+.p8  { left:84%; animation-duration:10s;  animation-delay:3.3s;  font-size:1.1rem; }
+.p9  { left:93%; animation-duration:11.5s;animation-delay:1s;   font-size:0.8rem; }
+.p10 { left:42%; animation-duration:10.5s;animation-delay:4.5s; }
+.p11 { left:7%;  animation-duration:14s;  animation-delay:5.5s;  font-size:0.9rem; }
+.p12 { left:77%; animation-duration:9s;   animation-delay:3.8s;  font-size:1.2rem; }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: riseIn 1s 2s ease forwards;
+}
+
+.sh-text {
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.sh-chevrons span {
+  display: block;
+  width: 14px; height: 14px;
+  border-right: 1px solid rgba(184,134,11,0.5);
+  border-bottom: 1px solid rgba(184,134,11,0.5);
+  transform: rotate(45deg);
+  margin: -5px auto 0;
+  animation: chevPulse 1.6s infinite;
+}
+
+.sh-chevrons span:nth-child(2) { animation-delay: 0.2s; opacity: 0.6; }
+.sh-chevrons span:nth-child(3) { animation-delay: 0.4s; opacity: 0.3; }
+
+@keyframes chevPulse {
+  0%,100% { opacity: 0.8; } 50% { opacity: 0.15; }
+}
+
+/* ═══════════════════════════════════════
+   SECTION 2 — THE STORY
+   Semi-transparent parchment panel
+═══════════════════════════════════════ */
+#story {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Left: transparent / shows rolling bg */
+.story-open {
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* Right: frosted parchment panel */
+.story-panel {
+  width: 50%;
+  background: rgba(245,230,200,0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 7rem 4.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 3px solid var(--gold);
+  position: relative;
+}
+
+/* Stamp corner marks */
+.story-panel::before {
+  content: '';
+  position: absolute;
+  top: 2rem; left: 2rem;
+  width: 36px; height: 36px;
+  border-top: 2px solid var(--sand);
+  border-left: 2px solid var(--sand);
+}
+
+.story-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 2rem; right: 2rem;
+  width: 36px; height: 36px;
+  border-bottom: 2px solid var(--sand);
+  border-right: 2px solid var(--sand);
+}
+
+.s-eyebrow {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 1.2rem;
+}
+
+.s-heading {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(139,58,26,0.15);
+}
+
+.s-heading em { font-style: italic; color: var(--crimson); }
+
+.s-body {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: rgba(26,15,0,0.62);
+  margin-bottom: 2rem;
+}
+
+/* Formal printed-card block */
+.inv-card {
+  background: rgba(232,213,168,0.6);
+  border: 1px solid var(--sand);
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+.inv-card::before {
+  content: '— Invitation —';
+  position: absolute;
+  top: -0.6rem; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(232,213,168,0.95);
+  padding: 0 0.8rem;
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sand);
+  white-space: nowrap;
+}
+
+.inv-row { margin-bottom: 1rem; }
+.inv-row:last-child { margin-bottom: 0; }
+
+.inv-k {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.5rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sand);
+  margin-bottom: 0.2rem;
+}
+
+.inv-v {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════
+   SECTION 3 — EVENTS
+   Transparent / shows rolling bg
+═══════════════════════════════════════ */
+#events {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+}
+
+.ev-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.ev-rule {
+  height: 1px;
+  max-width: 400px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.7), transparent);
+}
+
+.ev-title {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  color: white;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+.ev-sub {
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(184,134,11,0.7);
+  margin-top: 0.5rem;
+}
+
+/* Cards float over the rolling bg */
+.events-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  max-width: 1100px;
+  width: 100%;
+  background: rgba(184,134,11,0.15);
+  border: 1px solid rgba(184,134,11,0.2);
+}
+
+.ev-card {
+  background: rgba(10,6,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 2.5rem 2rem;
+  transition: all 0.45s ease;
+  cursor: default;
+  position: relative;
+}
+
+.ev-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-lt), transparent);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+
+.ev-card:hover { background: rgba(10,6,0,0.3); }
+.ev-card:hover::after { transform: scaleX(1); }
+
+.ev-num {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 3px;
+  color: rgba(184,134,11,0.4);
+  margin-bottom: 1.5rem;
+}
+
+.ev-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
+
+.ev-name {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  color: white;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.ev-name-sub {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.52rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-lt);
+  opacity: 0.7;
+  margin-top: 0.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.ev-sep {
+  width: 30px; height: 1px;
+  background: rgba(184,134,11,0.3);
+  margin-bottom: 1.2rem;
+}
+
+.ev-meta {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+.ev-badge {
+  display: inline-block;
+  margin-top: 1.2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(184,134,11,0.3);
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-lt);
+}
+
+.ev-badge.confirmed {
+  border-color: rgba(184,134,11,0.7);
+  color: var(--gold-pale);
+}
+
+/* ═══════════════════════════════════════
+   SECTION 4 — PLANNER (parchment)
+═══════════════════════════════════════ */
+#planner {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  position: relative;
+}
+
+/* Full-width frosted parchment */
+.planner-inner {
+  width: 100%;
+  max-width: 960px;
+  background: rgba(245,230,200,0.93);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 4rem 4rem 3.5rem;
+  border: 1px solid rgba(139,90,26,0.25);
+  color: var(--ink);
+  position: relative;
+}
+
+/* Vintage gazette header */
+.gazette-header {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 3px double rgba(139,58,26,0.25);
+}
+
+.gazette-tag {
+  font-family: var(--sans);
+  font-size: 0.5rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--rust);
+  opacity: 0.6;
+  margin-bottom: 0.8rem;
+}
+
+.gazette-title {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.gazette-deck {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(26,15,0,0.45);
+  margin-top: 0.7rem;
+}
+
+/* Newspaper-style 3×2 grid */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid rgba(139,90,26,0.15);
+  margin-bottom: 2.5rem;
+}
+
+.feat-col {
+  padding: 1.8rem;
+  border-right: 1px solid rgba(139,90,26,0.12);
+  border-bottom: 1px solid rgba(139,90,26,0.12);
+  transition: background 0.3s;
+}
+
+.feat-col:nth-child(3), .feat-col:nth-child(6) { border-right: none; }
+.feat-col:nth-child(4), .feat-col:nth-child(5), .feat-col:nth-child(6) { border-bottom: none; }
+.feat-col:hover { background: rgba(139,58,26,0.04); }
+
+.feat-num {
+  font-family: var(--sans);
+  font-size: 0.48rem;
+  letter-spacing: 2px;
+  color: var(--sand);
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  display: block;
+}
+
+.feat-icon {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(139,90,26,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+}
+
+.feat-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.feat-body {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  color: rgba(26,15,0,0.42);
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.planner-cta-wrap { text-align: center; }
+
+.planner-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 3.5rem;
+  background: var(--ink);
+  color: var(--gold-pale);
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  border: 2px solid var(--ink);
+}
+
+.planner-cta:hover {
+  background: transparent;
+  color: var(--ink);
+  letter-spacing: 6px;
+}
+
+.planner-cta .arr { transition: transform 0.3s; }
+.planner-cta:hover .arr { transform: translateX(5px); }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer {
+  position: relative;
+  z-index: 10;
+  background: rgba(10,6,0,0.9);
+  backdrop-filter: blur(8px);
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+footer::before {
+  content: '';
+  display: block;
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 3rem;
+}
+
+.ft-names {
+  font-family: var(--serif);
+  font-size: 3rem;
+  font-weight: 300;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.ft-names span { color: var(--gold-lt); font-style: italic; }
+
+.ft-detail {
+  font-family: var(--sans);
+  font-size: 0.52rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  margin-bottom: 2rem;
+}
+
+.ft-orn {
+  font-size: 0.75rem;
+  color: rgba(184,134,11,0.22);
+  letter-spacing: 10px;
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.ft-credit {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.13);
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════
+   REVEAL ANIMATION
+═══════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.85s ease, transform 0.85s ease;
+}
+
+.reveal.in { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; }
+.d2 { transition-delay: 0.22s; }
+.d3 { transition-delay: 0.34s; }
+.d4 { transition-delay: 0.46s; }
+.d5 { transition-delay: 0.58s; }
+.d6 { transition-delay: 0.7s; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  #story { flex-direction: column; }
+  .story-open { min-height: 45vh; flex: none; width: 100%; }
+  .story-panel { width: 100%; padding: 4rem 2.5rem; }
+  .events-row { grid-template-columns: repeat(2, 1fr); }
+  .feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .feat-col:nth-child(2) { border-right: none; }
+  .feat-col:nth-child(3) { border-right: 1px solid rgba(139,90,26,0.12); }
+  .nav-dots { display: none; }
+  .planner-inner { padding: 3rem 2rem; }
+}
+
+@media (max-width: 600px) {
+  .hero-frame { padding: 2rem 1.5rem; }
+  .hero-names { font-size: 2.8rem; }
+  .events-row { grid-template-columns: 1fr; }
+  .feat-grid { grid-template-columns: 1fr; }
+  .feat-col { border-right: none !important; }
+}
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-content">
-            <h1 class="couple-name">Akhila & Akshay</h1>
-            <div class="user-menu">
-                <span id="userGreeting">💍 Wedding Planning Dashboard</span>
-                <a href="#settings" data-page="settings">⚙️ Settings</a>
-            </div>
+
+<!-- ═══ ROLLING BACKGROUND ═══ -->
+<div id="rolling-stage">
+  <div id="rolling-img"></div>
+</div>
+<div id="rolling-overlay"></div>
+
+<!-- ═══ PETALS (fixed, always visible) ═══ -->
+<span class="petal p1">🌸</span>
+<span class="petal p2">🌹</span>
+<span class="petal p3">✿</span>
+<span class="petal p4">🌺</span>
+<span class="petal p5">🌸</span>
+<span class="petal p6">🌹</span>
+<span class="petal p7">✿</span>
+<span class="petal p8">🌸</span>
+<span class="petal p9">🌺</span>
+<span class="petal p10">🌹</span>
+<span class="petal p11">🌸</span>
+<span class="petal p12">✿</span>
+
+<!-- ═══ NAV DOTS ═══ -->
+<nav class="nav-dots" id="navDots">
+  <div class="nav-dot active" onclick="goTo('hero')"></div>
+  <div class="nav-dot" onclick="goTo('story')"></div>
+  <div class="nav-dot" onclick="goTo('events')"></div>
+  <div class="nav-dot" onclick="goTo('planner')"></div>
+</nav>
+
+<!-- ═══════════════════════════════════
+     PAGE CONTENT
+═══════════════════════════════════ -->
+<div class="page-content">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-frame">
+      <span class="frame-corner fc-tl">✦</span>
+      <span class="frame-corner fc-tr">✦</span>
+      <span class="frame-corner fc-bl">✦</span>
+      <span class="frame-corner fc-br">✦</span>
+
+      <p class="hero-eyebrow">You are cordially invited to celebrate the union of</p>
+
+      <div class="gold-rule">
+        <span class="rule-bar"></span>
+        <span class="rule-gem">◆ ◆ ◆</span>
+        <span class="rule-bar r"></span>
+      </div>
+
+      <h1 class="hero-names">
+        Akhila <span class="amp">&amp;</span> Akshay
+      </h1>
+
+      <div class="gold-rule" style="animation-delay:.7s">
+        <span class="rule-bar"></span>
+        <span class="rule-gem">◆ ◆ ◆</span>
+        <span class="rule-bar r"></span>
+      </div>
+
+      <div class="hero-date">August 2026</div>
+
+      <div class="countdown-wrap">
+        <p class="cd-pre">Counting down to the celebration</p>
+        <div class="countdown">
+          <div class="cd-block">
+            <span class="cd-num" id="cd-d">000</span>
+            <span class="cd-lbl">Days</span>
+          </div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-h">00</span>
+            <span class="cd-lbl">Hours</span>
+          </div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-m">00</span>
+            <span class="cd-lbl">Minutes</span>
+          </div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-s">00</span>
+            <span class="cd-lbl">Seconds</span>
+          </div>
         </div>
-    </header>
+      </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-nav">
-            <div class="nav-section">
-                <label class="nav-label">Planning</label>
-                <ul class="nav-links">
-                    <li><a href="#dashboard" data-page="dashboard" class="active">📋 Dashboard</a></li>
-                    <li><a href="#guests" data-page="guests">👥 Guest List</a></li>
-                    <li><a href="#tasks" data-page="tasks">✓ Tasks</a></li>
-                    <li><a href="#budget" data-page="budget">💰 Budget</a></li>
-                    <li><a href="#vendors" data-page="vendors">🏢 Vendors</a></li>
-                </ul>
-            </div>
-            <div class="nav-section">
-                <label class="nav-label">Events</label>
-                <ul class="nav-links">
-                    <li><a href="#venues" data-page="venues">📍 Venues</a></li>
-                    <li><a href="#food" data-page="food">🍽️ Food & Menu</a></li>
-                    <li><a href="#timeline" data-page="timeline">📅 Timeline</a></li>
-                </ul>
-            </div>
-            </div><!-- end sidebar-nav -->
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Dashboard View -->
-            <div data-view="dashboard" class="active">
-                <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--blue);">Dashboard Overview</h2>
-                <div class="dashboard-grid">
-                    <!-- Stats will be rendered by app.js -->
-                </div>
-            </div>
-
-            <!-- Guest List View -->
-            <div data-view="guests">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Guest List</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">📧 Bulk Invite</button>
-                        <button class="btn btn-secondary btn-sm guest-export-btn">⬇️ Export CSV</button>
-                        <button class="btn btn-primary btn-sm guest-add-btn">+ Add Guest</button>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="guest-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters & Search -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
-                        <input type="text" placeholder="🔍 Search name/email..." class="guest-search" style="margin-bottom: 0;">
-                        <select class="guest-rsvp-filter" style="margin-bottom: 0;">
-                            <option value="">All RSVP Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="declined">Declined</option>
-                            <option value="maybe">Maybe</option>
-                        </select>
-                        <select class="guest-dietary-filter" style="margin-bottom: 0;">
-                            <option value="">All Dietary</option>
-                            <option value="vegetarian">Vegetarian</option>
-                            <option value="vegan">Vegan</option>
-                            <option value="gluten-free">Gluten-Free</option>
-                            <option value="none">None</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="guest-table-container">
-                    <!-- Table will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Task Board View -->
-            <div data-view="tasks">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Tasks & Checklist</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm task-view-toggle">📊 Toggle View</button>
-                        <button class="btn btn-primary btn-sm task-add-btn">+ Add Task</button>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="task-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="task-category-filter" style="margin-bottom: 0;">
-                            <option value="">All Categories</option>
-                            <option value="vendors">Vendors</option>
-                            <option value="logistics">Logistics</option>
-                            <option value="design">Design</option>
-                            <option value="communication">Communication</option>
-                            <option value="finance">Finance</option>
-                            <option value="general">General</option>
-                        </select>
-                        <select class="task-status-filter" style="margin-bottom: 0;">
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Board -->
-                <div class="task-board-container">
-                    <!-- Kanban or list view will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Budget Tracker View -->
-            <div data-view="budget">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Budget Tracker</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm budget-export-btn">⬇️ Export CSV</button>
-                        <button class="btn btn-primary btn-sm budget-add-btn">+ Add Expense</button>
-                    </div>
-                </div>
-
-                <!-- Summary Stats -->
-                <div class="budget-summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="budget-category-filter" style="margin-bottom: 0;">
-                            <option value="">All Categories</option>
-                            <option value="venue">Venue</option>
-                            <option value="catering">Catering</option>
-                            <option value="photography">Photography</option>
-                            <option value="florist">Florist</option>
-                            <option value="music">Music</option>
-                            <option value="decor">Decor</option>
-                            <option value="attire">Attire</option>
-                            <option value="rings">Rings</option>
-                            <option value="invitations">Invitations</option>
-                            <option value="misc">Misc</option>
-                        </select>
-                        <select class="budget-status-filter" style="margin-bottom: 0;">
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="partial">Partial</option>
-                            <option value="paid">Paid</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Category Breakdown -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <h4 style="color: var(--blue); margin-bottom: 1.5rem;">Category Breakdown</h4>
-                    <div class="budget-breakdown">
-                        <!-- Categories will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Expense Table -->
-                <div class="budget-table-container">
-                    <!-- Table will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Vendor Manager View -->
-            <div data-view="vendors">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Vendor Management</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm vendor-view-toggle">📊 Toggle View</button>
-                        <button class="btn btn-primary btn-sm vendor-add-btn">+ Add Vendor</button>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="vendor-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="vendor-category-filter" style="margin-bottom: 0;">
-                            <option value="">All Categories</option>
-                            <option value="Photography">Photography</option>
-                            <option value="Catering">Catering</option>
-                            <option value="Florist">Florist</option>
-                            <option value="Music/DJ">Music/DJ</option>
-                            <option value="Decor">Decor</option>
-                            <option value="Venue">Venue</option>
-                            <option value="Transportation">Transportation</option>
-                            <option value="Makeup/Hair">Makeup/Hair</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <select class="vendor-status-filter" style="margin-bottom: 0;">
-                            <option value="">All Status</option>
-                            <option value="inquiry">Inquiry</option>
-                            <option value="negotiating">Negotiating</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="paid">Paid</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Grid -->
-                <div class="vendor-grid-container">
-                    <!-- Vendor cards will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Venue List View -->
-            <div data-view="venues">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Venue & Events</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm venue-view-toggle">📊 Toggle View</button>
-                        <button class="btn btn-primary btn-sm venue-add-btn">+ Add Venue</button>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="venue-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="venue-event-type-filter" style="margin-bottom: 0;">
-                            <option value="">All Event Types</option>
-                            <option value="Ceremony">Ceremony</option>
-                            <option value="Rehearsal Dinner">Rehearsal Dinner</option>
-                            <option value="Pre-Wedding">Pre-Wedding</option>
-                            <option value="Sangeet">Sangeet</option>
-                            <option value="Mehendi">Mehendi</option>
-                            <option value="Reception">Reception</option>
-                        </select>
-                        <select class="venue-status-filter" style="margin-bottom: 0;">
-                            <option value="">All Status</option>
-                            <option value="inquiry">Inquiry</option>
-                            <option value="negotiating">Negotiating</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="paid">Paid</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Grid -->
-                <div class="venue-grid-container">
-                    <!-- Venue cards will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Food & Menu View -->
-            <div data-view="food">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Food & Menu Planning</h2>
-                    <button class="btn btn-primary btn-sm food-add-btn">+ Add Dish</button>
-                </div>
-
-                <!-- Stats -->
-                <div class="food-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filters -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="food-event-type-filter" style="margin-bottom: 0;">
-                            <option value="">All Events</option>
-                            <option value="main-wedding">Main Wedding</option>
-                            <option value="pre-wedding">Pre-Wedding</option>
-                            <option value="rehearsal">Rehearsal</option>
-                            <option value="sangeet">Sangeet</option>
-                            <option value="mehendi">Mehendi</option>
-                            <option value="reception">Reception</option>
-                        </select>
-                        <select class="food-course-type-filter" style="margin-bottom: 0;">
-                            <option value="">All Courses</option>
-                            <option value="appetizers">Appetizers</option>
-                            <option value="mains">Mains</option>
-                            <option value="sides">Sides</option>
-                            <option value="desserts">Desserts</option>
-                            <option value="beverages">Beverages</option>
-                            <option value="snacks">Snacks</option>
-                        </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Food List Container -->
-                <div class="food-list-container">
-                    <!-- Food items will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Timeline View -->
-            <div data-view="timeline">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Timeline & Milestones</h2>
-                    <button class="btn btn-primary btn-sm timeline-add-btn">+ Add Milestone</button>
-                </div>
-
-                <!-- Stats -->
-                <div class="timeline-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                    <!-- Stats will be rendered here -->
-                </div>
-
-                <!-- Filter -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <select class="timeline-type-filter" style="margin-bottom: 0;">
-                            <option value="">All Types</option>
-                            <option value="event">Event</option>
-                            <option value="deadline">Deadline</option>
-                            <option value="reminder">Reminder</option>
-                            <option value="milestone">Milestone</option>
-                        </select>
-                        <div></div>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
-                    </div>
-                </div>
-
-                <!-- Timeline Container -->
-                <div class="timeline-container">
-                    <!-- Timeline items will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Settings View -->
-            <div data-view="settings">
-                <h2 style="font-size: 2rem; color: var(--blue); margin-bottom: 2rem;">Settings</h2>
-
-                <div class="card">
-                    <h4 style="margin-bottom: 1.5rem;">Wedding Details</h4>
-                    <form id="weddingForm">
-                        <label>Couple Name</label>
-                        <input type="text" id="coupleName" placeholder="Couple Name">
-
-                        <label>Wedding Date</label>
-                        <input type="date" id="weddingDate">
-
-                        <label>Location</label>
-                        <input type="text" id="location" placeholder="Wedding Location">
-
-                        <label>Currency</label>
-                        <select id="currency">
-                            <option value="INR">₹ INR</option>
-                            <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
-                        </select>
-
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
-                </div>
-
-                <div class="card" style="margin-top: 2rem;">
-                    <h4 style="margin-bottom: 1.5rem;">Manage Planners</h4>
-                    <div id="plannersList">
-                        <!-- Planners list will be populated here -->
-                    </div>
-                    <button class="btn btn-secondary" onclick="app?.openInvitePlannerModal?.()">+ Invite Planner</button>
-                </div>
-            </div>
-        </main>
+      <a href="dashboard.html" class="hero-cta">
+        <span>Enter Planning Dashboard</span>
+        <span class="arr">→</span>
+      </a>
     </div>
 
-    <!-- Modals -->
+    <div class="scroll-hint">
+      <span class="sh-text">Scroll to explore</span>
+      <div class="sh-chevrons">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </section>
 
-    <!-- Add Guest Modal -->
-    <div data-modal="addGuest" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Guest</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Guest Name *</label>
-                <input type="text" name="name" placeholder="Full name" required>
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="guest@example.com">
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="Contact number">
-
-                <label>Relationship</label>
-                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
-
-                <label>Party Size</label>
-                <input type="number" name="partySize" value="1" min="1">
-
-                <label>Dietary Restrictions</label>
-                <select name="dietary">
-                    <option value="none">None</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="gluten-free">Gluten-Free</option>
-                    <option value="other">Other</option>
-                </select>
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Any special notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Guest</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+  <!-- STORY -->
+  <section id="story">
+    <div class="story-open"></div>
+    <div class="story-panel">
+      <p class="s-eyebrow reveal d1">The Royal Union</p>
+      <h2 class="s-heading reveal d2">A Love <em>Written</em><br>in the Stars</h2>
+      <p class="s-body reveal d3">
+        Two hearts, one extraordinary celebration. Akhila and Akshay invite their dearest family and friends to bear witness to their union — where ancient palaces mirror upon still waters and every stone tells a story of love enduring through ages.
+      </p>
+      <div class="inv-card reveal d4">
+        <div class="inv-row">
+          <span class="inv-k">The Date</span>
+          <span class="inv-v">August 2026</span>
         </div>
+        <div class="inv-row">
+          <span class="inv-k">The Venue</span>
+          <span class="inv-v">To Be Announced</span>
+        </div>
+        <div class="inv-row">
+          <span class="inv-k">The Family</span>
+          <span class="inv-v">Akhila · Akshay · Balraj &amp; Parents</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events">
+    <div class="ev-header">
+      <div class="ev-rule"></div>
+      <h2 class="ev-title reveal">The Celebrations</h2>
+      <p class="ev-sub reveal d1">Four sacred ceremonies · One eternal bond</p>
+      <div class="ev-rule" style="margin-top:1.5rem"></div>
     </div>
 
-    <!-- Edit Guest Modal -->
-    <div data-modal="editGuest" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Guest</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Guest Name *</label>
-                <input type="text" name="name" placeholder="Full name" required>
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="guest@example.com">
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="Contact number">
-
-                <label>Relationship</label>
-                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
-
-                <label>Party Size</label>
-                <input type="number" name="partySize" value="1" min="1">
-
-                <label>Dietary Restrictions</label>
-                <select name="dietary">
-                    <option value="none">None</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="gluten-free">Gluten-Free</option>
-                    <option value="other">Other</option>
-                </select>
-
-                <label>RSVP Status</label>
-                <select name="rsvpStatus">
-                    <option value="pending">Pending</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="declined">Declined</option>
-                    <option value="maybe">Maybe</option>
-                </select>
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Any special notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
+    <div class="events-row">
+      <div class="ev-card reveal d1">
+        <span class="ev-num">I.</span>
+        <span class="ev-icon">🌿</span>
+        <h3 class="ev-name">Mehendi</h3>
+        <span class="ev-name-sub">Henna Ceremony</span>
+        <div class="ev-sep"></div>
+        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="ev-badge">Coming Soon</span>
+      </div>
+      <div class="ev-card reveal d2">
+        <span class="ev-num">II.</span>
+        <span class="ev-icon">🎶</span>
+        <h3 class="ev-name">Sangeet</h3>
+        <span class="ev-name-sub">Music &amp; Dance</span>
+        <div class="ev-sep"></div>
+        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="ev-badge">Coming Soon</span>
+      </div>
+      <div class="ev-card reveal d3">
+        <span class="ev-num">III.</span>
+        <span class="ev-icon">💍</span>
+        <h3 class="ev-name">Wedding</h3>
+        <span class="ev-name-sub">Main Ceremony</span>
+        <div class="ev-sep"></div>
+        <p class="ev-meta">August 2026<br>Venue · To Be Confirmed</p>
+        <span class="ev-badge confirmed">Confirmed</span>
+      </div>
+      <div class="ev-card reveal d4">
+        <span class="ev-num">IV.</span>
+        <span class="ev-icon">🎊</span>
+        <h3 class="ev-name">Reception</h3>
+        <span class="ev-name-sub">Grand Celebration</span>
+        <div class="ev-sep"></div>
+        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="ev-badge">Coming Soon</span>
+      </div>
     </div>
+  </section>
 
-    <!-- Bulk Invite Modal -->
-    <div data-modal="bulkInvite" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Send Bulk RSVP Invitations</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Filter Guests to Invite</label>
-                <select name="filterStatus">
-                    <option value="all">All Guests</option>
-                    <option value="pending">Pending RSVP Only</option>
-                    <option value="accepted">Accepted Only</option>
-                </select>
+  <!-- PLANNER -->
+  <section id="planner">
+    <div class="planner-inner">
+      <div class="gazette-header reveal">
+        <p class="gazette-tag">✦ The Wedding Gazette ✦</p>
+        <h2 class="gazette-title">Planning the Perfect Day</h2>
+        <p class="gazette-deck">Every detail, beautifully organised — for the family who cares deeply.</p>
+      </div>
 
-                <p style="color: var(--text-muted); margin-top: 1rem;">
-                    Invitations will be sent to guests with valid email addresses.
-                </p>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Send Invitations</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+      <div class="feat-grid">
+        <div class="feat-col reveal d1">
+          <span class="feat-num">I — Guests</span>
+          <div class="feat-icon">👥</div>
+          <h4 class="feat-title">Guest List</h4>
+          <p class="feat-body">RSVP tracking, dietary requirements &amp; seating coordination.</p>
         </div>
-    </div>
-
-    <!-- Add Task Modal -->
-    <div data-modal="addTask" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Task</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Task Title *</label>
-                <input type="text" name="title" placeholder="Task title" required>
-
-                <label>Category</label>
-                <select name="category">
-                    <option value="general">General</option>
-                    <option value="vendors">Vendors</option>
-                    <option value="logistics">Logistics</option>
-                    <option value="design">Design</option>
-                    <option value="communication">Communication</option>
-                    <option value="finance">Finance</option>
-                </select>
-
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
-
-                <label>Priority</label>
-                <select name="priority">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                </select>
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Task notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Task</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+        <div class="feat-col reveal d2">
+          <span class="feat-num">II — Tasks</span>
+          <div class="feat-icon">✅</div>
+          <h4 class="feat-title">Task Board</h4>
+          <p class="feat-body">Categorised checklists with deadlines, priorities &amp; assignments.</p>
         </div>
-    </div>
-
-    <!-- Edit Task Modal -->
-    <div data-modal="editTask" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Task</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Task Title *</label>
-                <input type="text" name="title" placeholder="Task title" required>
-
-                <label>Category</label>
-                <select name="category">
-                    <option value="general">General</option>
-                    <option value="vendors">Vendors</option>
-                    <option value="logistics">Logistics</option>
-                    <option value="design">Design</option>
-                    <option value="communication">Communication</option>
-                    <option value="finance">Finance</option>
-                </select>
-
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
-
-                <label>Priority</label>
-                <select name="priority">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                </select>
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Task notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+        <div class="feat-col reveal d3">
+          <span class="feat-num">III — Finance</span>
+          <div class="feat-icon">💰</div>
+          <h4 class="feat-title">Budget</h4>
+          <p class="feat-body">Expense tracking by category — budgeted vs. actual.</p>
         </div>
-    </div>
-
-    <!-- Add Expense Modal -->
-    <div data-modal="addExpense" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Expense</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Description *</label>
-                <input type="text" name="description" placeholder="Expense description" required>
-
-                <label>Category *</label>
-                <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="venue">Venue</option>
-                    <option value="catering">Catering</option>
-                    <option value="photography">Photography</option>
-                    <option value="florist">Florist</option>
-                    <option value="music">Music</option>
-                    <option value="decor">Decor</option>
-                    <option value="attire">Attire</option>
-                    <option value="rings">Rings</option>
-                    <option value="invitations">Invitations</option>
-                    <option value="transportation">Transportation</option>
-                    <option value="misc">Miscellaneous</option>
-                </select>
-
-                <label>Budgeted Amount (₹ in Lakhs)</label>
-                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
-
-                <label>Actual Amount (₹ in Lakhs)</label>
-                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending">Pending</option>
-                    <option value="partial">Partial Payment</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Vendor Name</label>
-                <input type="text" name="vendor" placeholder="Vendor name">
-
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Expense</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+        <div class="feat-col reveal d4">
+          <span class="feat-num">IV — Vendors</span>
+          <div class="feat-icon">🏢</div>
+          <h4 class="feat-title">Vendors</h4>
+          <p class="feat-body">Booking status, contacts &amp; contracts for every provider.</p>
         </div>
-    </div>
-
-    <!-- Edit Expense Modal -->
-    <div data-modal="editExpense" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Expense</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Description *</label>
-                <input type="text" name="description" placeholder="Expense description" required>
-
-                <label>Category *</label>
-                <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="venue">Venue</option>
-                    <option value="catering">Catering</option>
-                    <option value="photography">Photography</option>
-                    <option value="florist">Florist</option>
-                    <option value="music">Music</option>
-                    <option value="decor">Decor</option>
-                    <option value="attire">Attire</option>
-                    <option value="rings">Rings</option>
-                    <option value="invitations">Invitations</option>
-                    <option value="transportation">Transportation</option>
-                    <option value="misc">Miscellaneous</option>
-                </select>
-
-                <label>Budgeted Amount (₹ in Lakhs)</label>
-                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
-
-                <label>Actual Amount (₹ in Lakhs)</label>
-                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending">Pending</option>
-                    <option value="partial">Partial Payment</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Vendor Name</label>
-                <input type="text" name="vendor" placeholder="Vendor name">
-
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+        <div class="feat-col reveal d5">
+          <span class="feat-num">V — Venues</span>
+          <div class="feat-icon">📍</div>
+          <h4 class="feat-title">Venues</h4>
+          <p class="feat-body">Ceremony, sangeet, mehendi &amp; reception management.</p>
         </div>
-    </div>
-
-    <!-- Add Vendor Modal -->
-    <div data-modal="addVendor" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Vendor</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Vendor Name *</label>
-                <input type="text" name="name" placeholder="e.g., Decorators Plus" required>
-
-                <label>Category *</label>
-                <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Photography">Photography</option>
-                    <option value="Catering">Catering</option>
-                    <option value="Florist">Florist</option>
-                    <option value="Music/DJ">Music/DJ</option>
-                    <option value="Decor">Decor</option>
-                    <option value="Venue">Venue</option>
-                    <option value="Transportation">Transportation</option>
-                    <option value="Makeup/Hair">Makeup/Hair</option>
-                    <option value="Invitations">Invitations</option>
-                    <option value="Other">Other</option>
-                </select>
-
-                <label>Contact Name</label>
-                <input type="text" name="contactName" placeholder="Contact person name">
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="vendor@example.com">
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
-
-                <label>Website</label>
-                <input type="url" name="website" placeholder="https://vendor.com">
-
-                <label>Event Type</label>
-                <select name="eventType">
-                    <option value="">Select Event</option>
-                    <option value="Ceremony">Ceremony</option>
-                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
-                    <option value="Pre-Wedding">Pre-Wedding</option>
-                    <option value="Sangeet">Sangeet</option>
-                    <option value="Mehendi">Mehendi</option>
-                    <option value="Reception">Reception</option>
-                </select>
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="inquiry">Inquiry</option>
-                    <option value="negotiating">Negotiating</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Cost Estimate (₹ in Lakhs)</label>
-                <input type="number" name="costEstimate" placeholder="e.g., 5" step="0.1" min="0">
-
-                <label>Service Date</label>
-                <input type="date" name="serviceDate">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Vendor</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
+        <div class="feat-col reveal d6">
+          <span class="feat-num">VI — Dining</span>
+          <div class="feat-icon">🍽️</div>
+          <h4 class="feat-title">Food &amp; Menu</h4>
+          <p class="feat-body">Menu planning with per-guest dietary accommodations.</p>
         </div>
+      </div>
+
+      <div class="planner-cta-wrap reveal d4">
+        <a href="dashboard.html" class="planner-cta">
+          Enter the Dashboard
+          <span class="arr">→</span>
+        </a>
+      </div>
     </div>
-
-    <!-- Edit Vendor Modal -->
-    <div data-modal="editVendor" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Vendor</h3>
-                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Vendor Name *</label>
-                <input type="text" name="name" placeholder="Vendor name" required>
-
-                <label>Category *</label>
-                <select name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Photography">Photography</option>
-                    <option value="Catering">Catering</option>
-                    <option value="Florist">Florist</option>
-                    <option value="Music/DJ">Music/DJ</option>
-                    <option value="Decor">Decor</option>
-                    <option value="Venue">Venue</option>
-                    <option value="Transportation">Transportation</option>
-                    <option value="Makeup/Hair">Makeup/Hair</option>
-                    <option value="Invitations">Invitations</option>
-                    <option value="Other">Other</option>
-                </select>
-
-                <label>Contact Name</label>
-                <input type="text" name="contactName" placeholder="Contact person name">
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="vendor@example.com">
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
-
-                <label>Website</label>
-                <input type="url" name="website" placeholder="https://vendor.com">
-
-                <label>Event Type</label>
-                <select name="eventType">
-                    <option value="">Select Event</option>
-                    <option value="Ceremony">Ceremony</option>
-                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
-                    <option value="Pre-Wedding">Pre-Wedding</option>
-                    <option value="Sangeet">Sangeet</option>
-                    <option value="Mehendi">Mehendi</option>
-                    <option value="Reception">Reception</option>
-                </select>
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="inquiry">Inquiry</option>
-                    <option value="negotiating">Negotiating</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Booked Date</label>
-                <input type="date" name="bookedDate">
-
-                <label>Service Date</label>
-                <input type="date" name="serviceDate">
-
-                <label>Cost Estimate (₹ in Lakhs)</label>
-                <input type="number" name="costEstimate" placeholder="e.g., 5" step="0.1" min="0">
-
-                <label>Amount Paid (₹ in Lakhs)</label>
-                <input type="number" name="costActual" placeholder="e.g., 2.5" step="0.1" min="0">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Venue Modal -->
-    <div data-modal="addVenue" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Venue</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Venue Name *</label>
-                <input type="text" name="name" placeholder="e.g., The Grand Palace" required>
-
-                <label>Event Type *</label>
-                <select name="eventType" required>
-                    <option value="">Select Event Type</option>
-                    <option value="Ceremony">Ceremony</option>
-                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
-                    <option value="Pre-Wedding">Pre-Wedding</option>
-                    <option value="Sangeet">Sangeet</option>
-                    <option value="Mehendi">Mehendi</option>
-                    <option value="Reception">Reception</option>
-                </select>
-
-                <label>Location</label>
-                <input type="text" name="location" placeholder="City/Area">
-
-                <label>Full Address</label>
-                <textarea name="address" placeholder="Complete address"></textarea>
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
-
-                <label>Contact Person</label>
-                <input type="text" name="contactPerson" placeholder="Name">
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="venue@example.com">
-
-                <label>Capacity</label>
-                <input type="number" name="capacity" placeholder="Number of guests" min="0">
-
-                <label>Cost Estimate (₹ in Lakhs)</label>
-                <input type="number" name="costEstimate" placeholder="e.g., 10" step="0.1" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="inquiry">Inquiry</option>
-                    <option value="negotiating">Negotiating</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Event Date</label>
-                <input type="date" name="eventDate">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Venue</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Venue Modal -->
-    <div data-modal="editVenue" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Venue</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Venue Name *</label>
-                <input type="text" name="name" placeholder="Venue name" required>
-
-                <label>Event Type *</label>
-                <select name="eventType" required>
-                    <option value="">Select Event Type</option>
-                    <option value="Ceremony">Ceremony</option>
-                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
-                    <option value="Pre-Wedding">Pre-Wedding</option>
-                    <option value="Sangeet">Sangeet</option>
-                    <option value="Mehendi">Mehendi</option>
-                    <option value="Reception">Reception</option>
-                </select>
-
-                <label>Location</label>
-                <input type="text" name="location" placeholder="City/Area">
-
-                <label>Full Address</label>
-                <textarea name="address" placeholder="Complete address"></textarea>
-
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
-
-                <label>Contact Person</label>
-                <input type="text" name="contactPerson" placeholder="Name">
-
-                <label>Email</label>
-                <input type="email" name="email" placeholder="venue@example.com">
-
-                <label>Capacity</label>
-                <input type="number" name="capacity" placeholder="Number of guests" min="0">
-
-                <label>Cost Estimate (₹ in Lakhs)</label>
-                <input type="number" name="costEstimate" placeholder="e.g., 10" step="0.1" min="0">
-
-                <label>Amount Paid (₹ in Lakhs)</label>
-                <input type="number" name="costActual" placeholder="e.g., 5" step="0.1" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="inquiry">Inquiry</option>
-                    <option value="negotiating">Negotiating</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="paid">Paid</option>
-                </select>
-
-                <label>Event Date</label>
-                <input type="date" name="eventDate">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Dish Modal -->
-    <div data-modal="addDish" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Menu Item</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Dish Name *</label>
-                <input type="text" name="dish" placeholder="e.g., Butter Chicken" required>
-
-                <label>Event Type *</label>
-                <select name="eventType" required>
-                    <option value="">Select Event</option>
-                    <option value="main-wedding">Main Wedding</option>
-                    <option value="pre-wedding">Pre-Wedding</option>
-                    <option value="rehearsal">Rehearsal</option>
-                    <option value="sangeet">Sangeet</option>
-                    <option value="mehendi">Mehendi</option>
-                    <option value="reception">Reception</option>
-                </select>
-
-                <label>Course Type *</label>
-                <select name="courseType" required>
-                    <option value="">Select Course</option>
-                    <option value="appetizers">Appetizers</option>
-                    <option value="mains">Mains</option>
-                    <option value="sides">Sides</option>
-                    <option value="desserts">Desserts</option>
-                    <option value="beverages">Beverages</option>
-                    <option value="snacks">Snacks</option>
-                </select>
-
-                <label>Veg / Non-Veg</label>
-                <select name="vegNonVeg">
-                    <option value="both">Both</option>
-                    <option value="veg">Vegetarian</option>
-                    <option value="non-veg">Non-Vegetarian</option>
-                </select>
-
-                <label>Cuisine</label>
-                <select name="cuisine">
-                    <option value="">Select Cuisine</option>
-                    <option value="indian">Indian</option>
-                    <option value="fusion">Fusion</option>
-                    <option value="continental">Continental</option>
-                    <option value="other">Other</option>
-                </select>
-
-                <label>Cost per portion (₹)</label>
-                <input type="number" name="cost" placeholder="e.g., 500" step="10" min="0">
-
-                <label>Portion Size</label>
-                <input type="text" name="portionSize" placeholder="e.g., 1 plate">
-
-                <label>Prepared By</label>
-                <input type="text" name="preparedBy" placeholder="Vendor name or notes">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Dish</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Dish Modal -->
-    <div data-modal="editDish" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Menu Item</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Dish Name *</label>
-                <input type="text" name="dish" placeholder="Dish name" required>
-
-                <label>Event Type *</label>
-                <select name="eventType" required>
-                    <option value="">Select Event</option>
-                    <option value="main-wedding">Main Wedding</option>
-                    <option value="pre-wedding">Pre-Wedding</option>
-                    <option value="rehearsal">Rehearsal</option>
-                    <option value="sangeet">Sangeet</option>
-                    <option value="mehendi">Mehendi</option>
-                    <option value="reception">Reception</option>
-                </select>
-
-                <label>Course Type *</label>
-                <select name="courseType" required>
-                    <option value="">Select Course</option>
-                    <option value="appetizers">Appetizers</option>
-                    <option value="mains">Mains</option>
-                    <option value="sides">Sides</option>
-                    <option value="desserts">Desserts</option>
-                    <option value="beverages">Beverages</option>
-                    <option value="snacks">Snacks</option>
-                </select>
-
-                <label>Veg / Non-Veg</label>
-                <select name="vegNonVeg">
-                    <option value="both">Both</option>
-                    <option value="veg">Vegetarian</option>
-                    <option value="non-veg">Non-Vegetarian</option>
-                </select>
-
-                <label>Cuisine</label>
-                <select name="cuisine">
-                    <option value="">Select Cuisine</option>
-                    <option value="indian">Indian</option>
-                    <option value="fusion">Fusion</option>
-                    <option value="continental">Continental</option>
-                    <option value="other">Other</option>
-                </select>
-
-                <label>Cost per portion (₹)</label>
-                <input type="number" name="cost" placeholder="Cost" step="10" min="0">
-
-                <label>Portion Size</label>
-                <input type="text" name="portionSize" placeholder="e.g., 1 plate">
-
-                <label>Prepared By</label>
-                <input type="text" name="preparedBy" placeholder="Vendor name or notes">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Milestone Modal -->
-    <div data-modal="addMilestone" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Milestone</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Type *</label>
-                <select name="type" required>
-                    <option value="">Select Type</option>
-                    <option value="event">Event</option>
-                    <option value="deadline">Deadline</option>
-                    <option value="reminder">Reminder</option>
-                    <option value="milestone">Milestone</option>
-                </select>
-
-                <label>Title *</label>
-                <input type="text" name="title" placeholder="e.g., Send Invitations" required>
-
-                <label>Date *</label>
-                <input type="date" name="date" required>
-
-                <label>Location</label>
-                <input type="text" name="location" placeholder="Venue or location">
-
-                <label>Description</label>
-                <textarea name="description" placeholder="Describe this milestone..."></textarea>
-
-                <label>Attendees (comma-separated)</label>
-                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Milestone</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Milestone Modal -->
-    <div data-modal="editMilestone" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Milestone</h3>
-                <button class="modal-close">✕</button>
-            </div>
-            <form class="modal-form">
-                <label>Type *</label>
-                <select name="type" required>
-                    <option value="">Select Type</option>
-                    <option value="event">Event</option>
-                    <option value="deadline">Deadline</option>
-                    <option value="reminder">Reminder</option>
-                    <option value="milestone">Milestone</option>
-                </select>
-
-                <label>Title *</label>
-                <input type="text" name="title" placeholder="Milestone title" required>
-
-                <label>Date *</label>
-                <input type="date" name="date" required>
-
-                <label>Location</label>
-                <input type="text" name="location" placeholder="Venue or location">
-
-                <label>Description</label>
-                <textarea name="description" placeholder="Describe this milestone..."></textarea>
-
-                <label>Attendees (comma-separated)</label>
-                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
-
-                <label>Notes</label>
-                <textarea name="notes" placeholder="Additional notes..."></textarea>
-
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="modules/api.js"></script>
-    <script src="app.js"></script>
-
-    <!-- Guest Management -->
-    <script src="modules/guests.js"></script>
-    <script src="pages/guests.js"></script>
-
-    <!-- Task Management -->
-    <script src="modules/tasks.js"></script>
-    <script src="pages/tasks.js"></script>
-
-    <!-- Budget Tracking -->
-    <script src="modules/budget.js"></script>
-    <script src="pages/budget.js"></script>
-
-    <!-- Vendor Management -->
-    <script src="modules/vendors.js"></script>
-    <script src="pages/vendors.js"></script>
-
-    <!-- Venues -->
-    <script src="modules/venues.js"></script>
-    <script src="pages/venues.js"></script>
-
-    <!-- Food & Menu -->
-    <script src="modules/food.js"></script>
-    <script src="pages/food.js"></script>
-
-    <!-- Timeline -->
-    <script src="modules/timeline.js"></script>
-    <script src="pages/timeline.js"></script>
-
-    <!-- Animations & Scroll Effects -->
-    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="components/container-scroll.js"></script>
-    <script src="components/hero-section.js"></script>
+  </section>
+
+</div><!-- /page-content -->
+
+<!-- FOOTER -->
+<footer>
+  <h2 class="ft-names">Akhila <span>&amp;</span> Akshay</h2>
+  <p class="ft-detail">August 2026 · With Love</p>
+  <span class="ft-orn">✦ &nbsp; ✦ &nbsp; ✦</span>
+  <p class="ft-credit">Made with love for the most beautiful day</p>
+</footer>
+
+<script>
+/* ══════════════════════════════════
+   THE ROLLING BACKGROUND ENGINE
+   Fort panorama travels as you scroll:
+   — Starts: dome/left side of fort visible
+   — Ends:   right wing of fort visible
+   Direction: left → right (image pans right)
+══════════════════════════════════ */
+const rollingImg = document.getElementById('rolling-img');
+
+function updateRolling() {
+  const scrollTop   = window.scrollY;
+  const maxScroll   = document.documentElement.scrollHeight - window.innerHeight;
+  const progress    = Math.min(1, scrollTop / maxScroll);
+
+  // Image is 280vw wide. Viewport is 100vw.
+  // So we can travel 180vw horizontally.
+  // At progress=0: translateX(0)   — left/dome side shows
+  // At progress=1: translateX(-180vw) — right side of fort shows
+  const maxTravel   = -(window.innerWidth * 1.8);
+  const xPos        = progress * maxTravel;
+
+  // Slight vertical drift for depth
+  const yPos        = progress * 40;
+
+  rollingImg.style.transform = `translate(${xPos}px, ${yPos}px)`;
+}
+
+window.addEventListener('scroll', updateRolling, { passive: true });
+window.addEventListener('resize', updateRolling, { passive: true });
+updateRolling();
+
+/* ══ COUNTDOWN ══ */
+function tick() {
+  const target = new Date('2026-08-15T10:00:00+05:30');
+  const now    = new Date();
+  const diff   = Math.max(0, target - now);
+
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000)  / 60000);
+  const s = Math.floor((diff % 60000)    / 1000);
+
+  document.getElementById('cd-d').textContent = String(d).padStart(3,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+
+tick();
+setInterval(tick, 1000);
+
+/* ══ SCROLL REVEALS ══ */
+const io = new IntersectionObserver(entries =>
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+  { threshold: 0.12 }
+);
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ══ NAV DOTS ══ */
+const sections = ['hero','story','events','planner'];
+const dots     = document.querySelectorAll('.nav-dot');
+
+function goTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+const sio = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio >= 0.4) {
+      const i = sections.indexOf(e.target.id);
+      if (i !== -1) {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[i].classList.add('active');
+      }
+    }
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) sio.observe(el);
+});
+</script>
 </body>
 </html>
