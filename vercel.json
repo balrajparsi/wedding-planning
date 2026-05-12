@@ -1,6 +1,4 @@
 {
-  "buildCommand": "",
-  "framework": "html",
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
