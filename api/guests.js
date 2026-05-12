@@ -20,6 +20,10 @@ module.exports = async function handler(req, res) {
       return handleExportGuests(req, res);
     }
 
+    if (req.method === 'DELETE' && req.url.includes('/reset')) {
+      return handleResetGuests(req, res);
+    }
+
     if (req.method === 'GET' && req.url.includes('/guests')) {
       return handleListGuests(req, res);
     }
@@ -237,6 +241,12 @@ async function handleBulkInvite(req, res) {
     message: `Invite would be sent to ${invitedCount} guests`,
     invitedGuests: selectedGuests.filter(g => g.email)
   });
+}
+
+async function handleResetGuests(req, res) {
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
+  await kv.set(guestsKey, []);
+  res.json({ success: true, message: 'All guests cleared' });
 }
 
 async function handleExportGuests(req, res) {
