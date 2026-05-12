@@ -261,7 +261,7 @@ const guestListPage = {
     };
 
     try {
-      await apiCall(`/api/guests/${guestId}`, 'PUT', data);
+      await apiCall(`/api/guests?id=${guestId}`, 'PUT', data);
       showNotification('Guest updated!', 'success');
       modal.style.display = 'none';
       await this.loadGuests();
@@ -274,7 +274,7 @@ const guestListPage = {
   async deleteGuest(guestId) {
     if (!confirm('Delete this guest?')) return;
     try {
-      await apiCall(`/api/guests/${guestId}`, 'DELETE');
+      await apiCall(`/api/guests?id=${guestId}`, 'DELETE');
       showNotification('Guest deleted', 'success');
       await this.loadGuests();
       this.render();

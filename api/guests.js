@@ -32,11 +32,11 @@ module.exports = async function handler(req, res) {
       return handleAddGuest(req, res);
     }
 
-    if (req.method === 'PUT' && req.url.match(/\/guests\/[a-z0-9]+$/i)) {
+    if (req.method === 'PUT') {
       return handleUpdateGuest(req, res);
     }
 
-    if (req.method === 'DELETE' && req.url.match(/\/guests\/[a-z0-9]+$/i)) {
+    if (req.method === 'DELETE') {
       return handleDeleteGuest(req, res);
     }
 
@@ -157,8 +157,8 @@ async function handleAddGuest(req, res) {
 }
 
 async function handleUpdateGuest(req, res) {
-  // Extract guest ID from URL
-  const guestId = req.url.match(/\/guests\/([a-z0-9]+)$/i)[1];
+  const url = new URL(req.url, 'http://localhost');
+  const guestId = url.searchParams.get('id') || req.url.match(/\/guests\/([a-zA-Z0-9_]+)/)?.[1];
 
   // Get current guest
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
@@ -199,8 +199,8 @@ async function handleUpdateGuest(req, res) {
 }
 
 async function handleDeleteGuest(req, res) {
-  // Extract guest ID from URL
-  const guestId = req.url.match(/\/guests\/([a-z0-9]+)$/i)[1];
+  const url = new URL(req.url, 'http://localhost');
+  const guestId = url.searchParams.get('id') || req.url.match(/\/guests\/([a-zA-Z0-9_]+)/)?.[1];
 
   // Remove from guests list
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
