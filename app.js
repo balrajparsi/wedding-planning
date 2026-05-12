@@ -122,6 +122,12 @@ class WeddingPlanningApp {
         window.budgetPage?.init?.();
       } else if (page === 'vendors') {
         window.vendorPage?.init?.();
+      } else if (page === 'venues') {
+        window.venuesPage?.init?.();
+      } else if (page === 'food') {
+        window.foodPage?.init?.();
+      } else if (page === 'timeline') {
+        window.timelinePage?.init?.();
       }
     }
   }

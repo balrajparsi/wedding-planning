@@ -247,11 +247,43 @@
             <div data-view="venues">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Venue & Events</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddVenueModal?.()">+ Add Venue</button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm venue-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-primary btn-sm venue-add-btn">+ Add Venue</button>
+                    </div>
                 </div>
 
-                <div class="grid grid-3" id="venueGrid">
-                    <!-- Venue cards will be populated here -->
+                <!-- Stats -->
+                <div class="venue-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="venue-event-type-filter" style="margin-bottom: 0;">
+                            <option value="">All Event Types</option>
+                            <option value="Ceremony">Ceremony</option>
+                            <option value="Rehearsal Dinner">Rehearsal Dinner</option>
+                            <option value="Pre-Wedding">Pre-Wedding</option>
+                            <option value="Sangeet">Sangeet</option>
+                            <option value="Mehendi">Mehendi</option>
+                            <option value="Reception">Reception</option>
+                        </select>
+                        <select class="venue-status-filter" style="margin-bottom: 0;">
+                            <option value="">All Status</option>
+                            <option value="inquiry">Inquiry</option>
+                            <option value="negotiating">Negotiating</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div class="venue-grid-container">
+                    <!-- Venue cards will be rendered here -->
                 </div>
             </div>
 
@@ -259,23 +291,42 @@
             <div data-view="food">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Food & Menu Planning</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddDishModal?.()">+ Add Dish</button>
+                    <button class="btn btn-primary btn-sm food-add-btn">+ Add Dish</button>
                 </div>
 
-                <div class="grid grid-2">
-                    <div class="card">
-                        <h4 style="margin-bottom: 1.5rem;">Menu Items</h4>
-                        <div id="menuList">
-                            <!-- Menu items will be populated here -->
-                        </div>
-                    </div>
+                <!-- Stats -->
+                <div class="food-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
 
-                    <div class="card">
-                        <h4 style="margin-bottom: 1.5rem;">Dietary Accommodations</h4>
-                        <div id="dietaryList">
-                            <!-- Dietary info will be populated here -->
-                        </div>
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="food-event-type-filter" style="margin-bottom: 0;">
+                            <option value="">All Events</option>
+                            <option value="main-wedding">Main Wedding</option>
+                            <option value="pre-wedding">Pre-Wedding</option>
+                            <option value="rehearsal">Rehearsal</option>
+                            <option value="sangeet">Sangeet</option>
+                            <option value="mehendi">Mehendi</option>
+                            <option value="reception">Reception</option>
+                        </select>
+                        <select class="food-course-type-filter" style="margin-bottom: 0;">
+                            <option value="">All Courses</option>
+                            <option value="appetizers">Appetizers</option>
+                            <option value="mains">Mains</option>
+                            <option value="sides">Sides</option>
+                            <option value="desserts">Desserts</option>
+                            <option value="beverages">Beverages</option>
+                            <option value="snacks">Snacks</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
                     </div>
+                </div>
+
+                <!-- Food List Container -->
+                <div class="food-list-container">
+                    <!-- Food items will be rendered here -->
                 </div>
             </div>
 
@@ -283,13 +334,32 @@
             <div data-view="timeline">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Timeline & Milestones</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddMilestoneModal?.()">+ Add Milestone</button>
+                    <button class="btn btn-primary btn-sm timeline-add-btn">+ Add Milestone</button>
                 </div>
 
-                <div class="card" style="max-width: 800px;">
-                    <div id="timelineList">
-                        <!-- Timeline items will be populated here -->
+                <!-- Stats -->
+                <div class="timeline-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filter -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="timeline-type-filter" style="margin-bottom: 0;">
+                            <option value="">All Types</option>
+                            <option value="event">Event</option>
+                            <option value="deadline">Deadline</option>
+                            <option value="reminder">Reminder</option>
+                            <option value="milestone">Milestone</option>
+                        </select>
+                        <div></div>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
                     </div>
+                </div>
+
+                <!-- Timeline Container -->
+                <div class="timeline-container">
+                    <!-- Timeline items will be rendered here -->
                 </div>
             </div>
 
@@ -813,20 +883,393 @@
         </div>
     </div>
 
+    <!-- Add Venue Modal -->
+    <div data-modal="addVenue" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Venue</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Venue Name *</label>
+                <input type="text" name="name" placeholder="e.g., The Grand Palace" required>
+
+                <label>Event Type *</label>
+                <select name="eventType" required>
+                    <option value="">Select Event Type</option>
+                    <option value="Ceremony">Ceremony</option>
+                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
+                    <option value="Pre-Wedding">Pre-Wedding</option>
+                    <option value="Sangeet">Sangeet</option>
+                    <option value="Mehendi">Mehendi</option>
+                    <option value="Reception">Reception</option>
+                </select>
+
+                <label>Location</label>
+                <input type="text" name="location" placeholder="City/Area">
+
+                <label>Full Address</label>
+                <textarea name="address" placeholder="Complete address"></textarea>
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
+
+                <label>Contact Person</label>
+                <input type="text" name="contactPerson" placeholder="Name">
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="venue@example.com">
+
+                <label>Capacity</label>
+                <input type="number" name="capacity" placeholder="Number of guests" min="0">
+
+                <label>Cost Estimate (₹ in Lakhs)</label>
+                <input type="number" name="costEstimate" placeholder="e.g., 10" step="0.1" min="0">
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="inquiry">Inquiry</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Event Date</label>
+                <input type="date" name="eventDate">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Venue</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Venue Modal -->
+    <div data-modal="editVenue" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Venue</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Venue Name *</label>
+                <input type="text" name="name" placeholder="Venue name" required>
+
+                <label>Event Type *</label>
+                <select name="eventType" required>
+                    <option value="">Select Event Type</option>
+                    <option value="Ceremony">Ceremony</option>
+                    <option value="Rehearsal Dinner">Rehearsal Dinner</option>
+                    <option value="Pre-Wedding">Pre-Wedding</option>
+                    <option value="Sangeet">Sangeet</option>
+                    <option value="Mehendi">Mehendi</option>
+                    <option value="Reception">Reception</option>
+                </select>
+
+                <label>Location</label>
+                <input type="text" name="location" placeholder="City/Area">
+
+                <label>Full Address</label>
+                <textarea name="address" placeholder="Complete address"></textarea>
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX">
+
+                <label>Contact Person</label>
+                <input type="text" name="contactPerson" placeholder="Name">
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="venue@example.com">
+
+                <label>Capacity</label>
+                <input type="number" name="capacity" placeholder="Number of guests" min="0">
+
+                <label>Cost Estimate (₹ in Lakhs)</label>
+                <input type="number" name="costEstimate" placeholder="e.g., 10" step="0.1" min="0">
+
+                <label>Amount Paid (₹ in Lakhs)</label>
+                <input type="number" name="costActual" placeholder="e.g., 5" step="0.1" min="0">
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="inquiry">Inquiry</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Event Date</label>
+                <input type="date" name="eventDate">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Dish Modal -->
+    <div data-modal="addDish" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Menu Item</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Dish Name *</label>
+                <input type="text" name="dish" placeholder="e.g., Butter Chicken" required>
+
+                <label>Event Type *</label>
+                <select name="eventType" required>
+                    <option value="">Select Event</option>
+                    <option value="main-wedding">Main Wedding</option>
+                    <option value="pre-wedding">Pre-Wedding</option>
+                    <option value="rehearsal">Rehearsal</option>
+                    <option value="sangeet">Sangeet</option>
+                    <option value="mehendi">Mehendi</option>
+                    <option value="reception">Reception</option>
+                </select>
+
+                <label>Course Type *</label>
+                <select name="courseType" required>
+                    <option value="">Select Course</option>
+                    <option value="appetizers">Appetizers</option>
+                    <option value="mains">Mains</option>
+                    <option value="sides">Sides</option>
+                    <option value="desserts">Desserts</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="snacks">Snacks</option>
+                </select>
+
+                <label>Veg / Non-Veg</label>
+                <select name="vegNonVeg">
+                    <option value="both">Both</option>
+                    <option value="veg">Vegetarian</option>
+                    <option value="non-veg">Non-Vegetarian</option>
+                </select>
+
+                <label>Cuisine</label>
+                <select name="cuisine">
+                    <option value="">Select Cuisine</option>
+                    <option value="indian">Indian</option>
+                    <option value="fusion">Fusion</option>
+                    <option value="continental">Continental</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <label>Cost per portion (₹)</label>
+                <input type="number" name="cost" placeholder="e.g., 500" step="10" min="0">
+
+                <label>Portion Size</label>
+                <input type="text" name="portionSize" placeholder="e.g., 1 plate">
+
+                <label>Prepared By</label>
+                <input type="text" name="preparedBy" placeholder="Vendor name or notes">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Dish</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Dish Modal -->
+    <div data-modal="editDish" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Menu Item</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Dish Name *</label>
+                <input type="text" name="dish" placeholder="Dish name" required>
+
+                <label>Event Type *</label>
+                <select name="eventType" required>
+                    <option value="">Select Event</option>
+                    <option value="main-wedding">Main Wedding</option>
+                    <option value="pre-wedding">Pre-Wedding</option>
+                    <option value="rehearsal">Rehearsal</option>
+                    <option value="sangeet">Sangeet</option>
+                    <option value="mehendi">Mehendi</option>
+                    <option value="reception">Reception</option>
+                </select>
+
+                <label>Course Type *</label>
+                <select name="courseType" required>
+                    <option value="">Select Course</option>
+                    <option value="appetizers">Appetizers</option>
+                    <option value="mains">Mains</option>
+                    <option value="sides">Sides</option>
+                    <option value="desserts">Desserts</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="snacks">Snacks</option>
+                </select>
+
+                <label>Veg / Non-Veg</label>
+                <select name="vegNonVeg">
+                    <option value="both">Both</option>
+                    <option value="veg">Vegetarian</option>
+                    <option value="non-veg">Non-Vegetarian</option>
+                </select>
+
+                <label>Cuisine</label>
+                <select name="cuisine">
+                    <option value="">Select Cuisine</option>
+                    <option value="indian">Indian</option>
+                    <option value="fusion">Fusion</option>
+                    <option value="continental">Continental</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <label>Cost per portion (₹)</label>
+                <input type="number" name="cost" placeholder="Cost" step="10" min="0">
+
+                <label>Portion Size</label>
+                <input type="text" name="portionSize" placeholder="e.g., 1 plate">
+
+                <label>Prepared By</label>
+                <input type="text" name="preparedBy" placeholder="Vendor name or notes">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Milestone Modal -->
+    <div data-modal="addMilestone" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Milestone</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Type *</label>
+                <select name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="event">Event</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="milestone">Milestone</option>
+                </select>
+
+                <label>Title *</label>
+                <input type="text" name="title" placeholder="e.g., Send Invitations" required>
+
+                <label>Date *</label>
+                <input type="date" name="date" required>
+
+                <label>Location</label>
+                <input type="text" name="location" placeholder="Venue or location">
+
+                <label>Description</label>
+                <textarea name="description" placeholder="Describe this milestone..."></textarea>
+
+                <label>Attendees (comma-separated)</label>
+                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Milestone</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Milestone Modal -->
+    <div data-modal="editMilestone" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Milestone</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Type *</label>
+                <select name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="event">Event</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="milestone">Milestone</option>
+                </select>
+
+                <label>Title *</label>
+                <input type="text" name="title" placeholder="Milestone title" required>
+
+                <label>Date *</label>
+                <input type="date" name="date" required>
+
+                <label>Location</label>
+                <input type="text" name="location" placeholder="Venue or location">
+
+                <label>Description</label>
+                <textarea name="description" placeholder="Describe this milestone..."></textarea>
+
+                <label>Attendees (comma-separated)</label>
+                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="modules/api.js"></script>
     <script src="app.js"></script>
+
+    <!-- Guest Management -->
     <script src="modules/guests.js"></script>
     <script src="pages/guests.js"></script>
+
+    <!-- Task Management -->
     <script src="modules/tasks.js"></script>
     <script src="pages/tasks.js"></script>
+
+    <!-- Budget Tracking -->
     <script src="modules/budget.js"></script>
+    <script src="pages/budget.js"></script>
+
+    <!-- Vendor Management -->
     <script src="modules/vendors.js"></script>
     <script src="pages/vendors.js"></script>
-    <script src="pages/budget.js"></script>
-    <script src="modules/vendors.js"></script>
+
+    <!-- Venues -->
     <script src="modules/venues.js"></script>
+    <script src="pages/venues.js"></script>
+
+    <!-- Food & Menu -->
     <script src="modules/food.js"></script>
+    <script src="pages/food.js"></script>
+
+    <!-- Timeline -->
     <script src="modules/timeline.js"></script>
+    <script src="pages/timeline.js"></script>
 </body>
 </html>
