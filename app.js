@@ -147,39 +147,114 @@ class WeddingPlanningApp {
     const totalTasks = this.tasks.length;
     const budgetSpent = this.budget.reduce((sum, b) => sum + (b.actual || 0), 0);
     const budgetTotal = this.budget.reduce((sum, b) => sum + (b.budgeted || 0), 0);
+    const vendorsConfirmed = this.vendors.filter(v => v.status === 'confirmed').length;
+    const totalVendors = this.vendors.length;
+
+    const weddingDate = new Date((this.wedding && this.wedding.weddingDate) || '2026-08-15');
+    const now = new Date();
+    const diff = weddingDate - now;
+    const daysLeft = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+    const hoursLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+    const minutesLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
+
+    const weddingDateStr = weddingDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const location = (this.wedding && this.wedding.location) || 'Udaipur, Rajasthan';
+    const coupleName = (this.wedding && this.wedding.coupleName) || 'Akhila & Akshay';
 
     mainContent.innerHTML = `
+      <div class="dashboard-hero">
+        <div class="hero-ornament">❧</div>
+        <h1 class="hero-couple-name">${coupleName}</h1>
+        <p class="hero-tagline">${weddingDateStr} &nbsp;·&nbsp; ${location}</p>
+        <div class="hero-divider"><span></span><span class="hero-diamond">◆</span><span></span></div>
+        <div class="hero-countdown">
+          <div class="countdown-item">
+            <span class="countdown-number">${daysLeft}</span>
+            <span class="countdown-label">Days</span>
+          </div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-item">
+            <span class="countdown-number">${String(hoursLeft).padStart(2,'0')}</span>
+            <span class="countdown-label">Hours</span>
+          </div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-item">
+            <span class="countdown-number">${String(minutesLeft).padStart(2,'0')}</span>
+            <span class="countdown-label">Mins</span>
+          </div>
+        </div>
+        <p class="hero-subtitle">until the big day</p>
+      </div>
+
       <div class="dashboard-grid">
-        <div class="stat-card">
-          <div class="stat-number">${confirmedCount}/${totalGuests}</div>
+        <div class="stat-card" onclick="app.navigateTo('guests')">
+          <div class="stat-icon">👥</div>
+          <div class="stat-number">${confirmedCount}<span class="stat-total">/${totalGuests}</span></div>
           <div class="stat-label">Guests Confirmed</div>
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${totalGuests > 0 ? (confirmedCount/totalGuests)*100 : 0}%"></div>
           </div>
+          <div class="stat-sub">${totalGuests - confirmedCount} awaiting RSVP</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-number">${tasksDone}/${totalTasks}</div>
+        <div class="stat-card" onclick="app.navigateTo('tasks')">
+          <div class="stat-icon">✅</div>
+          <div class="stat-number">${tasksDone}<span class="stat-total">/${totalTasks}</span></div>
           <div class="stat-label">Tasks Completed</div>
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${totalTasks > 0 ? (tasksDone/totalTasks)*100 : 0}%"></div>
           </div>
+          <div class="stat-sub">${totalTasks - tasksDone} tasks remaining</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-number">₹${budgetSpent}L</div>
+        <div class="stat-card" onclick="app.navigateTo('budget')">
+          <div class="stat-icon">💰</div>
+          <div class="stat-number">₹${(budgetSpent/100000).toFixed(1)}<span class="stat-total">L</span></div>
           <div class="stat-label">Budget Spent</div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: ${budgetTotal > 0 ? (budgetSpent/budgetTotal)*100 : 0}%"></div>
+            <div class="progress-fill" style="width: ${budgetTotal > 0 ? Math.min(100,(budgetSpent/budgetTotal)*100) : 0}%"></div>
           </div>
+          <div class="stat-sub">of ₹${(budgetTotal/100000).toFixed(1)}L budgeted</div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-number">${this.vendors.filter(v => v.status === 'confirmed').length}/${this.vendors.length}</div>
-          <div class="stat-label">Vendors Confirmed</div>
+        <div class="stat-card" onclick="app.navigateTo('vendors')">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-number">${vendorsConfirmed}<span class="stat-total">/${totalVendors}</span></div>
+          <div class="stat-label">Vendors Booked</div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: ${this.vendors.length > 0 ? (this.vendors.filter(v => v.status === 'confirmed').length/this.vendors.length)*100 : 0}%"></div>
+            <div class="progress-fill" style="width: ${totalVendors > 0 ? (vendorsConfirmed/totalVendors)*100 : 0}%"></div>
           </div>
+          <div class="stat-sub">${totalVendors - vendorsConfirmed} still pending</div>
+        </div>
+      </div>
+
+      <div class="quick-links-section">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="quick-links-grid">
+          <a href="#guests" data-page="guests" class="quick-link-card">
+            <span class="ql-icon">👥</span>
+            <span class="ql-label">Add Guest</span>
+          </a>
+          <a href="#tasks" data-page="tasks" class="quick-link-card">
+            <span class="ql-icon">✅</span>
+            <span class="ql-label">Add Task</span>
+          </a>
+          <a href="#budget" data-page="budget" class="quick-link-card">
+            <span class="ql-icon">💰</span>
+            <span class="ql-label">Track Expense</span>
+          </a>
+          <a href="#vendors" data-page="vendors" class="quick-link-card">
+            <span class="ql-icon">🏢</span>
+            <span class="ql-label">Add Vendor</span>
+          </a>
+          <a href="#venues" data-page="venues" class="quick-link-card">
+            <span class="ql-icon">📍</span>
+            <span class="ql-label">Add Venue</span>
+          </a>
+          <a href="#timeline" data-page="timeline" class="quick-link-card">
+            <span class="ql-icon">📅</span>
+            <span class="ql-label">Add Milestone</span>
+          </a>
         </div>
       </div>
     `;

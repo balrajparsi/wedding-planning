@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Wedding planning platform for Akhila & Akshay",
   "main": "index.html",
-  "type": "module",
   "scripts": {
     "dev": "python -m http.server 3000",
     "deploy": "vercel"

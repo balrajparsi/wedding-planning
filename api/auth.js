@@ -26,7 +26,7 @@ function verifyPassword(password, hash) {
 }
 
 // Login endpoint
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method === 'POST' && req.url.includes('/login')) {
     return handleLogin(req, res);
   }

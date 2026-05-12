@@ -14,7 +14,7 @@ const kv = require('../lib/kv');
 // Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     if (req.method === 'GET' && req.url.includes('/tasks') && !req.url.includes('/subtasks')) {
       return handleListTasks(req, res);
