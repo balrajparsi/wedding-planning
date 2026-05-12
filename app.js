@@ -314,6 +314,52 @@ class WeddingPlanningApp {
     if (modal) modal.style.display = 'flex';
   }
 
+  openAddTaskModal() {
+    const modal = document.querySelector('[data-modal="addTask"]');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  openEditTaskModal(task) {
+    const modal = document.querySelector('[data-modal="editTask"]');
+    if (modal) {
+      const form = modal.querySelector('form');
+      if (form) {
+        form.querySelector('[name="title"]').value = task.title;
+        form.querySelector('[name="category"]').value = task.category;
+        form.querySelector('[name="dueDate"]').value = task.dueDate;
+        form.querySelector('[name="priority"]').value = task.priority;
+        form.querySelector('[name="status"]').value = task.status;
+        form.querySelector('[name="notes"]').value = task.notes || '';
+      }
+      modal.dataset.taskId = task.id;
+      modal.style.display = 'flex';
+    }
+  }
+
+  openAddExpenseModal() {
+    const modal = document.querySelector('[data-modal="addExpense"]');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  openEditExpenseModal(expense) {
+    const modal = document.querySelector('[data-modal="editExpense"]');
+    if (modal) {
+      const form = modal.querySelector('form');
+      if (form) {
+        form.querySelector('[name="description"]').value = expense.description;
+        form.querySelector('[name="category"]').value = expense.category;
+        form.querySelector('[name="budgeted"]').value = (expense.budgeted / 100000).toFixed(2);
+        form.querySelector('[name="actual"]').value = (expense.actual / 100000).toFixed(2);
+        form.querySelector('[name="status"]').value = expense.status;
+        form.querySelector('[name="vendor"]').value = expense.vendor || '';
+        form.querySelector('[name="dueDate"]').value = expense.dueDate || '';
+        form.querySelector('[name="notes"]').value = expense.notes || '';
+      }
+      modal.dataset.expenseId = expense.id;
+      modal.style.display = 'flex';
+    }
+  }
+
   openInvitePlannerModal() {
     // TODO: Implement planner invite modal
   }

@@ -191,12 +191,15 @@ All data stored in Vercel KV (Redis-compatible):
 - [ ] Email integration (Vercel Resend API)
 - [ ] Mobile responsive testing
 
-### Phase 3: Tasks & Budget
-- [ ] Task CRUD API
-- [ ] Task board (Kanban view)
-- [ ] Budget CRUD API
-- [ ] Budget tracker page
-- [ ] Expense tracking
+### Phase 3: Tasks & Budget (Complete ✅)
+- [x] Task CRUD API with categories, assignees, priorities, subtasks
+- [x] Task board with Kanban view (Pending → In Progress → Completed)
+- [x] List view toggle for tasks
+- [x] Budget CRUD API with category breakdown
+- [x] Budget tracker with summary cards
+- [x] Category breakdown by budgeted/actual/status
+- [x] Expense tracking with payment status
+- [x] CSV export for both tasks and expenses
 
 ### Phase 4: Vendors & Timeline
 - [ ] Vendor CRUD API

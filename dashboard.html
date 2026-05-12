@@ -102,11 +102,42 @@
             <div data-view="tasks">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Tasks & Checklist</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddTaskModal?.()">+ Add Task</button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm task-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-primary btn-sm task-add-btn">+ Add Task</button>
+                    </div>
                 </div>
 
-                <div class="grid grid-3">
-                    <!-- Task columns will be rendered here -->
+                <!-- Stats -->
+                <div class="task-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="task-category-filter" style="margin-bottom: 0;">
+                            <option value="">All Categories</option>
+                            <option value="vendors">Vendors</option>
+                            <option value="logistics">Logistics</option>
+                            <option value="design">Design</option>
+                            <option value="communication">Communication</option>
+                            <option value="finance">Finance</option>
+                            <option value="general">General</option>
+                        </select>
+                        <select class="task-status-filter" style="margin-bottom: 0;">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Board -->
+                <div class="task-board-container">
+                    <!-- Kanban or list view will be rendered here -->
                 </div>
             </div>
 
@@ -114,55 +145,54 @@
             <div data-view="budget">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Budget Tracker</h2>
-                    <button class="btn btn-primary btn-sm" onclick="app?.openAddExpenseModal?.()">+ Add Expense</button>
-                </div>
-
-                <div class="grid grid-2">
-                    <div class="card">
-                        <h4 style="margin-bottom: 1.5rem;">Budget Summary</h4>
-                        <div style="margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="color: var(--text-muted);">Total Budgeted</span>
-                                <span id="budgetTotal" style="font-weight: 600; color: var(--blue);">₹0L</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="color: var(--text-muted);">Amount Spent</span>
-                                <span id="budgetSpent" style="font-weight: 600; color: var(--gold);">₹0L</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="color: var(--text-muted);">Remaining</span>
-                                <span id="budgetRemaining" style="font-weight: 600; color: var(--success);">₹0L</span>
-                            </div>
-                            <div class="progress-bar" style="margin-top: 1rem;">
-                                <div class="progress-fill" id="budgetProgress" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h4 style="margin-bottom: 1.5rem;">Category Breakdown</h4>
-                        <div id="categoryBreakdown">
-                            <!-- Categories will be populated here -->
-                        </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm budget-export-btn">⬇️ Export CSV</button>
+                        <button class="btn btn-primary btn-sm budget-add-btn">+ Add Expense</button>
                     </div>
                 </div>
 
-                <div class="table-container" style="margin-top: 2rem;">
-                    <table id="expenseTable">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Budgeted</th>
-                                <th>Actual</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Expenses will be populated here -->
-                        </tbody>
-                    </table>
+                <!-- Summary Stats -->
+                <div class="budget-summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <select class="budget-category-filter" style="margin-bottom: 0;">
+                            <option value="">All Categories</option>
+                            <option value="venue">Venue</option>
+                            <option value="catering">Catering</option>
+                            <option value="photography">Photography</option>
+                            <option value="florist">Florist</option>
+                            <option value="music">Music</option>
+                            <option value="decor">Decor</option>
+                            <option value="attire">Attire</option>
+                            <option value="rings">Rings</option>
+                            <option value="invitations">Invitations</option>
+                            <option value="misc">Misc</option>
+                        </select>
+                        <select class="budget-status-filter" style="margin-bottom: 0;">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="partial">Partial</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--blue); margin-bottom: 1.5rem;">Category Breakdown</h4>
+                    <div class="budget-breakdown">
+                        <!-- Categories will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Expense Table -->
+                <div class="budget-table-container">
+                    <!-- Table will be rendered here -->
                 </div>
             </div>
 
@@ -389,13 +419,220 @@
         </div>
     </div>
 
+    <!-- Add Task Modal -->
+    <div data-modal="addTask" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Task</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Task Title *</label>
+                <input type="text" name="title" placeholder="Task title" required>
+
+                <label>Category</label>
+                <select name="category">
+                    <option value="general">General</option>
+                    <option value="vendors">Vendors</option>
+                    <option value="logistics">Logistics</option>
+                    <option value="design">Design</option>
+                    <option value="communication">Communication</option>
+                    <option value="finance">Finance</option>
+                </select>
+
+                <label>Due Date</label>
+                <input type="date" name="dueDate">
+
+                <label>Priority</label>
+                <select name="priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Task notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div data-modal="editTask" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Task</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Task Title *</label>
+                <input type="text" name="title" placeholder="Task title" required>
+
+                <label>Category</label>
+                <select name="category">
+                    <option value="general">General</option>
+                    <option value="vendors">Vendors</option>
+                    <option value="logistics">Logistics</option>
+                    <option value="design">Design</option>
+                    <option value="communication">Communication</option>
+                    <option value="finance">Finance</option>
+                </select>
+
+                <label>Due Date</label>
+                <input type="date" name="dueDate">
+
+                <label>Priority</label>
+                <select name="priority">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Task notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div data-modal="addExpense" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Expense</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Description *</label>
+                <input type="text" name="description" placeholder="Expense description" required>
+
+                <label>Category *</label>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="venue">Venue</option>
+                    <option value="catering">Catering</option>
+                    <option value="photography">Photography</option>
+                    <option value="florist">Florist</option>
+                    <option value="music">Music</option>
+                    <option value="decor">Decor</option>
+                    <option value="attire">Attire</option>
+                    <option value="rings">Rings</option>
+                    <option value="invitations">Invitations</option>
+                    <option value="transportation">Transportation</option>
+                    <option value="misc">Miscellaneous</option>
+                </select>
+
+                <label>Budgeted Amount (₹ in Lakhs)</label>
+                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
+
+                <label>Actual Amount (₹ in Lakhs)</label>
+                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="pending">Pending</option>
+                    <option value="partial">Partial Payment</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Vendor Name</label>
+                <input type="text" name="vendor" placeholder="Vendor name">
+
+                <label>Due Date</label>
+                <input type="date" name="dueDate">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div data-modal="editExpense" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Expense</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Description *</label>
+                <input type="text" name="description" placeholder="Expense description" required>
+
+                <label>Category *</label>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="venue">Venue</option>
+                    <option value="catering">Catering</option>
+                    <option value="photography">Photography</option>
+                    <option value="florist">Florist</option>
+                    <option value="music">Music</option>
+                    <option value="decor">Decor</option>
+                    <option value="attire">Attire</option>
+                    <option value="rings">Rings</option>
+                    <option value="invitations">Invitations</option>
+                    <option value="transportation">Transportation</option>
+                    <option value="misc">Miscellaneous</option>
+                </select>
+
+                <label>Budgeted Amount (₹ in Lakhs)</label>
+                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
+
+                <label>Actual Amount (₹ in Lakhs)</label>
+                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
+
+                <label>Status</label>
+                <select name="status">
+                    <option value="pending">Pending</option>
+                    <option value="partial">Partial Payment</option>
+                    <option value="paid">Paid</option>
+                </select>
+
+                <label>Vendor Name</label>
+                <input type="text" name="vendor" placeholder="Vendor name">
+
+                <label>Due Date</label>
+                <input type="date" name="dueDate">
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="modules/api.js"></script>
     <script src="app.js"></script>
     <script src="modules/guests.js"></script>
     <script src="pages/guests.js"></script>
     <script src="modules/tasks.js"></script>
+    <script src="pages/tasks.js"></script>
     <script src="modules/budget.js"></script>
+    <script src="pages/budget.js"></script>
     <script src="modules/vendors.js"></script>
     <script src="modules/venues.js"></script>
     <script src="modules/food.js"></script>
