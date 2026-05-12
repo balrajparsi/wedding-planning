@@ -3,7 +3,6 @@
   "buildCommand": "true",
   "framework": null,
   "public": true,
-  "serverlessFunctionRegion": "iad1",
   "env": {
     "VERCEL_KV_REST_API_URL": "@vercel_kv_rest_api_url",
     "VERCEL_KV_REST_API_TOKEN": "@vercel_kv_rest_api_token",
