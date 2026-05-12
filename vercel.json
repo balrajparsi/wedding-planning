@@ -1,8 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "true",
-  "framework": null,
-  "public": true,
+  "buildCommand": "",
+  "framework": "html",
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
