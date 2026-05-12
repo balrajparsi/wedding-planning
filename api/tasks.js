@@ -9,21 +9,10 @@
  */
 
 const crypto = require('crypto');
-const JWT = require('../lib/jwt');
 const kv = require('../lib/kv');
 
-const jwt = new JWT();
-
-async function verifyAuth(req, headers) {
-  const authToken = headers.authorization?.split(' ')[1];
-  if (!authToken) throw new Error('Unauthorized');
-
-  const payload = jwt.verify(authToken);
-  const user = await kv.get(`user:${payload.email}`);
-  if (!user) throw new Error('User not found');
-
-  return { payload, user };
-}
+// Fixed wedding ID for Akhila & Akshay's wedding
+const WEDDING_ID = 'akhila-akshay-2026';
 
 export default async function handler(req, res) {
   try {
@@ -59,9 +48,7 @@ export default async function handler(req, res) {
 }
 
 async function handleListTasks(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+    const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
 
   const url = new URL(req.url, 'http://localhost');
@@ -112,9 +99,7 @@ async function handleListTasks(req, res) {
 }
 
 async function handleAddTask(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can add tasks' });
   }
 
@@ -140,7 +125,7 @@ async function handleAddTask(req, res) {
     updatedAt: new Date().toISOString()
   };
 
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
   tasks.push(task);
   await kv.set(tasksKey, tasks);
@@ -149,11 +134,9 @@ async function handleAddTask(req, res) {
 }
 
 async function handleUpdateTask(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
+    const taskId = req.url.match(/\/tasks\/([a-z0-9]+)$/i)[1];
 
-  const taskId = req.url.match(/\/tasks\/([a-z0-9]+)$/i)[1];
-
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
   const taskIndex = tasks.findIndex(t => t.id === taskId);
 
@@ -191,15 +174,13 @@ async function handleUpdateTask(req, res) {
 }
 
 async function handleDeleteTask(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can delete tasks' });
   }
 
   const taskId = req.url.match(/\/tasks\/([a-z0-9]+)$/i)[1];
 
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
   const filtered = tasks.filter(t => t.id !== taskId);
 
@@ -213,9 +194,7 @@ async function handleDeleteTask(req, res) {
 }
 
 async function handleAddSubtask(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can add subtasks' });
   }
 
@@ -226,7 +205,7 @@ async function handleAddSubtask(req, res) {
     return res.status(400).json({ error: 'Subtask title required' });
   }
 
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
   const taskIndex = tasks.findIndex(t => t.id === taskId);
 
@@ -249,9 +228,7 @@ async function handleAddSubtask(req, res) {
 }
 
 async function handleUpdateSubtask(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can update subtasks' });
   }
 
@@ -259,7 +236,7 @@ async function handleUpdateSubtask(req, res) {
   const taskId = match[1];
   const subtaskId = match[2];
 
-  const tasksKey = `wedding:${user.weddingId}:tasks`;
+  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
   const tasks = (await kv.get(tasksKey)) || [];
   const taskIndex = tasks.findIndex(t => t.id === taskId);
 
@@ -281,3 +258,4 @@ async function handleUpdateSubtask(req, res) {
 
   res.json(tasks[taskIndex].subtasks[subtaskIndex]);
 }
+

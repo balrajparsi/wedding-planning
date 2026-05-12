@@ -1,5 +1,5 @@
 /**
- * Guest Management API Endpoints
+ * Guest Management API Endpoints (No Authentication)
  * GET /api/guests - List guests with filters/search
  * POST /api/guests - Add new guest
  * PUT /api/guests/:id - Update guest or RSVP status
@@ -9,22 +9,10 @@
  */
 
 const crypto = require('crypto');
-const JWT = require('../lib/jwt');
 const kv = require('../lib/kv');
 
-const jwt = new JWT();
-
-// Middleware: Verify JWT and check authorization
-async function verifyAuth(req, headers) {
-  const authToken = headers.authorization?.split(' ')[1];
-  if (!authToken) throw new Error('Unauthorized');
-
-  const payload = jwt.verify(authToken);
-  const user = await kv.get(`user:${payload.email}`);
-  if (!user) throw new Error('User not found');
-
-  return { payload, user };
-}
+// Fixed wedding ID for Akhila & Akshay's wedding
+const WEDDING_ID = 'akhila-akshay-2026';
 
 export default async function handler(req, res) {
   try {
@@ -60,10 +48,8 @@ export default async function handler(req, res) {
 }
 
 async function handleListGuests(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
   // Get all guests for this wedding
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
 
   // Apply filters from query string
@@ -129,13 +115,6 @@ async function handleListGuests(req, res) {
 }
 
 async function handleAddGuest(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  // Check permission (admin or planner)
-  if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can add guests' });
-  }
-
   const { name, email, phone, relationship, partySize, dietaryRestrictions, notes } = req.body;
 
   if (!name) {
@@ -145,7 +124,7 @@ async function handleAddGuest(req, res) {
   const guestId = crypto.randomBytes(8).toString('hex');
   const guest = {
     id: guestId,
-    weddingId: user.weddingId,
+    weddingId: WEDDING_ID,
     name,
     email: email || '',
     phone: phone || '',
@@ -161,7 +140,7 @@ async function handleAddGuest(req, res) {
   };
 
   // Add to guests list
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
   guests.push(guest);
   await kv.set(guestsKey, guests);
@@ -170,13 +149,11 @@ async function handleAddGuest(req, res) {
 }
 
 async function handleUpdateGuest(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
   // Extract guest ID from URL
   const guestId = req.url.match(/\/guests\/([a-z0-9]+)$/i)[1];
 
   // Get current guest
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
   const guestIndex = guests.findIndex(g => g.id === guestId);
 
@@ -185,11 +162,6 @@ async function handleUpdateGuest(req, res) {
   }
 
   const guest = guests[guestIndex];
-
-  // Check permission (admin, planner, or the guest themselves)
-  if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can update guests' });
-  }
 
   // Update fields
   const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, rsvpStatus } = req.body;
@@ -219,18 +191,11 @@ async function handleUpdateGuest(req, res) {
 }
 
 async function handleDeleteGuest(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  // Check permission
-  if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can delete guests' });
-  }
-
   // Extract guest ID from URL
   const guestId = req.url.match(/\/guests\/([a-z0-9]+)$/i)[1];
 
   // Remove from guests list
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
   const filtered = guests.filter(g => g.id !== guestId);
 
@@ -244,13 +209,6 @@ async function handleDeleteGuest(req, res) {
 }
 
 async function handleBulkInvite(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  // Check permission (admin only for sending invites)
-  if (user.role !== 'admin') {
-    return res.status(403).json({ error: 'Only admins can send bulk invites' });
-  }
-
   const { guestIds, subject, message } = req.body;
 
   if (!guestIds || !Array.isArray(guestIds) || guestIds.length === 0) {
@@ -258,7 +216,7 @@ async function handleBulkInvite(req, res) {
   }
 
   // Get guests
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
   const selectedGuests = guests.filter(g => guestIds.includes(g.id));
 
@@ -278,10 +236,10 @@ async function handleBulkInvite(req, res) {
 }
 
 async function handleExportGuests(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
+  
 
   // Get all guests
-  const guestsKey = `wedding:${user.weddingId}:guests`;
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
 
   // Generate CSV
@@ -307,3 +265,4 @@ async function handleExportGuests(req, res) {
   res.setHeader('Content-Disposition', 'attachment; filename="guests.csv"');
   res.send(csv.join('\n'));
 }
+

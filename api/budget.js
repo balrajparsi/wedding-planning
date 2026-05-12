@@ -9,21 +9,10 @@
  */
 
 const crypto = require('crypto');
-const JWT = require('../lib/jwt');
 const kv = require('../lib/kv');
 
-const jwt = new JWT();
-
-async function verifyAuth(req, headers) {
-  const authToken = headers.authorization?.split(' ')[1];
-  if (!authToken) throw new Error('Unauthorized');
-
-  const payload = jwt.verify(authToken);
-  const user = await kv.get(`user:${payload.email}`);
-  if (!user) throw new Error('User not found');
-
-  return { payload, user };
-}
+// Fixed wedding ID for Akhila & Akshay's wedding
+const WEDDING_ID = 'akhila-akshay-2026';
 
 export default async function handler(req, res) {
   try {
@@ -59,9 +48,7 @@ export default async function handler(req, res) {
 }
 
 async function handleGetSummary(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
 
   const categories = [
@@ -104,9 +91,7 @@ function calculateStatus(items) {
 }
 
 async function handleListItems(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
 
   const url = new URL(req.url, 'http://localhost');
@@ -130,9 +115,7 @@ async function handleListItems(req, res) {
 }
 
 async function handleAddItem(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can add expenses' });
   }
 
@@ -158,7 +141,7 @@ async function handleAddItem(req, res) {
     updatedAt: new Date().toISOString()
   };
 
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
   items.push(item);
   await kv.set(budgetKey, items);
@@ -167,15 +150,13 @@ async function handleAddItem(req, res) {
 }
 
 async function handleUpdateItem(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can update expenses' });
   }
 
   const itemId = req.url.match(/\/items\/([a-z0-9]+)$/i)[1];
 
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
   const itemIndex = items.findIndex(i => i.id === itemId);
 
@@ -204,15 +185,13 @@ async function handleUpdateItem(req, res) {
 }
 
 async function handleDeleteItem(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
+    if (user.role !== 'admin' && user.role !== 'planner') {
     return res.status(403).json({ error: 'Only admins and planners can delete expenses' });
   }
 
   const itemId = req.url.match(/\/items\/([a-z0-9]+)$/i)[1];
 
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
   const filtered = items.filter(i => i.id !== itemId);
 
@@ -226,9 +205,7 @@ async function handleDeleteItem(req, res) {
 }
 
 async function handleExport(req, res) {
-  const { payload, user } = await verifyAuth(req, req.headers);
-
-  const budgetKey = `wedding:${user.weddingId}:budget`;
+    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
   const items = (await kv.get(budgetKey)) || [];
 
   const csv = [
@@ -252,3 +229,4 @@ async function handleExport(req, res) {
   res.setHeader('Content-Disposition', 'attachment; filename="budget.csv"');
   res.send(csv.join('\n'));
 }
+

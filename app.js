@@ -6,7 +6,6 @@
 class WeddingPlanningApp {
   constructor() {
     this.currentPage = 'dashboard';
-    this.user = null;
     this.wedding = null;
     this.guests = [];
     this.tasks = [];
@@ -15,7 +14,6 @@ class WeddingPlanningApp {
     this.venues = [];
     this.foods = [];
     this.timeline = [];
-    this.isLoggedIn = false;
     this.syncInterval = null;
 
     this.init();
@@ -23,25 +21,9 @@ class WeddingPlanningApp {
 
   // Initialize app
   async init() {
-    this.checkAuth();
-    if (this.isLoggedIn) {
-      this.loadDashboard();
-      this.setupRouting();
-      this.startPollingSync();
-    } else {
-      this.showLoginPage();
-    }
-  }
-
-  // Check if user is logged in
-  checkAuth() {
-    const token = localStorage.getItem('authToken');
-    const userStr = localStorage.getItem('user');
-
-    if (token && userStr) {
-      this.isLoggedIn = true;
-      this.user = JSON.parse(userStr);
-    }
+    this.loadDashboard();
+    this.setupRouting();
+    this.startPollingSync();
   }
 
   // Load dashboard and fetch data
@@ -137,8 +119,7 @@ class WeddingPlanningApp {
     const options = {
       method,
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        'Content-Type': 'application/json'
       }
     };
 
@@ -149,10 +130,6 @@ class WeddingPlanningApp {
     const response = await fetch(endpoint, options);
 
     if (!response.ok) {
-      if (response.status === 401) {
-        this.logout();
-        throw new Error('Unauthorized');
-      }
       throw new Error(`API error: ${response.status}`);
     }
 
@@ -208,59 +185,6 @@ class WeddingPlanningApp {
     `;
   }
 
-  // Show login page
-  showLoginPage() {
-    document.body.innerHTML = `
-      <div class="login-container">
-        <div class="login-card">
-          <h1>Wedding Planning Platform</h1>
-          <p>Akhila & Akshay</p>
-          <form id="loginForm">
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Password" required>
-            <button type="submit" class="btn btn-primary">Login</button>
-          </form>
-          <p><a href="#signup">Create new wedding plan</a></p>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.login(e.target[0].value, e.target[1].value);
-    });
-  }
-
-  // Login function
-  async login(email, password) {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (!response.ok) throw new Error('Login failed');
-
-      const { token, user } = await response.json();
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      this.isLoggedIn = true;
-      this.user = user;
-      this.init();
-    } catch (error) {
-      this.showError('Login failed. Check your credentials.');
-    }
-  }
-
-  // Logout function
-  logout() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    this.isLoggedIn = false;
-    this.init();
-  }
 
   // Start polling sync (5s intervals)
   startPollingSync() {
