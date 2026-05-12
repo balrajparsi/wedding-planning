@@ -31,7 +31,8 @@
       "Bash(git add *)",
       "Bash(git commit -m 'Phase 3: Task Board and Budget Tracker implementation *)",
       "Bash(git push *)",
-      "Bash(grep -n \"data-modal\" \"C:\\\\\\\\Users\\\\\\\\balra\\\\\\\\Claude local\\\\\\\\dashboard.html\")"
+      "Bash(grep -n \"data-modal\" \"C:\\\\\\\\Users\\\\\\\\balra\\\\\\\\Claude local\\\\\\\\dashboard.html\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

@@ -1,20 +1,172 @@
 /**
- * Food & Menu Planning Module
- * Client-side logic for food menu planning (Phase 4)
+ * Food & Menu Module - Client-side food management
+ * Handles menu CRUD and dietary accommodations
  */
 
 const foodModule = {
   menuItems: [],
+  filteredItems: [],
 
-  async fetch() {
+  eventTypes: [
+    'Main Wedding',
+    'Pre-Wedding',
+    'Rehearsal Dinner',
+    'Sangeet',
+    'Mehendi',
+    'Reception'
+  ],
+
+  courseTypes: [
+    'Appetizers',
+    'Mains',
+    'Sides',
+    'Desserts',
+    'Beverages',
+    'Snacks'
+  ],
+
+  cuisines: [
+    'Indian',
+    'Fusion',
+    'Continental',
+    'Chinese',
+    'Italian',
+    'Other'
+  ],
+
+  async fetch(filters = {}) {
     try {
-      const response = await apiCall('/api/food', 'GET');
-      this.menuItems = response.items || [];
-      return response;
+      const queryParams = new URLSearchParams();
+      if (filters.eventType) queryParams.append('eventType', filters.eventType);
+      if (filters.courseType) queryParams.append('courseType', filters.courseType);
+
+      const response = await apiCall(`/api/food?${queryParams.toString()}`, 'GET');
+      this.menuItems = response;
+      this.filteredItems = response;
+      return this.menuItems;
     } catch (error) {
-      console.error('Failed to fetch menu:', error);
+      console.error('Failed to fetch menu items:', error);
       throw error;
     }
+  },
+
+  filter(filters = {}) {
+    this.filteredItems = this.menuItems;
+
+    if (filters.eventType) {
+      this.filteredItems = this.filteredItems.filter(m => m.eventType === filters.eventType);
+    }
+    if (filters.courseType) {
+      this.filteredItems = this.filteredItems.filter(m => m.courseType === filters.courseType);
+    }
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
+      this.filteredItems = this.filteredItems.filter(m =>
+        m.dish.toLowerCase().includes(query) ||
+        m.cuisine.toLowerCase().includes(query)
+      );
+    }
+  },
+
+  async addMenuItem(data) {
+    try {
+      const response = await apiCall('/api/food', 'POST', data);
+      this.menuItems.push(response);
+      this.filteredItems = [...this.menuItems];
+      return response;
+    } catch (error) {
+      console.error('Failed to add menu item:', error);
+      throw error;
+    }
+  },
+
+  async updateMenuItem(itemId, data) {
+    try {
+      const response = await apiCall(`/api/food/${itemId}`, 'PUT', data);
+      const index = this.menuItems.findIndex(m => m.id === itemId);
+      if (index !== -1) {
+        this.menuItems[index] = response;
+        this.filteredItems = [...this.menuItems];
+      }
+      return response;
+    } catch (error) {
+      console.error('Failed to update menu item:', error);
+      throw error;
+    }
+  },
+
+  async deleteMenuItem(itemId) {
+    try {
+      await apiCall(`/api/food/${itemId}`, 'DELETE');
+      this.menuItems = this.menuItems.filter(m => m.id !== itemId);
+      this.filteredItems = this.filteredItems.filter(m => m.id !== itemId);
+    } catch (error) {
+      console.error('Failed to delete menu item:', error);
+      throw error;
+    }
+  },
+
+  async addGuestAccommodation(itemId, guestId, modification) {
+    try {
+      const response = await apiCall(`/api/food/${itemId}/accommodation`, 'POST', {
+        guestId,
+        modification
+      });
+      const index = this.menuItems.findIndex(m => m.id === itemId);
+      if (index !== -1) {
+        this.menuItems[index] = response;
+      }
+      return response;
+    } catch (error) {
+      console.error('Failed to add accommodation:', error);
+      throw error;
+    }
+  },
+
+  getSummary() {
+    const summary = {
+      total: this.menuItems.length,
+      byEventType: {},
+      byCourseType: {},
+      byVegType: {
+        veg: 0,
+        'non-veg': 0,
+        both: 0
+      },
+      totalCost: 0
+    };
+
+    this.menuItems.forEach(m => {
+      // By event type
+      if (!summary.byEventType[m.eventType]) {
+        summary.byEventType[m.eventType] = 0;
+      }
+      summary.byEventType[m.eventType]++;
+
+      // By course type
+      if (!summary.byCourseType[m.courseType]) {
+        summary.byCourseType[m.courseType] = 0;
+      }
+      summary.byCourseType[m.courseType]++;
+
+      // By veg type
+      if (summary.byVegType[m.vegNonVeg] !== undefined) {
+        summary.byVegType[m.vegNonVeg]++;
+      }
+
+      // Total cost
+      summary.totalCost += m.cost || 0;
+    });
+
+    return summary;
+  },
+
+  getItemsByEventType(eventType) {
+    return this.filteredItems.filter(m => m.eventType === eventType);
+  },
+
+  getItemsByCourseType(courseType) {
+    return this.filteredItems.filter(m => m.courseType === courseType);
   }
 };
 
