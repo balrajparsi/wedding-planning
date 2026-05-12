@@ -16,7 +16,11 @@ const WEDDING_ID = 'akhila-akshay-2026';
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method === 'GET' && req.url.includes('/guests') && !req.url.includes('/export')) {
+    if (req.method === 'GET' && (req.url.includes('action=export') || req.url.includes('/export'))) {
+      return handleExportGuests(req, res);
+    }
+
+    if (req.method === 'GET' && req.url.includes('/guests')) {
       return handleListGuests(req, res);
     }
 

@@ -93,13 +93,18 @@ const guestModule = {
   // Export guests as CSV
   async exportCSV() {
     try {
-      const response = await fetch(apiCall('/api/guests/export', 'GET'));
+      const response = await fetch('/api/guests?action=export', {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error(`Export failed: ${response.status}`);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `guests-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       return true;
     } catch (error) {
