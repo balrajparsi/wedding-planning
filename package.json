@@ -1,0 +1,20 @@
+{
+  "name": "akhila-akshay-wedding-planning",
+  "version": "1.0.0",
+  "description": "Wedding planning platform for Akhila & Akshay",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "deploy": "vercel"
+  },
+  "keywords": [
+    "wedding",
+    "planning",
+    "coordination",
+    "vercel"
+  ],
+  "author": "Balraj Parsi",
+  "license": "MIT",
+  "dependencies": {}
+}

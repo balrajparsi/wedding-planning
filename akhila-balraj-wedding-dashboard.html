@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akhila & Akshay Wedding Planning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold-primary: #b8860b;
+            --gold-light: #daa520;
+            --blue-royal: #1a3a52;
+            --blue-light: #2a5f7f;
+            --rust: #a0644e;
+            --cream: #f5f1e8;
+            --text-dark: #2d2d2d;
+            --text-muted: #8b8b7a;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --shadow-sm: 0 2px 8px rgba(26, 58, 82, 0.08);
+            --shadow-md: 0 8px 24px rgba(26, 58, 82, 0.12);
+            --shadow-lg: 0 16px 48px rgba(26, 58, 82, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f1e8 0%, #faf8f3 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--blue-royal) 0%, var(--blue-light) 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(100px, -100px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .couple-title h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+            background: linear-gradient(90deg, #ffffff 0%, #daa520 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .couple-title p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.5px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+            border-left: 2px solid var(--gold-light);
+            padding-left: 1.5rem;
+        }
+
+        .stat-item .number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            line-height: 1;
+        }
+
+        .stat-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.3rem;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem 0;
+            box-shadow: var(--shadow-md);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .nav-section {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .nav-links a::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(184, 134, 11, 0.08);
+            color: var(--gold-primary);
+            border-left-color: var(--gold-primary);
+        }
+
+        .nav-links a:hover::before {
+            background: var(--gold-primary);
+            transform: scale(1.3);
+        }
+
+        .nav-links a.active {
+            background: linear-gradient(90deg, rgba(184, 134, 11, 0.1) 0%, transparent 100%);
+            color: var(--gold-primary);
+            border-left-color: var(--gold-primary);
+        }
+
+        .nav-links a.active::before {
+            background: var(--gold-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            color: var(--blue-royal);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold-primary) 0%, var(--rust) 100%);
+            border-radius: 2px;
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(184, 134, 11, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-primary) 0%, var(--rust) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+        }
+
+        .card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: var(--blue-royal);
+            font-weight: 600;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(192, 57, 43, 0.1);
+            color: var(--danger);
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: linear-gradient(135deg, white 0%, rgba(218, 165, 32, 0.02) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(184, 134, 11, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.05), transparent);
+            border-radius: 50%;
+        }
+
+        .stat-card-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--blue-royal) 0%, var(--gold-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(218, 165, 32, 0.15);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-primary) 0%, var(--rust) 100%);
+            border-radius: 3px;
+            animation: progress 0.8s ease-out;
+        }
+
+        @keyframes progress {
+            from {
+                width: 0;
+            }
+        }
+
+        /* Venue Cards */
+        .venue-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--gold-primary);
+            position: relative;
+        }
+
+        .venue-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .venue-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: var(--blue-royal);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .venue-date {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .venue-status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-confirmed {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        /* Menu Items */
+        .menu-item {
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.05) 0%, transparent 100%);
+            border-radius: 8px;
+            border-left: 3px solid var(--gold-primary);
+            margin-bottom: 1rem;
+        }
+
+        .dish-name {
+            font-weight: 600;
+            color: var(--blue-royal);
+            margin-bottom: 0.3rem;
+        }
+
+        .dish-type {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            background: white;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .veg {
+            color: var(--success);
+        }
+
+        .non-veg {
+            color: var(--danger);
+        }
+
+        /* Budget Breakdown */
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(184, 134, 11, 0.1);
+        }
+
+        .budget-item:last-child {
+            border-bottom: none;
+        }
+
+        .budget-category {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .budget-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--rust) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .budget-name {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .budget-amount {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        /* Button */
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--rust) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(184, 134, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(218, 165, 32, 0.1);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gold-primary);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-top: 1px solid rgba(184, 134, 11, 0.1);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .couple-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .header-stats {
+                gap: 1.5rem;
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="couple-title">
+                <h1>Akhila & Akshay</h1>
+                <p>Wedding Planning Dashboard</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="number">47</div>
+                    <div class="label">Days Left</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">285</div>
+                    <div class="label">Guests Invited</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">₹12.5L</div>
+                    <div class="label">Budget</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="nav-section">
+                <label class="nav-label">Planning</label>
+                <ul class="nav-links">
+                    <li><a href="#" class="active">📋 Guest List</a></li>
+                    <li><a href="#">✓ Tasks</a></li>
+                    <li><a href="#">💰 Budget</a></li>
+                    <li><a href="#">🏢 Vendors</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <label class="nav-label">Events</label>
+                <ul class="nav-links">
+                    <li><a href="#">📍 Venues</a></li>
+                    <li><a href="#">🍽️ Food & Menu</a></li>
+                    <li><a href="#">📅 Timeline</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <label class="nav-label">Account</label>
+                <ul class="nav-links">
+                    <li><a href="#">⚙️ Settings</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Overview -->
+            <section>
+                <h2 class="section-title">Dashboard Overview</h2>
+                <div class="grid grid-4">
+                    <div class="stat-card">
+                        <div class="stat-card-value">285</div>
+                        <div class="stat-card-label">Total Guests</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value">218</div>
+                        <div class="stat-card-label">Confirmed RSVPs</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 76%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value">₹8.7L</div>
+                        <div class="stat-card-label">Amount Spent</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value">23/35</div>
+                        <div class="stat-card-label">Tasks Completed</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 66%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Venues Section -->
+            <section style="margin-top: 3rem;">
+                <h2 class="section-title">Venues & Events</h2>
+                <div class="grid grid-3">
+                    <div class="venue-card">
+                        <div class="venue-type">💒 Ceremony</div>
+                        <div class="venue-name">Radisson Blu Lake Palace</div>
+                        <div class="venue-date">June 15, 2026 • 4:00 PM</div>
+                        <span class="venue-status status-confirmed">Confirmed</span>
+                    </div>
+                    <div class="venue-card">
+                        <div class="venue-type">🎉 Reception</div>
+                        <div class="venue-name">Taj Lake Palace Grand</div>
+                        <div class="venue-date">June 15, 2026 • 7:00 PM</div>
+                        <span class="venue-status status-confirmed">Confirmed</span>
+                    </div>
+                    <div class="venue-card">
+                        <div class="venue-type">🎊 Sangeet</div>
+                        <div class="venue-name">Heritage Club Resort</div>
+                        <div class="venue-date">June 13, 2026 • 7:00 PM</div>
+                        <span class="venue-status status-pending">Pending</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Food & Menu Section -->
+            <section style="margin-top: 3rem;">
+                <h2 class="section-title">Food & Menu Planning</h2>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Main Reception Menu</div>
+                            <span class="card-badge badge-success">Finalized</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="dish-name">Butter Chicken</div>
+                            <span class="dish-type veg">🥬 Veg • ₹450/plate</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="dish-name">Tandoori Prawns</div>
+                            <span class="dish-type non-veg">🍖 Non-Veg • ₹650/plate</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="dish-name">Paneer Tikka Masala</div>
+                            <span class="dish-type veg">🥬 Veg • ₹380/plate</span>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">View Full Menu</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Dietary Accommodations</div>
+                            <span class="card-badge badge-warning">23 Dietary Needs</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Vegetarian</div>
+                                <div style="font-weight: 600; color: var(--gold-primary);">45 guests</div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Gluten-Free</div>
+                                <div style="font-weight: 600; color: var(--gold-primary);">8 guests</div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Dairy-Free</div>
+                                <div style="font-weight: 600; color: var(--gold-primary);">5 guests</div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Manage Dietary Needs</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budget Breakdown -->
+            <section style="margin-top: 3rem; margin-bottom: 3rem;">
+                <h2 class="section-title">Budget Breakdown</h2>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Spending by Category</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-category">
+                                <div class="budget-icon">🏛️</div>
+                                <div class="budget-name">Venue</div>
+                            </div>
+                            <div class="budget-amount">₹3.2L</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-category">
+                                <div class="budget-icon">🍽️</div>
+                                <div class="budget-name">Catering</div>
+                            </div>
+                            <div class="budget-amount">₹2.8L</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-category">
+                                <div class="budget-icon">📸</div>
+                                <div class="budget-name">Photography</div>
+                            </div>
+                            <div class="budget-amount">₹1.5L</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-category">
+                                <div class="budget-icon">💐</div>
+                                <div class="budget-name">Decorations</div>
+                            </div>
+                            <div class="budget-amount">₹0.9L</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-category">
+                                <div class="budget-icon">🎵</div>
+                                <div class="budget-name">Music & Entertainment</div>
+                            </div>
+                            <div class="budget-amount">₹0.3L</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Budget Status</div>
+                        </div>
+                        <div style="padding: 1rem 0;">
+                            <div style="margin-bottom: 2rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Total Budgeted</span>
+                                    <span style="color: var(--blue-royal); font-weight: 600;">₹12.5L</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Amount Spent</span>
+                                    <span style="color: var(--gold-primary); font-weight: 600;">₹8.7L</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Remaining</span>
+                                    <span style="color: var(--success); font-weight: 600;">₹3.8L</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 70%"></div>
+                            </div>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; text-align: center;">70% Budget Utilization</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Akhila & Akshay Wedding Planning. Crafted with elegance and care.</p>
+    </footer>
+</body>
+</html>

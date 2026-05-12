@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akhila & Akshay - Wedding Planning Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1 class="couple-name">Akhila & Akshay</h1>
+            <div class="user-menu">
+                <span id="userGreeting">Welcome!</span>
+                <a href="#settings" data-page="settings">⚙️ Settings</a>
+                <a href="#logout" onclick="window.app?.logout()">🚪 Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="nav-section">
+                <label class="nav-label">Planning</label>
+                <ul class="nav-links">
+                    <li><a href="#dashboard" data-page="dashboard" class="active">📋 Dashboard</a></li>
+                    <li><a href="#guests" data-page="guests">👥 Guest List</a></li>
+                    <li><a href="#tasks" data-page="tasks">✓ Tasks</a></li>
+                    <li><a href="#budget" data-page="budget">💰 Budget</a></li>
+                    <li><a href="#vendors" data-page="vendors">🏢 Vendors</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <label class="nav-label">Events</label>
+                <ul class="nav-links">
+                    <li><a href="#venues" data-page="venues">📍 Venues</a></li>
+                    <li><a href="#food" data-page="food">🍽️ Food & Menu</a></li>
+                    <li><a href="#timeline" data-page="timeline">📅 Timeline</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div data-view="dashboard" class="active">
+                <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--blue);">Dashboard Overview</h2>
+                <div class="dashboard-grid">
+                    <!-- Stats will be rendered by app.js -->
+                </div>
+            </div>
+
+            <!-- Guest List View -->
+            <div data-view="guests">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Guest List</h2>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">📧 Bulk Invite</button>
+                        <button class="btn btn-secondary btn-sm guest-export-btn">⬇️ Export CSV</button>
+                        <button class="btn btn-primary btn-sm guest-add-btn">+ Add Guest</button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="guest-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Stats will be rendered here -->
+                </div>
+
+                <!-- Filters & Search -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+                        <input type="text" placeholder="🔍 Search name/email..." class="guest-search" style="margin-bottom: 0;">
+                        <select class="guest-rsvp-filter" style="margin-bottom: 0;">
+                            <option value="">All RSVP Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="declined">Declined</option>
+                            <option value="maybe">Maybe</option>
+                        </select>
+                        <select class="guest-dietary-filter" style="margin-bottom: 0;">
+                            <option value="">All Dietary</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="gluten-free">Gluten-Free</option>
+                            <option value="none">None</option>
+                        </select>
+                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="guest-table-container">
+                    <!-- Table will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Task Board View -->
+            <div data-view="tasks">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Tasks & Checklist</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddTaskModal?.()">+ Add Task</button>
+                </div>
+
+                <div class="grid grid-3">
+                    <!-- Task columns will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Budget Tracker View -->
+            <div data-view="budget">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Budget Tracker</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddExpenseModal?.()">+ Add Expense</button>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h4 style="margin-bottom: 1.5rem;">Budget Summary</h4>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="color: var(--text-muted);">Total Budgeted</span>
+                                <span id="budgetTotal" style="font-weight: 600; color: var(--blue);">₹0L</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="color: var(--text-muted);">Amount Spent</span>
+                                <span id="budgetSpent" style="font-weight: 600; color: var(--gold);">₹0L</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Remaining</span>
+                                <span id="budgetRemaining" style="font-weight: 600; color: var(--success);">₹0L</span>
+                            </div>
+                            <div class="progress-bar" style="margin-top: 1rem;">
+                                <div class="progress-fill" id="budgetProgress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="margin-bottom: 1.5rem;">Category Breakdown</h4>
+                        <div id="categoryBreakdown">
+                            <!-- Categories will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 2rem;">
+                    <table id="expenseTable">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Budgeted</th>
+                                <th>Actual</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Expenses will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vendor Manager View -->
+            <div data-view="vendors">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Vendor Management</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddVendorModal?.()">+ Add Vendor</button>
+                </div>
+
+                <div class="grid grid-3" id="vendorGrid">
+                    <!-- Vendor cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Venue List View -->
+            <div data-view="venues">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Venue & Events</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddVenueModal?.()">+ Add Venue</button>
+                </div>
+
+                <div class="grid grid-3" id="venueGrid">
+                    <!-- Venue cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Food & Menu View -->
+            <div data-view="food">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Food & Menu Planning</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddDishModal?.()">+ Add Dish</button>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h4 style="margin-bottom: 1.5rem;">Menu Items</h4>
+                        <div id="menuList">
+                            <!-- Menu items will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="margin-bottom: 1.5rem;">Dietary Accommodations</h4>
+                        <div id="dietaryList">
+                            <!-- Dietary info will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline View -->
+            <div data-view="timeline">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; color: var(--blue);">Timeline & Milestones</h2>
+                    <button class="btn btn-primary btn-sm" onclick="app?.openAddMilestoneModal?.()">+ Add Milestone</button>
+                </div>
+
+                <div class="card" style="max-width: 800px;">
+                    <div id="timelineList">
+                        <!-- Timeline items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div data-view="settings">
+                <h2 style="font-size: 2rem; color: var(--blue); margin-bottom: 2rem;">Settings</h2>
+
+                <div class="card">
+                    <h4 style="margin-bottom: 1.5rem;">Wedding Details</h4>
+                    <form id="weddingForm">
+                        <label>Couple Name</label>
+                        <input type="text" id="coupleName" placeholder="Couple Name">
+
+                        <label>Wedding Date</label>
+                        <input type="date" id="weddingDate">
+
+                        <label>Location</label>
+                        <input type="text" id="location" placeholder="Wedding Location">
+
+                        <label>Currency</label>
+                        <select id="currency">
+                            <option value="INR">₹ INR</option>
+                            <option value="USD">$ USD</option>
+                            <option value="EUR">€ EUR</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1.5rem;">Manage Planners</h4>
+                    <div id="plannersList">
+                        <!-- Planners list will be populated here -->
+                    </div>
+                    <button class="btn btn-secondary" onclick="app?.openInvitePlannerModal?.()">+ Invite Planner</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add Guest Modal -->
+    <div data-modal="addGuest" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Guest</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Guest Name *</label>
+                <input type="text" name="name" placeholder="Full name" required>
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="guest@example.com">
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="Contact number">
+
+                <label>Relationship</label>
+                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
+
+                <label>Party Size</label>
+                <input type="number" name="partySize" value="1" min="1">
+
+                <label>Dietary Restrictions</label>
+                <select name="dietary">
+                    <option value="none">None</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="gluten-free">Gluten-Free</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Any special notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Add Guest</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Guest Modal -->
+    <div data-modal="editGuest" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Guest</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Guest Name *</label>
+                <input type="text" name="name" placeholder="Full name" required>
+
+                <label>Email</label>
+                <input type="email" name="email" placeholder="guest@example.com">
+
+                <label>Phone</label>
+                <input type="tel" name="phone" placeholder="Contact number">
+
+                <label>Relationship</label>
+                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
+
+                <label>Party Size</label>
+                <input type="number" name="partySize" value="1" min="1">
+
+                <label>Dietary Restrictions</label>
+                <select name="dietary">
+                    <option value="none">None</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="gluten-free">Gluten-Free</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <label>RSVP Status</label>
+                <select name="rsvpStatus">
+                    <option value="pending">Pending</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="declined">Declined</option>
+                    <option value="maybe">Maybe</option>
+                </select>
+
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Any special notes..."></textarea>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Invite Modal -->
+    <div data-modal="bulkInvite" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Bulk RSVP Invitations</h3>
+                <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
+            </div>
+            <form class="modal-form">
+                <label>Filter Guests to Invite</label>
+                <select name="filterStatus">
+                    <option value="all">All Guests</option>
+                    <option value="pending">Pending RSVP Only</option>
+                    <option value="accepted">Accepted Only</option>
+                </select>
+
+                <p style="color: var(--text-muted); margin-top: 1rem;">
+                    Invitations will be sent to guests with valid email addresses.
+                </p>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Send Invitations</button>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="modules/api.js"></script>
+    <script src="app.js"></script>
+    <script src="modules/guests.js"></script>
+    <script src="pages/guests.js"></script>
+    <script src="modules/tasks.js"></script>
+    <script src="modules/budget.js"></script>
+    <script src="modules/vendors.js"></script>
+    <script src="modules/venues.js"></script>
+    <script src="modules/food.js"></script>
+    <script src="modules/timeline.js"></script>
+</body>
+</html>

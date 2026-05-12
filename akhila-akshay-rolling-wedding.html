@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akhila & Akshay - Wedding Planning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #b8860b;
+            --gold-light: #daa520;
+            --blue: #1a3a52;
+            --blue-light: #2a5f7f;
+            --rust: #a0644e;
+            --cream: #f5f1e8;
+            --text-dark: #2d2d2d;
+            --text-muted: #8b8b7a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background: var(--cream);
+            color: var(--text-dark);
+        }
+
+        /* Hero Section with Rolling Background */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f1e8 0%, #faf8f3 100%);
+        }
+
+        /* Animated Background - Udaipur Fort */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="fort" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%25" style="stop-color:%231a3a52;stop-opacity:0.15"/><stop offset="100%25" style="stop-color:%23a0644e;stop-opacity:0.05"/></linearGradient></defs><path d="M100,500 L150,350 L200,400 L250,300 L300,380 L350,280 L400,350 L450,250 L500,320 L550,220 L600,300 L650,200 L700,290 L750,180 L800,270 L850,150 L900,250 L950,120 L1000,220 L1050,100 L1100,200" fill="none" stroke="url(%23fort)" stroke-width="2" opacity="0.3"/><circle cx="200" cy="350" r="30" fill="%23b8860b" opacity="0.2"/><circle cx="500" cy="280" r="40" fill="%23b8860b" opacity="0.15"/><circle cx="800" cy="220" r="35" fill="%23b8860b" opacity="0.2"/><circle cx="1100" cy="150" r="45" fill="%23b8860b" opacity="0.15"/><path d="M0,500 Q300,400 600,480 T1200,500 L1200,600 L0,600 Z" fill="url(%23fort)" opacity="0.08"/></svg>');
+            background-size: 50% 100%;
+            background-repeat: repeat-x;
+            background-position: 0 center;
+            opacity: 0.4;
+            animation: rollBackground 20s linear infinite;
+        }
+
+        @keyframes rollBackground {
+            0% {
+                background-position: 0 center;
+            }
+            100% {
+                background-position: -50% center;
+            }
+        }
+
+        /* Additional Fort silhouette layer */
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 200px;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 58, 82, 0.05) 50%, rgba(160, 100, 78, 0.1) 100%);
+            background-size: 50% 100%;
+            animation: rollBackground 25s linear infinite;
+            opacity: 0.6;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .couple-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--blue) 0%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: slideUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--rust) 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(184, 134, 11, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(184, 134, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--gold);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Features Section */
+        .features-section {
+            position: relative;
+            z-index: 15;
+            padding: 4rem 2rem;
+            background: white;
+            margin-top: -100px;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: var(--blue);
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold) 0%, var(--rust) 100%);
+            border-radius: 2px;
+        }
+
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #fff 0%, rgba(218, 165, 32, 0.03) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(184, 134, 11, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold) 0%, var(--rust) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(26, 58, 82, 0.15);
+            border-color: rgba(184, 134, 11, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            color: var(--blue);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            margin: 3rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .stat {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        /* Food/Menu Section */
+        .menu-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(26, 58, 82, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(184, 134, 11, 0.1);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(26, 58, 82, 0.15);
+        }
+
+        .menu-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--rust) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .menu-content {
+            padding: 1.5rem;
+        }
+
+        .menu-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: var(--blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, rgba(218, 165, 32, 0.05) 0%, transparent 100%);
+        }
+
+        .timeline {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--gold) 0%, var(--rust) 100%);
+        }
+
+        .timeline-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            text-align: right;
+            padding-right: 52%;
+        }
+
+        .timeline-item:nth-child(even) {
+            text-align: left;
+            padding-left: 52%;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: var(--gold);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px var(--gold);
+            top: 0;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 3px solid var(--gold);
+        }
+
+        .timeline-date {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            color: var(--blue);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--blue);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-top: 3px solid var(--gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .couple-name {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 60px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+            }
+
+            .timeline-marker {
+                left: 20px;
+            }
+
+            .timeline-content {
+                border-left: 3px solid var(--gold);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="couple-name">Akhila & Akshay</h1>
+            <p class="subtitle">A Celebration of Love & Tradition</p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary">📋 Start Planning</button>
+                <button class="btn btn-secondary">👥 Guest List</button>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24">
+                <polyline points="18 15 12 21 6 15"></polyline>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2 class="section-title">Wedding Planning Tools</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>Guest List</h3>
+                <p>Manage invitations, track RSVPs, and handle dietary preferences for all your guests.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✓</div>
+                <h3>Task Management</h3>
+                <p>Organize tasks, set deadlines, and assign responsibilities to your planning team.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Budget Tracker</h3>
+                <p>Monitor expenses, track spending by category, and stay within your wedding budget.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏢</div>
+                <h3>Vendor Management</h3>
+                <p>Keep vendor contact info, booking details, and payment status in one place.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Venue Planning</h3>
+                <p>Manage multiple venues for ceremony, pre-wedding, and reception events.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🍽️</div>
+                <h3>Food & Menu</h3>
+                <p>Plan menus, track dietary accommodations, and coordinate catering for each event.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-number">47</div>
+                <div class="stat-label">Days Until Wedding</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">285</div>
+                <div class="stat-label">Guests Invited</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">₹12.5L</div>
+                <div class="stat-label">Total Budget</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">23/35</div>
+                <div class="stat-label">Tasks Completed</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="menu-section">
+        <h2 class="section-title">Signature Menu</h2>
+        <div class="menu-grid">
+            <div class="menu-card">
+                <div class="menu-image">🍲</div>
+                <div class="menu-content">
+                    <div class="menu-title">Butter Chicken</div>
+                    <div class="menu-desc">Creamy tomato-based delicacy, perfect for all occasions</div>
+                </div>
+            </div>
+            <div class="menu-card">
+                <div class="menu-image">🍤</div>
+                <div class="menu-content">
+                    <div class="menu-title">Tandoori Prawns</div>
+                    <div class="menu-desc">Spiced to perfection with traditional tandoori masala</div>
+                </div>
+            </div>
+            <div class="menu-card">
+                <div class="menu-image">🥘</div>
+                <div class="menu-content">
+                    <div class="menu-title">Paneer Tikka Masala</div>
+                    <div class="menu-desc">Rich, creamy curry with tender cottage cheese cubes</div>
+                </div>
+            </div>
+            <div class="menu-card">
+                <div class="menu-image">🍛</div>
+                <div class="menu-content">
+                    <div class="menu-title">Biryani</div>
+                    <div class="menu-desc">Aromatic rice dish layered with marinated meat</div>
+                </div>
+            </div>
+            <div class="menu-card">
+                <div class="menu-image">🥗</div>
+                <div class="menu-content">
+                    <div class="menu-title">Garden Salad</div>
+                    <div class="menu-desc">Fresh vegetables with house special dressing</div>
+                </div>
+            </div>
+            <div class="menu-card">
+                <div class="menu-image">🍰</div>
+                <div class="menu-content">
+                    <div class="menu-title">Royal Dessert</div>
+                    <div class="menu-desc">Decadent cake with premium ingredients</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section">
+        <h2 class="section-title">Wedding Timeline</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">June 13, 2026</div>
+                    <div class="timeline-title">Pre-Wedding Events</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">June 14, 2026</div>
+                    <div class="timeline-title">Rehearsal & Sangeet</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">June 15, 2026</div>
+                    <div class="timeline-title">Wedding Ceremony</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">June 15, 2026</div>
+                    <div class="timeline-title">Reception & Dinner</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Akhila & Akshay Wedding Planning • Crafted with Elegance & Care</p>
+    </footer>
+</body>
+</html>

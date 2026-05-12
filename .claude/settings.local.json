@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mcp-registry__search_mcp_registry",
+      "Bash(npm install *)",
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "WebFetch(domain:boards-api.greenhouse.io)",
+      "WebSearch",
+      "WebFetch(domain:api.lever.co)",
+      "WebFetch(domain:job-boards.greenhouse.io)",
+      "WebFetch(domain:n26.com)",
+      "WebFetch(domain:traderepublic.com)",
+      "WebFetch(domain:jobs.lever.co)",
+      "WebFetch(domain:simplify.jobs)",
+      "WebFetch(domain:jobs.accel.com)",
+      "WebFetch(domain:startup.jobs)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "Bash(git --version)",
+      "Bash(npm --version)",
+      "Bash(git clone *)",
+      "Bash(find \"/mnt/c/Users/balra/Claude local/resume-chatbot\" -type f)",
+      "Bash(gh auth *)",
+      "PowerShell(gh auth status 2>&1)",
+      "Skill(anthropic-skills:humanizer)",
+      "Skill(anthropic-skills:humanizer:*)"
+    ]
+  }
+}

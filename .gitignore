@@ -1,0 +1,30 @@
+# Environment variables
+.env.local
+.env*.local
+.env
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
+dist/
+build/
+*.zip
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Vercel
+.vercel/
+.vercelignore
