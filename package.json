@@ -16,5 +16,7 @@
   ],
   "author": "Balraj Parsi",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "framer-motion": "^12.38.0"
+  }
 }
