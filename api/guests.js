@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
       return handleExportGuests(req, res);
     }
 
-    if (req.method === 'DELETE' && req.url.includes('/reset')) {
+    if (req.method === 'DELETE' && (req.url.includes('action=reset') || req.url.includes('/reset'))) {
       return handleResetGuests(req, res);
     }
 

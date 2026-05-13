@@ -67,7 +67,7 @@ const timelineModule = {
 
   async updateMilestone(milestoneId, data) {
     try {
-      const response = await apiCall(`/api/timeline/${milestoneId}`, 'PUT', data);
+      const response = await apiCall(`/api/timeline?id=${milestoneId}`, 'PUT', data);
       const index = this.milestones.findIndex(m => m.id === milestoneId);
       if (index !== -1) {
         this.milestones[index] = response;
@@ -82,7 +82,7 @@ const timelineModule = {
 
   async deleteMilestone(milestoneId) {
     try {
-      await apiCall(`/api/timeline/${milestoneId}`, 'DELETE');
+      await apiCall(`/api/timeline?id=${milestoneId}`, 'DELETE');
       this.milestones = this.milestones.filter(m => m.id !== milestoneId);
       this.filteredMilestones = this.filteredMilestones.filter(m => m.id !== milestoneId);
     } catch (error) {

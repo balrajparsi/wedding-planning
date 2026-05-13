@@ -85,7 +85,7 @@ const vendorModule = {
 
   async updateVendor(vendorId, data) {
     try {
-      const response = await apiCall(`/api/vendors/${vendorId}`, 'PUT', data);
+      const response = await apiCall(`/api/vendors?id=${vendorId}`, 'PUT', data);
       const index = this.vendors.findIndex(v => v.id === vendorId);
       if (index !== -1) {
         this.vendors[index] = response;
@@ -100,7 +100,7 @@ const vendorModule = {
 
   async deleteVendor(vendorId) {
     try {
-      await apiCall(`/api/vendors/${vendorId}`, 'DELETE');
+      await apiCall(`/api/vendors?id=${vendorId}`, 'DELETE');
       this.vendors = this.vendors.filter(v => v.id !== vendorId);
       this.filteredVendors = this.filteredVendors.filter(v => v.id !== vendorId);
     } catch (error) {
@@ -111,7 +111,7 @@ const vendorModule = {
 
   async addDocument(vendorId, documentName, documentUrl) {
     try {
-      const response = await apiCall(`/api/vendors/${vendorId}/documents`, 'POST', {
+      const response = await apiCall(`/api/vendors?id=${vendorId}&action=documents`, 'POST', {
         documentName,
         documentUrl
       });
@@ -128,7 +128,7 @@ const vendorModule = {
 
   async removeDocument(vendorId, docIndex) {
     try {
-      const response = await apiCall(`/api/vendors/${vendorId}/documents/${docIndex}`, 'DELETE');
+      const response = await apiCall(`/api/vendors?id=${vendorId}&action=documents&docIndex=${docIndex}`, 'DELETE');
       const index = this.vendors.findIndex(v => v.id === vendorId);
       if (index !== -1) {
         this.vendors[index] = response;

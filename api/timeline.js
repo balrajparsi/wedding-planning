@@ -1,114 +1,55 @@
 /**
- * Timeline Management API
- * Handles milestones, deadlines, and event scheduling
+ * Timeline Management API — No Auth
  */
 
-const { getKV } = require('../lib/kv');
-const { verifyJWT } = require('../lib/jwt');
+const kv = require('../lib/kv');
+const WEDDING_ID = 'akhila-akshay-2026';
 
 module.exports = async (req, res) => {
-  const kv = getKV();
-
-  // JWT verification middleware
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  let user;
-  try {
-    user = verifyJWT(token);
-  } catch (error) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const weddingId = user.weddingId;
   const method = req.method;
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
-  const searchParams = url.searchParams;
+  const url    = new URL(req.url, 'http://localhost');
+  const sp     = url.searchParams;
+  const id     = sp.get('id') || '';
+  const key    = `wedding:${WEDDING_ID}:timeline`;
 
   try {
-    // GET /api/timeline - List all milestones chronologically
-    if (method === 'GET' && path === '/api/timeline') {
-      const type = searchParams.get('type'); // event, deadline, reminder, milestone
-
-      const timelineKey = `wedding:${weddingId}:timeline`;
-      let milestones = await kv.get(timelineKey) || [];
-
-      // Apply filters
-      if (type) {
-        milestones = milestones.filter(m => m.type === type);
-      }
-
-      // Sort by date chronologically
-      milestones = milestones.sort((a, b) => {
-        const aDate = new Date(a.date).getTime();
-        const bDate = new Date(b.date).getTime();
-        return aDate - bDate;
-      });
-
+    if (method === 'GET') {
+      let milestones = await kv.get(key) || [];
+      const type = sp.get('type');
+      if (type) milestones = milestones.filter(m => m.type === type);
+      milestones.sort((a, b) => new Date(a.date) - new Date(b.date));
       return res.status(200).json(milestones);
     }
 
-    // POST /api/timeline - Create new milestone
-    if (method === 'POST' && path === '/api/timeline') {
-      const { type, title, date, location, description, attendees, notes } = req.body;
-
-      if (!type || !title || !date) {
-        return res.status(400).json({ error: 'Type, title, and date required' });
-      }
-
+    if (method === 'POST') {
+      const { type, title, date, location, description, attendees, notes } = req.body || {};
+      if (!type || !title || !date) return res.status(400).json({ error: 'Type, title, and date required' });
       const milestone = {
-        id: `timeline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        weddingId,
-        type, // event, deadline, reminder, milestone
-        title,
-        date,
-        location: location || '',
-        description: description || '',
-        attendees: attendees || [], // Array of names or emails
-        notes: notes || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        id: `timeline_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
+        weddingId: WEDDING_ID, type, title, date,
+        location: location||'', description: description||'',
+        attendees: attendees||[], notes: notes||'',
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
       };
-
-      const timelineKey = `wedding:${weddingId}:timeline`;
-      let milestones = await kv.get(timelineKey) || [];
+      let milestones = await kv.get(key) || [];
       milestones.push(milestone);
-      await kv.set(timelineKey, milestones);
-
+      await kv.set(key, milestones);
       return res.status(201).json(milestone);
     }
 
-    // PUT /api/timeline/:id - Update milestone
-    if (method === 'PUT' && path.startsWith('/api/timeline/')) {
-      const milestoneId = path.split('/')[3];
-      const updates = req.body;
-
-      const timelineKey = `wedding:${weddingId}:timeline`;
-      let milestones = await kv.get(timelineKey) || [];
-      const index = milestones.findIndex(m => m.id === milestoneId);
-
-      if (index === -1) {
-        return res.status(404).json({ error: 'Milestone not found' });
-      }
-
-      milestones[index] = {
-        ...milestones[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-
-      await kv.set(timelineKey, milestones);
-      return res.status(200).json(milestones[index]);
+    if (method === 'PUT' && id) {
+      let milestones = await kv.get(key) || [];
+      const idx = milestones.findIndex(m => m.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Milestone not found' });
+      milestones[idx] = { ...milestones[idx], ...(req.body||{}), updatedAt: new Date().toISOString() };
+      await kv.set(key, milestones);
+      return res.status(200).json(milestones[idx]);
     }
 
-    // DELETE /api/timeline/:id - Delete milestone
-    if (method === 'DELETE' && path.startsWith('/api/timeline/')) {
-      const milestoneId = path.split('/')[3];
-
-      const timelineKey = `wedding:${weddingId}:timeline`;
-      let milestones = await kv.get(timelineKey) || [];
-      milestones = milestones.filter(m => m.id !== milestoneId);
-      await kv.set(timelineKey, milestones);
-
+    if (method === 'DELETE' && id) {
+      let milestones = await kv.get(key) || [];
+      milestones = milestones.filter(m => m.id !== id);
+      await kv.set(key, milestones);
       return res.status(200).json({ success: true });
     }
 
@@ -118,4 +59,3 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-

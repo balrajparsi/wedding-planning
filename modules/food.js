@@ -82,7 +82,7 @@ const foodModule = {
 
   async updateMenuItem(itemId, data) {
     try {
-      const response = await apiCall(`/api/food/${itemId}`, 'PUT', data);
+      const response = await apiCall(`/api/food?id=${itemId}`, 'PUT', data);
       const index = this.menuItems.findIndex(m => m.id === itemId);
       if (index !== -1) {
         this.menuItems[index] = response;
@@ -97,7 +97,7 @@ const foodModule = {
 
   async deleteMenuItem(itemId) {
     try {
-      await apiCall(`/api/food/${itemId}`, 'DELETE');
+      await apiCall(`/api/food?id=${itemId}`, 'DELETE');
       this.menuItems = this.menuItems.filter(m => m.id !== itemId);
       this.filteredItems = this.filteredItems.filter(m => m.id !== itemId);
     } catch (error) {

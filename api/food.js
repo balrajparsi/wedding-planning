@@ -1,148 +1,74 @@
 /**
- * Food & Menu Management API
- * Handles menu planning with dietary accommodations per guest
+ * Food & Menu Management API — No Auth
  */
 
-const { getKV } = require('../lib/kv');
-const { verifyJWT } = require('../lib/jwt');
+const kv = require('../lib/kv');
+const WEDDING_ID = 'akhila-akshay-2026';
 
 module.exports = async (req, res) => {
-  const kv = getKV();
-
-  // JWT verification middleware
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  let user;
-  try {
-    user = verifyJWT(token);
-  } catch (error) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const weddingId = user.weddingId;
   const method = req.method;
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
-  const searchParams = url.searchParams;
+  const url    = new URL(req.url, 'http://localhost');
+  const sp     = url.searchParams;
+  const id     = sp.get('id') || '';
+  const action = sp.get('action') || '';
+  const key    = `wedding:${WEDDING_ID}:food`;
 
   try {
-    // GET /api/food - List menu items with optional filters
-    if (method === 'GET' && path === '/api/food') {
-      const eventType = searchParams.get('eventType');
-      const courseType = searchParams.get('courseType');
-
-      const foodKey = `wedding:${weddingId}:food`;
-      let menuItems = await kv.get(foodKey) || [];
-
-      // Apply filters
-      if (eventType) {
-        menuItems = menuItems.filter(m => m.eventType === eventType);
-      }
-      if (courseType) {
-        menuItems = menuItems.filter(m => m.courseType === courseType);
-      }
-
-      return res.status(200).json(menuItems);
+    if (method === 'GET') {
+      let items = await kv.get(key) || [];
+      const evt  = sp.get('eventType');
+      const crs  = sp.get('courseType');
+      if (evt) items = items.filter(m => m.eventType  === evt);
+      if (crs) items = items.filter(m => m.courseType === crs);
+      return res.status(200).json(items);
     }
 
-    // POST /api/food - Create new menu item
-    if (method === 'POST' && path === '/api/food') {
-      const { eventType, courseType, dish, vegNonVeg, cost, portionSize,
-              preparedBy, cuisine, notes } = req.body;
+    if (method === 'POST' && action === 'accommodation' && id) {
+      const { guestId, modification } = req.body || {};
+      if (!guestId || !modification) return res.status(400).json({ error: 'guestId and modification required' });
+      let items = await kv.get(key) || [];
+      const item = items.find(m => m.id === id);
+      if (!item) return res.status(404).json({ error: 'Menu item not found' });
+      item.guestAccommodations = item.guestAccommodations || [];
+      const existing = item.guestAccommodations.findIndex(a => a.guestId === guestId);
+      if (existing !== -1) item.guestAccommodations[existing].modification = modification;
+      else item.guestAccommodations.push({ guestId, modification });
+      item.updatedAt = new Date().toISOString();
+      await kv.set(key, items);
+      return res.status(200).json(item);
+    }
 
-      if (!dish || !eventType || !courseType) {
-        return res.status(400).json({ error: 'Dish, event type, and course type required' });
-      }
-
-      const menuItem = {
-        id: `food_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        weddingId,
-        eventType, // main-wedding, pre-wedding, rehearsal, sangeet, mehendi, reception
-        eventDate: '',
-        courseType, // appetizers, mains, sides, desserts, beverages, snacks
-        dish,
-        vegNonVeg: vegNonVeg || 'both', // veg, non-veg, both
-        cost: cost || 0,
-        portionSize: portionSize || '1 plate',
-        preparedBy: preparedBy || '', // vendor name or notes
-        cuisine: cuisine || '', // indian, fusion, continental, other
-        guestAccommodations: [], // Array of {guestId, modification}
-        notes: notes || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+    if (method === 'POST') {
+      const { eventType, courseType, dish, vegNonVeg, cost, portionSize, preparedBy, cuisine, notes } = req.body || {};
+      if (!dish || !eventType || !courseType) return res.status(400).json({ error: 'Dish, event type, and course type required' });
+      const item = {
+        id: `food_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
+        weddingId: WEDDING_ID, eventType, eventDate: '', courseType, dish,
+        vegNonVeg: vegNonVeg||'both', cost: cost||0,
+        portionSize: portionSize||'1 plate', preparedBy: preparedBy||'',
+        cuisine: cuisine||'', guestAccommodations: [], notes: notes||'',
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
       };
-
-      const foodKey = `wedding:${weddingId}:food`;
-      let menuItems = await kv.get(foodKey) || [];
-      menuItems.push(menuItem);
-      await kv.set(foodKey, menuItems);
-
-      return res.status(201).json(menuItem);
+      let items = await kv.get(key) || [];
+      items.push(item);
+      await kv.set(key, items);
+      return res.status(201).json(item);
     }
 
-    // PUT /api/food/:id - Update menu item
-    if (method === 'PUT' && path.startsWith('/api/food/')) {
-      const foodId = path.split('/')[3];
-      const updates = req.body;
-
-      const foodKey = `wedding:${weddingId}:food`;
-      let menuItems = await kv.get(foodKey) || [];
-      const index = menuItems.findIndex(m => m.id === foodId);
-
-      if (index === -1) {
-        return res.status(404).json({ error: 'Menu item not found' });
-      }
-
-      menuItems[index] = {
-        ...menuItems[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-
-      await kv.set(foodKey, menuItems);
-      return res.status(200).json(menuItems[index]);
+    if (method === 'PUT' && id) {
+      let items = await kv.get(key) || [];
+      const idx  = items.findIndex(m => m.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Menu item not found' });
+      items[idx] = { ...items[idx], ...(req.body||{}), updatedAt: new Date().toISOString() };
+      await kv.set(key, items);
+      return res.status(200).json(items[idx]);
     }
 
-    // DELETE /api/food/:id - Delete menu item
-    if (method === 'DELETE' && path.startsWith('/api/food/')) {
-      const foodId = path.split('/')[3];
-
-      const foodKey = `wedding:${weddingId}:food`;
-      let menuItems = await kv.get(foodKey) || [];
-      menuItems = menuItems.filter(m => m.id !== foodId);
-      await kv.set(foodKey, menuItems);
-
+    if (method === 'DELETE' && id) {
+      let items = await kv.get(key) || [];
+      items = items.filter(m => m.id !== id);
+      await kv.set(key, items);
       return res.status(200).json({ success: true });
-    }
-
-    // POST /api/food/:id/accommodation - Add guest dietary accommodation
-    if (method === 'POST' && path.includes('/accommodation')) {
-      const foodId = path.split('/')[3];
-      const { guestId, modification } = req.body;
-
-      if (!guestId || !modification) {
-        return res.status(400).json({ error: 'Guest ID and modification required' });
-      }
-
-      const foodKey = `wedding:${weddingId}:food`;
-      let menuItems = await kv.get(foodKey) || [];
-      const menuItem = menuItems.find(m => m.id === foodId);
-
-      if (!menuItem) {
-        return res.status(404).json({ error: 'Menu item not found' });
-      }
-
-      // Check if accommodation already exists for this guest
-      const existingIndex = menuItem.guestAccommodations.findIndex(a => a.guestId === guestId);
-      if (existingIndex !== -1) {
-        menuItem.guestAccommodations[existingIndex].modification = modification;
-      } else {
-        menuItem.guestAccommodations.push({ guestId, modification });
-      }
-
-      menuItem.updatedAt = new Date().toISOString();
-      await kv.set(foodKey, menuItems);
-
-      return res.status(200).json(menuItem);
     }
 
     return res.status(404).json({ error: 'Not found' });
@@ -151,4 +77,3 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-

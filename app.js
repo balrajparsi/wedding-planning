@@ -47,16 +47,25 @@ class WeddingPlanningApp {
   // Fetch all data from APIs
   async fetchAllData() {
     try {
-      [this.guests, this.tasks, this.budget, this.vendors, this.venues, this.foods, this.timeline] =
+      const [guestsRes, tasksRes, budgetRes, vendorsRes, venuesRes, foodRes, timelineRes] =
         await Promise.all([
-          this.apiCall('/api/guests', 'GET').catch(e => []),
-          this.apiCall('/api/tasks', 'GET').catch(e => []),
-          this.apiCall('/api/budget/items', 'GET').catch(e => []),
-          this.apiCall('/api/vendors', 'GET').catch(e => []),
-          this.apiCall('/api/venues', 'GET').catch(e => []),
-          this.apiCall('/api/food', 'GET').catch(e => []),
-          this.apiCall('/api/timeline', 'GET').catch(e => []),
+          this.apiCall('/api/guests', 'GET').catch(() => ({ guests: [] })),
+          this.apiCall('/api/tasks', 'GET').catch(() => ({ tasks: [] })),
+          this.apiCall('/api/budget?action=items', 'GET').catch(() => ({ items: [] })),
+          this.apiCall('/api/vendors', 'GET').catch(() => []),
+          this.apiCall('/api/venues', 'GET').catch(() => []),
+          this.apiCall('/api/food', 'GET').catch(() => []),
+          this.apiCall('/api/timeline', 'GET').catch(() => []),
         ]);
+
+      // Extract arrays from response objects
+      this.guests   = Array.isArray(guestsRes)   ? guestsRes   : (guestsRes.guests   || []);
+      this.tasks    = Array.isArray(tasksRes)    ? tasksRes    : (tasksRes.tasks     || []);
+      this.budget   = Array.isArray(budgetRes)   ? budgetRes   : (budgetRes.items    || []);
+      this.vendors  = Array.isArray(vendorsRes)  ? vendorsRes  : (vendorsRes.vendors || []);
+      this.venues   = Array.isArray(venuesRes)   ? venuesRes   : (venuesRes.venues   || []);
+      this.foods    = Array.isArray(foodRes)     ? foodRes     : (foodRes.items      || []);
+      this.timeline = Array.isArray(timelineRes) ? timelineRes : (timelineRes.items  || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     }

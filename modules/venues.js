@@ -79,7 +79,7 @@ const venueModule = {
 
   async updateVenue(venueId, data) {
     try {
-      const response = await apiCall(`/api/venues/${venueId}`, 'PUT', data);
+      const response = await apiCall(`/api/venues?id=${venueId}`, 'PUT', data);
       const index = this.venues.findIndex(v => v.id === venueId);
       if (index !== -1) {
         this.venues[index] = response;
@@ -94,7 +94,7 @@ const venueModule = {
 
   async deleteVenue(venueId) {
     try {
-      await apiCall(`/api/venues/${venueId}`, 'DELETE');
+      await apiCall(`/api/venues?id=${venueId}`, 'DELETE');
       this.venues = this.venues.filter(v => v.id !== venueId);
       this.filteredVenues = this.filteredVenues.filter(v => v.id !== venueId);
     } catch (error) {

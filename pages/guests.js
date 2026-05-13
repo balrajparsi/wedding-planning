@@ -286,7 +286,7 @@ const guestListPage = {
   async resetAllGuests() {
     if (!confirm('⚠️ Reset ALL guests? This will permanently delete all guest data.')) return;
     try {
-      await apiCall('/api/guests/reset', 'DELETE');
+      await apiCall('/api/guests?action=reset', 'DELETE');
       guestModule.guests = [];
       guestModule.filteredGuests = [];
       showNotification('All guests cleared', 'success');

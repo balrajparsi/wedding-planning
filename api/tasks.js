@@ -1,261 +1,153 @@
 /**
- * Task Management API Endpoints
- * GET /api/tasks - List tasks with filters
- * POST /api/tasks - Create task
- * PUT /api/tasks/:id - Update task
- * DELETE /api/tasks/:id - Delete task
- * POST /api/tasks/:id/subtasks - Add subtask
- * PUT /api/tasks/:id/subtasks/:subId - Update subtask
+ * Task Management API — No Auth
+ * Uses ?id= query param for all ID-based operations
  */
 
 const crypto = require('crypto');
-const kv = require('../lib/kv');
+const kv     = require('../lib/kv');
 
-// Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
+const TASKS_KEY  = `wedding:${WEDDING_ID}:tasks`;
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method === 'GET' && req.url.includes('/tasks') && !req.url.includes('/subtasks')) {
-      return handleListTasks(req, res);
-    }
+    const url    = new URL(req.url, 'http://localhost');
+    const sp     = url.searchParams;
+    const id     = sp.get('id')     || '';
+    const action = sp.get('action') || '';
+    const subId  = sp.get('subId')  || '';
 
-    if (req.method === 'POST' && req.url.includes('/tasks') && !req.url.includes('/subtasks')) {
-      return handleAddTask(req, res);
-    }
-
-    if (req.method === 'PUT' && req.url.match(/\/tasks\/[a-z0-9]+$/i)) {
-      return handleUpdateTask(req, res);
-    }
-
-    if (req.method === 'DELETE' && req.url.match(/\/tasks\/[a-z0-9]+$/i)) {
-      return handleDeleteTask(req, res);
-    }
-
-    if (req.method === 'POST' && req.url.includes('/subtasks')) {
-      return handleAddSubtask(req, res);
-    }
-
-    if (req.method === 'PUT' && req.url.includes('/subtasks')) {
-      return handleUpdateSubtask(req, res);
-    }
+    if (req.method === 'GET')                            return handleListTasks(sp, res);
+    if (req.method === 'POST' && !id)                    return handleAddTask(req, res);
+    if (req.method === 'PUT'    && id && action === 'subtasks') return handleUpdateSubtask(id, subId, req, res);
+    if (req.method === 'POST'   && id && action === 'subtasks') return handleAddSubtask(id, req, res);
+    if (req.method === 'PUT'    && id)                   return handleUpdateTask(id, req, res);
+    if (req.method === 'DELETE' && id)                   return handleDeleteTask(id, res);
 
     res.status(404).json({ error: 'Not found' });
   } catch (error) {
     console.error('Tasks API error:', error);
     res.status(500).json({ error: error.message || 'Internal server error' });
   }
-}
+};
 
-async function handleListTasks(req, res) {
-    const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
+async function handleListTasks(sp, res) {
+  let tasks    = await kv.get(TASKS_KEY) || [];
+  const cat    = sp.get('category');
+  const stat   = sp.get('status');
+  const assign = sp.get('assignee');
+  const sort   = sp.get('sortBy') || 'dueDate';
 
-  const url = new URL(req.url, 'http://localhost');
-  const category = url.searchParams.get('category');
-  const status = url.searchParams.get('status');
-  const assignee = url.searchParams.get('assignee');
-  const sortBy = url.searchParams.get('sortBy') || 'dueDate';
+  if (cat)    tasks = tasks.filter(t => t.category === cat);
+  if (stat)   tasks = tasks.filter(t => t.status   === stat);
+  if (assign) tasks = tasks.filter(t => t.assignees?.includes(assign));
 
-  let filtered = tasks;
-
-  if (category && category !== 'all') {
-    filtered = filtered.filter(t => t.category === category);
-  }
-
-  if (status && status !== 'all') {
-    filtered = filtered.filter(t => t.status === status);
-  }
-
-  if (assignee && assignee !== 'all') {
-    filtered = filtered.filter(t => t.assignees?.includes(assignee));
-  }
-
-  // Sort
-  filtered.sort((a, b) => {
-    if (sortBy === 'dueDate') {
-      const aDate = new Date(a.dueDate || '9999-12-31');
-      const bDate = new Date(b.dueDate || '9999-12-31');
-      return aDate - bDate;
-    } else if (sortBy === 'priority') {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+  tasks.sort((a, b) => {
+    if (sort === 'priority') {
+      const ord = { high:0, medium:1, low:2 };
+      return (ord[a.priority]||2) - (ord[b.priority]||2);
     }
-    return 0;
+    return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
   });
 
-  const stats = {
-    total: tasks.length,
-    pending: tasks.filter(t => t.status === 'pending').length,
-    inProgress: tasks.filter(t => t.status === 'in-progress').length,
-    completed: tasks.filter(t => t.status === 'completed').length,
-    overdue: tasks.filter(t => t.status !== 'completed' && new Date(t.dueDate) < new Date()).length
-  };
-
   res.json({
-    tasks: filtered,
-    stats
+    tasks,
+    stats: {
+      total:      tasks.length,
+      pending:    tasks.filter(t => t.status === 'pending').length,
+      inProgress: tasks.filter(t => t.status === 'in-progress').length,
+      completed:  tasks.filter(t => t.status === 'completed').length
+    }
   });
 }
 
 async function handleAddTask(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can add tasks' });
-  }
+  const { title, category, dueDate, assignees, priority, notes } = req.body || {};
+  if (!title) return res.status(400).json({ error: 'Task title required' });
 
-  const { title, category, dueDate, assignees, priority, notes } = req.body;
-
-  if (!title) {
-    return res.status(400).json({ error: 'Task title required' });
-  }
-
-  const taskId = crypto.randomBytes(8).toString('hex');
   const task = {
-    id: taskId,
-    weddingId: user.weddingId,
-    title,
-    category: category || 'general',
-    dueDate: dueDate || '',
+    id:        crypto.randomBytes(8).toString('hex'),
+    weddingId: WEDDING_ID, title,
+    category:  category  || 'general',
+    dueDate:   dueDate   || '',
     assignees: assignees || [],
-    priority: priority || 'medium',
-    status: 'pending',
-    notes: notes || '',
-    subtasks: [],
+    priority:  priority  || 'medium',
+    status:    'pending',
+    notes:     notes     || '',
+    subtasks:  [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
 
-  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
+  const tasks = (await kv.get(TASKS_KEY)) || [];
   tasks.push(task);
-  await kv.set(tasksKey, tasks);
-
+  await kv.set(TASKS_KEY, tasks);
   res.status(201).json(task);
 }
 
-async function handleUpdateTask(req, res) {
-    const taskId = req.url.match(/\/tasks\/([a-z0-9]+)$/i)[1];
+async function handleUpdateTask(id, req, res) {
+  const tasks = (await kv.get(TASKS_KEY)) || [];
+  const idx   = tasks.findIndex(t => t.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Task not found' });
 
-  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
-
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: 'Task not found' });
+  const t = tasks[idx];
+  const b = req.body || {};
+  if (b.title    !== undefined) t.title    = b.title;
+  if (b.category !== undefined) t.category = b.category;
+  if (b.dueDate  !== undefined) t.dueDate  = b.dueDate;
+  if (b.assignees!== undefined) t.assignees= b.assignees;
+  if (b.priority !== undefined) t.priority = b.priority;
+  if (b.notes    !== undefined) t.notes    = b.notes;
+  if (b.status   !== undefined) {
+    t.status = b.status;
+    if (b.status === 'completed') t.completedAt = new Date().toISOString();
   }
-
-  const task = tasks[taskIndex];
-
-  if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can update tasks' });
-  }
-
-  const { title, category, dueDate, assignees, priority, status, notes } = req.body;
-
-  if (title !== undefined) task.title = title;
-  if (category !== undefined) task.category = category;
-  if (dueDate !== undefined) task.dueDate = dueDate;
-  if (assignees !== undefined) task.assignees = assignees;
-  if (priority !== undefined) task.priority = priority;
-  if (status !== undefined) {
-    task.status = status;
-    if (status === 'completed') {
-      task.completedAt = new Date().toISOString();
-    }
-  }
-  if (notes !== undefined) task.notes = notes;
-
-  task.updatedAt = new Date().toISOString();
-
-  tasks[taskIndex] = task;
-  await kv.set(tasksKey, tasks);
-
-  res.json(task);
+  t.updatedAt = new Date().toISOString();
+  tasks[idx] = t;
+  await kv.set(TASKS_KEY, tasks);
+  res.json(t);
 }
 
-async function handleDeleteTask(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can delete tasks' });
-  }
-
-  const taskId = req.url.match(/\/tasks\/([a-z0-9]+)$/i)[1];
-
-  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
-  const filtered = tasks.filter(t => t.id !== taskId);
-
-  if (filtered.length === tasks.length) {
-    return res.status(404).json({ error: 'Task not found' });
-  }
-
-  await kv.set(tasksKey, filtered);
-
-  res.json({ success: true, message: 'Task deleted' });
+async function handleDeleteTask(id, res) {
+  const tasks    = (await kv.get(TASKS_KEY)) || [];
+  const filtered = tasks.filter(t => t.id !== id);
+  if (filtered.length === tasks.length) return res.status(404).json({ error: 'Task not found' });
+  await kv.set(TASKS_KEY, filtered);
+  res.json({ success: true });
 }
 
-async function handleAddSubtask(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can add subtasks' });
-  }
+async function handleAddSubtask(taskId, req, res) {
+  const { title } = req.body || {};
+  if (!title) return res.status(400).json({ error: 'Subtask title required' });
 
-  const taskId = req.url.match(/\/tasks\/([a-z0-9]+)/i)[1];
-  const { title } = req.body;
+  const tasks = (await kv.get(TASKS_KEY)) || [];
+  const task  = tasks.find(t => t.id === taskId);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
 
-  if (!title) {
-    return res.status(400).json({ error: 'Subtask title required' });
-  }
-
-  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
-
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: 'Task not found' });
-  }
-
-  const subtaskId = crypto.randomBytes(8).toString('hex');
   const subtask = {
-    id: subtaskId,
-    title,
-    completed: false,
+    id: crypto.randomBytes(4).toString('hex'),
+    title, completed: false,
     createdAt: new Date().toISOString()
   };
-
-  tasks[taskIndex].subtasks.push(subtask);
-  await kv.set(tasksKey, tasks);
-
+  task.subtasks = task.subtasks || [];
+  task.subtasks.push(subtask);
+  task.updatedAt = new Date().toISOString();
+  await kv.set(TASKS_KEY, tasks);
   res.status(201).json(subtask);
 }
 
-async function handleUpdateSubtask(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can update subtasks' });
-  }
+async function handleUpdateSubtask(taskId, subtaskId, req, res) {
+  const tasks = (await kv.get(TASKS_KEY)) || [];
+  const task  = tasks.find(t => t.id === taskId);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
 
-  const match = req.url.match(/\/tasks\/([a-z0-9]+)\/subtasks\/([a-z0-9]+)/i);
-  const taskId = match[1];
-  const subtaskId = match[2];
+  const subtask = (task.subtasks||[]).find(s => s.id === subtaskId);
+  if (!subtask) return res.status(404).json({ error: 'Subtask not found' });
 
-  const tasksKey = `wedding:$\{WEDDING_ID\}:tasks`;
-  const tasks = (await kv.get(tasksKey)) || [];
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
-
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: 'Task not found' });
-  }
-
-  const subtaskIndex = tasks[taskIndex].subtasks.findIndex(s => s.id === subtaskId);
-  if (subtaskIndex === -1) {
-    return res.status(404).json({ error: 'Subtask not found' });
-  }
-
-  const { completed, title } = req.body;
-
-  if (completed !== undefined) tasks[taskIndex].subtasks[subtaskIndex].completed = completed;
-  if (title !== undefined) tasks[taskIndex].subtasks[subtaskIndex].title = title;
-
-  await kv.set(tasksKey, tasks);
-
-  res.json(tasks[taskIndex].subtasks[subtaskIndex]);
+  const b = req.body || {};
+  if (b.completed !== undefined) subtask.completed = b.completed;
+  if (b.title     !== undefined) subtask.title     = b.title;
+  task.updatedAt = new Date().toISOString();
+  await kv.set(TASKS_KEY, tasks);
+  res.json(subtask);
 }
-

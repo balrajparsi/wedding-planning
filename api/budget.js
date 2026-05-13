@@ -1,232 +1,146 @@
 /**
- * Budget Tracking API Endpoints
- * GET /api/budget/summary - Budget summary by category
- * GET /api/budget/items - List expenses with filters
- * POST /api/budget/items - Add expense
- * PUT /api/budget/items/:id - Update expense
- * DELETE /api/budget/items/:id - Delete expense
- * GET /api/budget/export - Export as CSV
+ * Budget Tracking API — No Auth
+ * GET  /api/budget?action=summary  - Budget summary
+ * GET  /api/budget?action=items    - List expenses
+ * POST /api/budget?action=items    - Add expense
+ * PUT  /api/budget?action=items&id=:id  - Update expense
+ * DELETE /api/budget?action=items&id=:id - Delete expense
+ * GET  /api/budget?action=export   - Export CSV
  */
 
 const crypto = require('crypto');
-const kv = require('../lib/kv');
+const kv     = require('../lib/kv');
 
-// Fixed wedding ID for Akhila & Akshay's wedding
-const WEDDING_ID = 'akhila-akshay-2026';
+const WEDDING_ID  = 'akhila-akshay-2026';
+const BUDGET_KEY  = `wedding:${WEDDING_ID}:budget`;
+const CATEGORIES  = ['venue','catering','photography','florist','music','decor','attire','rings','invitations','transportation','misc'];
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method === 'GET' && req.url.includes('/summary')) {
-      return handleGetSummary(req, res);
-    }
+    const url    = new URL(req.url, 'http://localhost');
+    const action = url.searchParams.get('action') || 'items';
+    const id     = url.searchParams.get('id') || '';
 
-    if (req.method === 'GET' && req.url.includes('/items') && !req.url.includes('/export')) {
-      return handleListItems(req, res);
-    }
-
-    if (req.method === 'POST' && req.url.includes('/items')) {
-      return handleAddItem(req, res);
-    }
-
-    if (req.method === 'PUT' && req.url.match(/\/items\/[a-z0-9]+$/i)) {
-      return handleUpdateItem(req, res);
-    }
-
-    if (req.method === 'DELETE' && req.url.match(/\/items\/[a-z0-9]+$/i)) {
-      return handleDeleteItem(req, res);
-    }
-
-    if (req.method === 'GET' && req.url.includes('/export')) {
-      return handleExport(req, res);
-    }
+    if (req.method === 'GET'    && action === 'summary') return handleGetSummary(res);
+    if (req.method === 'GET'    && action === 'export')  return handleExport(res);
+    if (req.method === 'GET')                            return handleListItems(req, res);
+    if (req.method === 'POST')                           return handleAddItem(req, res);
+    if (req.method === 'PUT'    && id)                   return handleUpdateItem(id, req, res);
+    if (req.method === 'DELETE' && id)                   return handleDeleteItem(id, res);
 
     res.status(404).json({ error: 'Not found' });
   } catch (error) {
     console.error('Budget API error:', error);
     res.status(500).json({ error: error.message || 'Internal server error' });
   }
-}
+};
 
-async function handleGetSummary(req, res) {
-    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
+async function handleGetSummary(res) {
+  const items = (await kv.get(BUDGET_KEY)) || [];
 
-  const categories = [
-    'venue', 'catering', 'photography', 'florist', 'music',
-    'decor', 'attire', 'rings', 'invitations', 'transportation', 'misc'
-  ];
+  const summary = { totalBudgeted: 0, totalActual: 0, totalRemaining: 0, byCategory: {} };
 
-  const summary = {
-    totalBudgeted: 0,
-    totalActual: 0,
-    totalRemaining: 0,
-    byCategory: {}
-  };
-
-  categories.forEach(cat => {
+  CATEGORIES.forEach(cat => {
     const catItems = items.filter(i => i.category === cat);
-    summary.byCategory[cat] = {
-      budgeted: catItems.reduce((sum, i) => sum + (i.budgeted || 0), 0),
-      actual: catItems.reduce((sum, i) => sum + (i.actual || 0), 0),
-      count: catItems.length,
-      status: calculateStatus(catItems)
-    };
-    summary.totalBudgeted += summary.byCategory[cat].budgeted;
-    summary.totalActual += summary.byCategory[cat].actual;
+    const budgeted = catItems.reduce((s, i) => s + (i.budgeted || 0), 0);
+    const actual   = catItems.reduce((s, i) => s + (i.actual   || 0), 0);
+    summary.byCategory[cat] = { budgeted, actual, count: catItems.length };
+    summary.totalBudgeted  += budgeted;
+    summary.totalActual    += actual;
   });
 
   summary.totalRemaining = summary.totalBudgeted - summary.totalActual;
-
   res.json(summary);
 }
 
-function calculateStatus(items) {
-  if (items.length === 0) return 'none';
-  const paid = items.filter(i => i.status === 'paid').length;
-  const partial = items.filter(i => i.status === 'partial').length;
-
-  if (paid === items.length) return 'paid';
-  if (paid + partial === items.length) return 'partial';
-  return 'pending';
-}
-
 async function handleListItems(req, res) {
-    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
-
-  const url = new URL(req.url, 'http://localhost');
-  const category = url.searchParams.get('category');
-  const status = url.searchParams.get('status');
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const url   = new URL(req.url, 'http://localhost');
+  const cat   = url.searchParams.get('category');
+  const stat  = url.searchParams.get('status');
 
   let filtered = items;
+  if (cat  && cat  !== 'all') filtered = filtered.filter(i => i.category === cat);
+  if (stat && stat !== 'all') filtered = filtered.filter(i => i.status   === stat);
 
-  if (category && category !== 'all') {
-    filtered = filtered.filter(i => i.category === category);
-  }
-
-  if (status && status !== 'all') {
-    filtered = filtered.filter(i => i.status === status);
-  }
-
-  res.json({
-    items: filtered,
-    total: items.length
-  });
+  res.json({ items: filtered, total: items.length });
 }
 
 async function handleAddItem(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can add expenses' });
-  }
-
-  const { description, category, budgeted, actual, status, vendor, dueDate, notes } = req.body;
+  const { description, category, budgeted, actual, status, vendor, dueDate, notes } = req.body || {};
 
   if (!description || !category) {
     return res.status(400).json({ error: 'Description and category required' });
   }
 
-  const itemId = crypto.randomBytes(8).toString('hex');
   const item = {
-    id: itemId,
-    weddingId: user.weddingId,
+    id:          crypto.randomBytes(8).toString('hex'),
+    weddingId:   WEDDING_ID,
     description,
     category,
-    budgeted: parseFloat(budgeted) || 0,
-    actual: parseFloat(actual) || 0,
-    status: status || 'pending',
-    vendor: vendor || '',
-    dueDate: dueDate || '',
-    notes: notes || '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    budgeted:    parseFloat(budgeted) || 0,
+    actual:      parseFloat(actual)   || 0,
+    status:      status   || 'pending',
+    vendor:      vendor   || '',
+    dueDate:     dueDate  || '',
+    notes:       notes    || '',
+    createdAt:   new Date().toISOString(),
+    updatedAt:   new Date().toISOString()
   };
 
-  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
+  const items = (await kv.get(BUDGET_KEY)) || [];
   items.push(item);
-  await kv.set(budgetKey, items);
-
+  await kv.set(BUDGET_KEY, items);
   res.status(201).json(item);
 }
 
-async function handleUpdateItem(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can update expenses' });
-  }
+async function handleUpdateItem(id, req, res) {
+  const items     = (await kv.get(BUDGET_KEY)) || [];
+  const idx       = items.findIndex(i => i.id === id);
 
-  const itemId = req.url.match(/\/items\/([a-z0-9]+)$/i)[1];
+  if (idx === -1) return res.status(404).json({ error: 'Expense not found' });
 
-  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
-  const itemIndex = items.findIndex(i => i.id === itemId);
+  const item = items[idx];
+  const body = req.body || {};
 
-  if (itemIndex === -1) {
-    return res.status(404).json({ error: 'Expense not found' });
-  }
-
-  const item = items[itemIndex];
-  const { description, category, budgeted, actual, status, vendor, dueDate, notes } = req.body;
-
-  if (description !== undefined) item.description = description;
-  if (category !== undefined) item.category = category;
-  if (budgeted !== undefined) item.budgeted = parseFloat(budgeted);
-  if (actual !== undefined) item.actual = parseFloat(actual);
-  if (status !== undefined) item.status = status;
-  if (vendor !== undefined) item.vendor = vendor;
-  if (dueDate !== undefined) item.dueDate = dueDate;
-  if (notes !== undefined) item.notes = notes;
-
+  if (body.description !== undefined) item.description = body.description;
+  if (body.category    !== undefined) item.category    = body.category;
+  if (body.budgeted    !== undefined) item.budgeted    = parseFloat(body.budgeted);
+  if (body.actual      !== undefined) item.actual      = parseFloat(body.actual);
+  if (body.status      !== undefined) item.status      = body.status;
+  if (body.vendor      !== undefined) item.vendor      = body.vendor;
+  if (body.dueDate     !== undefined) item.dueDate     = body.dueDate;
+  if (body.notes       !== undefined) item.notes       = body.notes;
   item.updatedAt = new Date().toISOString();
 
-  items[itemIndex] = item;
-  await kv.set(budgetKey, items);
-
+  items[idx] = item;
+  await kv.set(BUDGET_KEY, items);
   res.json(item);
 }
 
-async function handleDeleteItem(req, res) {
-    if (user.role !== 'admin' && user.role !== 'planner') {
-    return res.status(403).json({ error: 'Only admins and planners can delete expenses' });
-  }
+async function handleDeleteItem(id, res) {
+  const items    = (await kv.get(BUDGET_KEY)) || [];
+  const filtered = items.filter(i => i.id !== id);
 
-  const itemId = req.url.match(/\/items\/([a-z0-9]+)$/i)[1];
+  if (filtered.length === items.length) return res.status(404).json({ error: 'Expense not found' });
 
-  const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
-  const filtered = items.filter(i => i.id !== itemId);
-
-  if (filtered.length === items.length) {
-    return res.status(404).json({ error: 'Expense not found' });
-  }
-
-  await kv.set(budgetKey, filtered);
-
-  res.json({ success: true, message: 'Expense deleted' });
+  await kv.set(BUDGET_KEY, filtered);
+  res.json({ success: true });
 }
 
-async function handleExport(req, res) {
-    const budgetKey = `wedding:$\{WEDDING_ID\}:budget`;
-  const items = (await kv.get(budgetKey)) || [];
+async function handleExport(res) {
+  const items = (await kv.get(BUDGET_KEY)) || [];
 
-  const csv = [
-    ['Description', 'Category', 'Budgeted', 'Actual', 'Status', 'Vendor', 'Due Date', 'Notes'].join(',')
+  const rows = [
+    ['Description','Category','Budgeted','Actual','Status','Vendor','Due Date','Notes'].join(','),
+    ...items.map(i => [
+      `"${i.description}"`, i.category,
+      i.budgeted || 0, i.actual || 0, i.status,
+      `"${i.vendor || ''}"`, i.dueDate || '', `"${i.notes || ''}"`
+    ].join(','))
   ];
-
-  items.forEach(i => {
-    csv.push([
-      `"${i.description}"`,
-      i.category,
-      i.budgeted || 0,
-      i.actual || 0,
-      i.status,
-      `"${i.vendor || ''}"`,
-      i.dueDate || '',
-      `"${i.notes || ''}"`
-    ].join(','));
-  });
 
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="budget.csv"');
-  res.send(csv.join('\n'));
+  res.send(rows.join('\n'));
 }
-

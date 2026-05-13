@@ -45,7 +45,7 @@ const taskModule = {
 
   async updateTask(taskId, updates) {
     try {
-      const response = await apiCall(`/api/tasks/${taskId}`, 'PUT', updates);
+      const response = await apiCall(`/api/tasks?id=${taskId}`, 'PUT', updates);
       const index = this.tasks.findIndex(t => t.id === taskId);
       if (index !== -1) {
         this.tasks[index] = response;
@@ -59,7 +59,7 @@ const taskModule = {
 
   async deleteTask(taskId) {
     try {
-      await apiCall(`/api/tasks/${taskId}`, 'DELETE');
+      await apiCall(`/api/tasks?id=${taskId}`, 'DELETE');
       this.tasks = this.tasks.filter(t => t.id !== taskId);
       return true;
     } catch (error) {
@@ -70,7 +70,7 @@ const taskModule = {
 
   async addSubtask(taskId, title) {
     try {
-      const response = await apiCall(`/api/tasks/${taskId}/subtasks`, 'POST', { title });
+      const response = await apiCall(`/api/tasks?id=${taskId}&action=subtasks`, 'POST', { title });
       const task = this.tasks.find(t => t.id === taskId);
       if (task) {
         task.subtasks.push(response);
@@ -84,7 +84,7 @@ const taskModule = {
 
   async updateSubtask(taskId, subtaskId, updates) {
     try {
-      const response = await apiCall(`/api/tasks/${taskId}/subtasks/${subtaskId}`, 'PUT', updates);
+      const response = await apiCall(`/api/tasks?id=${taskId}&action=subtask&subId=${subtaskId}`, 'PUT', updates);
       const task = this.tasks.find(t => t.id === taskId);
       if (task) {
         const subtask = task.subtasks.find(s => s.id === subtaskId);
