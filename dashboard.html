@@ -12,7 +12,10 @@
     <!-- Header -->
     <header>
         <div class="header-content">
-            <h1 class="couple-name">Akhila & Akshay</h1>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <img src="aa-logo.png" alt="A&A" style="width:52px;height:52px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                <h1 class="couple-name">Akhila & Akshay</h1>
+            </div>
             <div class="user-menu">
                 <span id="userGreeting">💍 Wedding Planning Dashboard</span>
                 <a href="#settings" data-page="settings">⚙️ Settings</a>
@@ -40,7 +43,7 @@
                 <ul class="nav-links">
                     <li><a href="#venues" data-page="venues">📍 Venues</a></li>
                     <li><a href="#food" data-page="food">🍽️ Food & Menu</a></li>
-                    <li><a href="#timeline" data-page="timeline">📅 Timeline</a></li>
+                    <li><a href="#timeline" data-page="timeline">📅 Events</a></li>
                 </ul>
             </div>
             </div><!-- end sidebar-nav -->
@@ -87,8 +90,10 @@
                         <select class="guest-dietary-filter" style="margin-bottom: 0;">
                             <option value="">All Dietary</option>
                             <option value="vegetarian">Vegetarian</option>
+                            <option value="non-vegetarian">Non-Vegetarian</option>
                             <option value="vegan">Vegan</option>
                             <option value="gluten-free">Gluten-Free</option>
+                            <option value="apane">Apane (Family)</option>
                             <option value="none">None</option>
                         </select>
                         <button class="btn btn-secondary guest-clear-btn" style="cursor: pointer;">🔄 Clear Filters</button>
@@ -126,6 +131,8 @@
                             <option value="design">Design</option>
                             <option value="communication">Communication</option>
                             <option value="finance">Finance</option>
+                            <option value="food">Food</option>
+                            <option value="jewelry">Jewelry</option>
                             <option value="general">General</option>
                         </select>
                         <select class="task-status-filter" style="margin-bottom: 0;">
@@ -177,7 +184,7 @@
                         </select>
                         <select class="budget-status-filter" style="margin-bottom: 0;">
                             <option value="">All Status</option>
-                            <option value="pending">Pending</option>
+                            <option value="unpaid">Unpaid</option>
                             <option value="partial">Partial</option>
                             <option value="paid">Paid</option>
                         </select>
@@ -221,12 +228,15 @@
                             <option value="">All Categories</option>
                             <option value="Photography">Photography</option>
                             <option value="Catering">Catering</option>
+                            <option value="Food">Food</option>
                             <option value="Florist">Florist</option>
                             <option value="Music/DJ">Music/DJ</option>
                             <option value="Decor">Decor</option>
                             <option value="Venue">Venue</option>
                             <option value="Transportation">Transportation</option>
                             <option value="Makeup/Hair">Makeup/Hair</option>
+                            <option value="Invitations">Invitations</option>
+                            <option value="Rings/Jewelry">Rings/Jewelry</option>
                             <option value="Other">Other</option>
                         </select>
                         <select class="vendor-status-filter" style="margin-bottom: 0;">
@@ -333,11 +343,11 @@
                 </div>
             </div>
 
-            <!-- Timeline View -->
+            <!-- Events View -->
             <div data-view="timeline">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-size: 2rem; color: var(--blue);">Timeline & Milestones</h2>
-                    <button class="btn btn-primary btn-sm timeline-add-btn">+ Add Milestone</button>
+                    <h2 style="font-size: 2rem; color: var(--blue);">Events</h2>
+                    <button class="btn btn-primary btn-sm timeline-add-btn">+ Add Event</button>
                 </div>
 
                 <!-- Stats -->
@@ -429,14 +439,26 @@
                 <label>Party Size</label>
                 <input type="number" name="partySize" value="1" min="1">
 
-                <label>Dietary Restrictions</label>
+                <label>Dietary Preference</label>
                 <select name="dietary">
                     <option value="none">None</option>
                     <option value="vegetarian">Vegetarian</option>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
                     <option value="vegan">Vegan</option>
                     <option value="gluten-free">Gluten-Free</option>
+                    <option value="apane">Apane (Family)</option>
                     <option value="other">Other</option>
                 </select>
+
+                <label>Events Invited To</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Mehendi"> Mehendi</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Sangeet"> Sangeet</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Ceremony"> Ceremony</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Reception"> Reception</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Rehearsal Dinner"> Rehearsal Dinner</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Pre-Wedding"> Pre-Wedding</label>
+                </div>
 
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Any special notes..."></textarea>
@@ -472,12 +494,14 @@
                 <label>Party Size</label>
                 <input type="number" name="partySize" value="1" min="1">
 
-                <label>Dietary Restrictions</label>
+                <label>Dietary Preference</label>
                 <select name="dietary">
                     <option value="none">None</option>
                     <option value="vegetarian">Vegetarian</option>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
                     <option value="vegan">Vegan</option>
                     <option value="gluten-free">Gluten-Free</option>
+                    <option value="apane">Apane (Family)</option>
                     <option value="other">Other</option>
                 </select>
 
@@ -488,6 +512,16 @@
                     <option value="declined">Declined</option>
                     <option value="maybe">Maybe</option>
                 </select>
+
+                <label>Events Invited To</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Mehendi"> Mehendi</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Sangeet"> Sangeet</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Ceremony"> Ceremony</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Reception"> Reception</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Rehearsal Dinner"> Rehearsal Dinner</label>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Pre-Wedding"> Pre-Wedding</label>
+                </div>
 
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Any special notes..."></textarea>
@@ -546,6 +580,8 @@
                     <option value="design">Design</option>
                     <option value="communication">Communication</option>
                     <option value="finance">Finance</option>
+                    <option value="food">Food</option>
+                    <option value="jewelry">Jewelry</option>
                 </select>
 
                 <label>Due Date</label>
@@ -588,6 +624,8 @@
                     <option value="design">Design</option>
                     <option value="communication">Communication</option>
                     <option value="finance">Finance</option>
+                    <option value="food">Food</option>
+                    <option value="jewelry">Jewelry</option>
                 </select>
 
                 <label>Due Date</label>
@@ -627,7 +665,7 @@
             </div>
             <form class="modal-form">
                 <label>Description *</label>
-                <input type="text" name="description" placeholder="Expense description" required>
+                <input type="text" name="description" placeholder="e.g., Photography package" required>
 
                 <label>Category *</label>
                 <select name="category" required>
@@ -642,32 +680,22 @@
                     <option value="rings">Rings</option>
                     <option value="invitations">Invitations</option>
                     <option value="transportation">Transportation</option>
+                    <option value="food">Food</option>
                     <option value="misc">Miscellaneous</option>
                 </select>
 
-                <label>Budgeted Amount (₹ in Lakhs)</label>
-                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
-
-                <label>Actual Amount (₹ in Lakhs)</label>
-                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending">Pending</option>
-                    <option value="partial">Partial Payment</option>
-                    <option value="paid">Paid</option>
-                </select>
+                <label>Total Cost (USD $)</label>
+                <input type="number" name="totalCost" placeholder="e.g., 2500.00" step="0.01" min="0">
 
                 <label>Vendor Name</label>
                 <input type="text" name="vendor" placeholder="Vendor name">
 
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
-
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Additional notes..."></textarea>
 
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">💡 After adding, log individual payments directly on the expense card.</p>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                     <button type="submit" class="btn btn-primary">Add Expense</button>
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
                 </div>
@@ -699,27 +727,15 @@
                     <option value="rings">Rings</option>
                     <option value="invitations">Invitations</option>
                     <option value="transportation">Transportation</option>
+                    <option value="food">Food</option>
                     <option value="misc">Miscellaneous</option>
                 </select>
 
-                <label>Budgeted Amount (₹ in Lakhs)</label>
-                <input type="number" name="budgeted" placeholder="e.g., 2.5" step="0.01" min="0">
-
-                <label>Actual Amount (₹ in Lakhs)</label>
-                <input type="number" name="actual" placeholder="e.g., 2.3" step="0.01" min="0">
-
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending">Pending</option>
-                    <option value="partial">Partial Payment</option>
-                    <option value="paid">Paid</option>
-                </select>
+                <label>Total Cost (USD $)</label>
+                <input type="number" name="totalCost" placeholder="e.g., 2500.00" step="0.01" min="0">
 
                 <label>Vendor Name</label>
                 <input type="text" name="vendor" placeholder="Vendor name">
-
-                <label>Due Date</label>
-                <input type="date" name="dueDate">
 
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Additional notes..."></textarea>
@@ -748,6 +764,7 @@
                     <option value="">Select Category</option>
                     <option value="Photography">Photography</option>
                     <option value="Catering">Catering</option>
+                    <option value="Food">Food</option>
                     <option value="Florist">Florist</option>
                     <option value="Music/DJ">Music/DJ</option>
                     <option value="Decor">Decor</option>
@@ -755,6 +772,7 @@
                     <option value="Transportation">Transportation</option>
                     <option value="Makeup/Hair">Makeup/Hair</option>
                     <option value="Invitations">Invitations</option>
+                    <option value="Rings/Jewelry">Rings/Jewelry</option>
                     <option value="Other">Other</option>
                 </select>
 
@@ -822,6 +840,7 @@
                     <option value="">Select Category</option>
                     <option value="Photography">Photography</option>
                     <option value="Catering">Catering</option>
+                    <option value="Food">Food</option>
                     <option value="Florist">Florist</option>
                     <option value="Music/DJ">Music/DJ</option>
                     <option value="Decor">Decor</option>
@@ -829,6 +848,7 @@
                     <option value="Transportation">Transportation</option>
                     <option value="Makeup/Hair">Makeup/Hair</option>
                     <option value="Invitations">Invitations</option>
+                    <option value="Rings/Jewelry">Rings/Jewelry</option>
                     <option value="Other">Other</option>
                 </select>
 
@@ -1157,11 +1177,11 @@
         </div>
     </div>
 
-    <!-- Add Milestone Modal -->
+    <!-- Add Event Modal -->
     <div data-modal="addMilestone" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add Milestone</h3>
+                <h3>Add Event</h3>
                 <button class="modal-close">✕</button>
             </div>
             <form class="modal-form">
@@ -1186,25 +1206,28 @@
                 <label>Description</label>
                 <textarea name="description" placeholder="Describe this milestone..."></textarea>
 
-                <label>Attendees (comma-separated)</label>
-                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
+                <label>Attendees (select from guest list)</label>
+                <select name="attendees" multiple style="height:130px;padding:0.4rem;">
+                    <!-- Populated dynamically from guest list -->
+                </select>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">Hold Ctrl / Cmd to select multiple guests</p>
 
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Additional notes..."></textarea>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Add Milestone</button>
+                    <button type="submit" class="btn btn-primary">Add Event</button>
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Edit Milestone Modal -->
+    <!-- Edit Event Modal -->
     <div data-modal="editMilestone" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Edit Milestone</h3>
+                <h3>Edit Event</h3>
                 <button class="modal-close">✕</button>
             </div>
             <form class="modal-form">
@@ -1229,8 +1252,11 @@
                 <label>Description</label>
                 <textarea name="description" placeholder="Describe this milestone..."></textarea>
 
-                <label>Attendees (comma-separated)</label>
-                <input type="text" name="attendees" placeholder="e.g., Akhila, Akshay, Balraj">
+                <label>Attendees (select from guest list)</label>
+                <select name="attendees" multiple style="height:130px;padding:0.4rem;">
+                    <!-- Populated dynamically from guest list -->
+                </select>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">Hold Ctrl / Cmd to select multiple guests</p>
 
                 <label>Notes</label>
                 <textarea name="notes" placeholder="Additional notes..."></textarea>

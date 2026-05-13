@@ -1,32 +1,43 @@
 /**
- * Budget Tracking API — No Auth
- * GET  /api/budget?action=summary  - Budget summary
- * GET  /api/budget?action=items    - List expenses
- * POST /api/budget?action=items    - Add expense
- * PUT  /api/budget?action=items&id=:id  - Update expense
- * DELETE /api/budget?action=items&id=:id - Delete expense
- * GET  /api/budget?action=export   - Export CSV
+ * Budget Tracking API — USD, payment-log model
+ * GET  /api/budget               - List all expenses
+ * POST /api/budget               - Add expense
+ * PUT  /api/budget?id=:id        - Update expense details
+ * DELETE /api/budget?id=:id      - Delete expense
+ * POST /api/budget?id=:id&action=payment  - Log a payment
+ * GET  /api/budget?action=export - Export CSV
  */
 
 const crypto = require('crypto');
 const kv     = require('../lib/kv');
 
-const WEDDING_ID  = 'akhila-akshay-2026';
-const BUDGET_KEY  = `wedding:${WEDDING_ID}:budget`;
-const CATEGORIES  = ['venue','catering','photography','florist','music','decor','attire','rings','invitations','transportation','misc'];
+const WEDDING_ID = 'akhila-akshay-2026';
+const BUDGET_KEY = `wedding:${WEDDING_ID}:budget`;
+const CATEGORIES = ['venue','catering','photography','florist','music','decor','attire','rings','invitations','transportation','food','misc'];
+
+function computeExpense(item) {
+  const paid = (item.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  return {
+    ...item,
+    paidAmount: paid,
+    remaining: (parseFloat(item.totalCost) || 0) - paid,
+    status: paid === 0 ? 'unpaid' : paid >= (parseFloat(item.totalCost) || 0) ? 'paid' : 'partial'
+  };
+}
 
 module.exports = async function handler(req, res) {
   try {
     const url    = new URL(req.url, 'http://localhost');
-    const action = url.searchParams.get('action') || 'items';
-    const id     = url.searchParams.get('id') || '';
+    const sp     = url.searchParams;
+    const id     = sp.get('id')     || '';
+    const action = sp.get('action') || '';
 
-    if (req.method === 'GET'    && action === 'summary') return handleGetSummary(res);
-    if (req.method === 'GET'    && action === 'export')  return handleExport(res);
-    if (req.method === 'GET')                            return handleListItems(req, res);
-    if (req.method === 'POST')                           return handleAddItem(req, res);
-    if (req.method === 'PUT'    && id)                   return handleUpdateItem(id, req, res);
-    if (req.method === 'DELETE' && id)                   return handleDeleteItem(id, res);
+    if (req.method === 'GET'    && action === 'export') return handleExport(res);
+    if (req.method === 'GET')                           return handleList(res);
+    if (req.method === 'POST'   && id && action === 'payment') return handleAddPayment(id, req, res);
+    if (req.method === 'POST'   && !id)                 return handleAdd(req, res);
+    if (req.method === 'PUT'    && id)                  return handleUpdate(id, req, res);
+    if (req.method === 'DELETE' && id)                  return handleDelete(id, res);
 
     res.status(404).json({ error: 'Not found' });
   } catch (error) {
@@ -35,55 +46,27 @@ module.exports = async function handler(req, res) {
   }
 };
 
-async function handleGetSummary(res) {
+async function handleList(res) {
   const items = (await kv.get(BUDGET_KEY)) || [];
-
-  const summary = { totalBudgeted: 0, totalActual: 0, totalRemaining: 0, byCategory: {} };
-
-  CATEGORIES.forEach(cat => {
-    const catItems = items.filter(i => i.category === cat);
-    const budgeted = catItems.reduce((s, i) => s + (i.budgeted || 0), 0);
-    const actual   = catItems.reduce((s, i) => s + (i.actual   || 0), 0);
-    summary.byCategory[cat] = { budgeted, actual, count: catItems.length };
-    summary.totalBudgeted  += budgeted;
-    summary.totalActual    += actual;
-  });
-
-  summary.totalRemaining = summary.totalBudgeted - summary.totalActual;
-  res.json(summary);
+  const enriched = items.map(computeExpense);
+  const totalCost  = enriched.reduce((s, i) => s + (parseFloat(i.totalCost) || 0), 0);
+  const totalPaid  = enriched.reduce((s, i) => s + i.paidAmount, 0);
+  res.json({ items: enriched, summary: { totalCost, totalPaid, totalRemaining: totalCost - totalPaid } });
 }
 
-async function handleListItems(req, res) {
-  const items = (await kv.get(BUDGET_KEY)) || [];
-  const url   = new URL(req.url, 'http://localhost');
-  const cat   = url.searchParams.get('category');
-  const stat  = url.searchParams.get('status');
-
-  let filtered = items;
-  if (cat  && cat  !== 'all') filtered = filtered.filter(i => i.category === cat);
-  if (stat && stat !== 'all') filtered = filtered.filter(i => i.status   === stat);
-
-  res.json({ items: filtered, total: items.length });
-}
-
-async function handleAddItem(req, res) {
-  const { description, category, budgeted, actual, status, vendor, dueDate, notes } = req.body || {};
-
-  if (!description || !category) {
-    return res.status(400).json({ error: 'Description and category required' });
-  }
+async function handleAdd(req, res) {
+  const { description, category, totalCost, vendor, notes } = req.body || {};
+  if (!description || !category) return res.status(400).json({ error: 'Description and category required' });
 
   const item = {
     id:          crypto.randomBytes(8).toString('hex'),
     weddingId:   WEDDING_ID,
     description,
     category,
-    budgeted:    parseFloat(budgeted) || 0,
-    actual:      parseFloat(actual)   || 0,
-    status:      status   || 'pending',
-    vendor:      vendor   || '',
-    dueDate:     dueDate  || '',
-    notes:       notes    || '',
+    totalCost:   parseFloat(totalCost) || 0,
+    vendor:      vendor || '',
+    notes:       notes  || '',
+    payments:    [],
     createdAt:   new Date().toISOString(),
     updatedAt:   new Date().toISOString()
   };
@@ -91,55 +74,65 @@ async function handleAddItem(req, res) {
   const items = (await kv.get(BUDGET_KEY)) || [];
   items.push(item);
   await kv.set(BUDGET_KEY, items);
-  res.status(201).json(item);
+  res.status(201).json(computeExpense(item));
 }
 
-async function handleUpdateItem(id, req, res) {
-  const items     = (await kv.get(BUDGET_KEY)) || [];
-  const idx       = items.findIndex(i => i.id === id);
+async function handleAddPayment(id, req, res) {
+  const { amount, date, notes } = req.body || {};
+  if (!amount || !date) return res.status(400).json({ error: 'Amount and date required' });
 
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const item  = items.find(i => i.id === id);
+  if (!item) return res.status(404).json({ error: 'Expense not found' });
+
+  item.payments = item.payments || [];
+  item.payments.push({
+    id:     crypto.randomBytes(4).toString('hex'),
+    amount: parseFloat(amount),
+    date,
+    notes: notes || '',
+    loggedAt: new Date().toISOString()
+  });
+  item.updatedAt = new Date().toISOString();
+  await kv.set(BUDGET_KEY, items);
+  res.json(computeExpense(item));
+}
+
+async function handleUpdate(id, req, res) {
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const idx   = items.findIndex(i => i.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Expense not found' });
 
   const item = items[idx];
-  const body = req.body || {};
-
-  if (body.description !== undefined) item.description = body.description;
-  if (body.category    !== undefined) item.category    = body.category;
-  if (body.budgeted    !== undefined) item.budgeted    = parseFloat(body.budgeted);
-  if (body.actual      !== undefined) item.actual      = parseFloat(body.actual);
-  if (body.status      !== undefined) item.status      = body.status;
-  if (body.vendor      !== undefined) item.vendor      = body.vendor;
-  if (body.dueDate     !== undefined) item.dueDate     = body.dueDate;
-  if (body.notes       !== undefined) item.notes       = body.notes;
+  const b    = req.body || {};
+  if (b.description !== undefined) item.description = b.description;
+  if (b.category    !== undefined) item.category    = b.category;
+  if (b.totalCost   !== undefined) item.totalCost   = parseFloat(b.totalCost) || 0;
+  if (b.vendor      !== undefined) item.vendor      = b.vendor;
+  if (b.notes       !== undefined) item.notes       = b.notes;
   item.updatedAt = new Date().toISOString();
-
   items[idx] = item;
   await kv.set(BUDGET_KEY, items);
-  res.json(item);
+  res.json(computeExpense(item));
 }
 
-async function handleDeleteItem(id, res) {
+async function handleDelete(id, res) {
   const items    = (await kv.get(BUDGET_KEY)) || [];
   const filtered = items.filter(i => i.id !== id);
-
   if (filtered.length === items.length) return res.status(404).json({ error: 'Expense not found' });
-
   await kv.set(BUDGET_KEY, filtered);
   res.json({ success: true });
 }
 
 async function handleExport(res) {
   const items = (await kv.get(BUDGET_KEY)) || [];
-
   const rows = [
-    ['Description','Category','Budgeted','Actual','Status','Vendor','Due Date','Notes'].join(','),
-    ...items.map(i => [
-      `"${i.description}"`, i.category,
-      i.budgeted || 0, i.actual || 0, i.status,
-      `"${i.vendor || ''}"`, i.dueDate || '', `"${i.notes || ''}"`
-    ].join(','))
+    ['Description','Category','Total Cost (USD)','Paid (USD)','Remaining (USD)','Status','Vendor','Notes'].join(','),
+    ...items.map(i => {
+      const e = computeExpense(i);
+      return [`"${i.description}"`, i.category, e.totalCost.toFixed(2), e.paidAmount.toFixed(2), e.remaining.toFixed(2), e.status, `"${i.vendor||''}"`, `"${i.notes||''}"`].join(',');
+    })
   ];
-
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="budget.csv"');
   res.send(rows.join('\n'));

@@ -4,6 +4,7 @@
  */
 
 const vendorPage = {
+  listenersSetup: false,
   currentFilters: {
     category: '',
     status: '',
@@ -13,7 +14,10 @@ const vendorPage = {
   viewMode: 'grid',
 
   async init() {
-    this.setupEventListeners();
+    if (!this.listenersSetup) {
+      this.setupEventListeners();
+      this.listenersSetup = true;
+    }
     await this.loadVendors();
     this.render();
   },

@@ -1,76 +1,35 @@
 /**
- * Budget Tracker Page Logic
- * Renders budget overview, category breakdown, and expense list
+ * Budget Tracker Page Logic — USD, payment-log model
+ * Each expense has a totalCost + a log of payments made over time.
  */
 
 const budgetPage = {
-  currentFilters: {
-    category: '',
-    status: ''
-  },
+  listenersSetup: false,
+  currentFilters: { category: '', status: '' },
 
   async init() {
-    this.setupEventListeners();
+    if (!this.listenersSetup) {
+      this.setupEventListeners();
+      this.listenersSetup = true;
+    }
     await this.loadBudget();
     this.render();
   },
 
   setupEventListeners() {
-    const budgetView = document.querySelector('[data-view="budget"]');
-    if (!budgetView) return;
+    const view = document.querySelector('[data-view="budget"]');
+    if (!view) return;
 
-    // Category filter
-    const categoryFilter = budgetView.querySelector('.budget-category-filter');
-    if (categoryFilter) {
-      categoryFilter.addEventListener('change', (e) => {
-        this.currentFilters.category = e.target.value;
-        this.applyFilters();
-      });
-    }
-
-    // Status filter
-    const statusFilter = budgetView.querySelector('.budget-status-filter');
-    if (statusFilter) {
-      statusFilter.addEventListener('change', (e) => {
-        this.currentFilters.status = e.target.value;
-        this.applyFilters();
-      });
-    }
-
-    // Add expense button
-    const addBtn = budgetView.querySelector('.budget-add-btn');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => this.openAddExpenseModal());
-    }
-
-    // Export button
-    const exportBtn = budgetView.querySelector('.budget-export-btn');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', () => this.exportBudget());
-    }
-
-    // Modal form submissions
-    const addExpenseModal = document.querySelector('[data-modal="addExpense"]');
-    if (addExpenseModal) {
-      const form = addExpenseModal.querySelector('form');
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          this.submitAddExpense(addExpenseModal);
-        });
-      }
-    }
-
-    const editExpenseModal = document.querySelector('[data-modal="editExpense"]');
-    if (editExpenseModal) {
-      const form = editExpenseModal.querySelector('form');
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          this.submitEditExpense(editExpenseModal);
-        });
-      }
-    }
+    view.querySelector('.budget-category-filter')?.addEventListener('change', (e) => {
+      this.currentFilters.category = e.target.value;
+      this.render();
+    });
+    view.querySelector('.budget-status-filter')?.addEventListener('change', (e) => {
+      this.currentFilters.status = e.target.value;
+      this.render();
+    });
+    view.querySelector('.budget-add-btn')?.addEventListener('click', () => this.openAddExpenseModal());
+    view.querySelector('.budget-export-btn')?.addEventListener('click', () => this.exportBudget());
   },
 
   async loadBudget() {
@@ -81,194 +40,212 @@ const budgetPage = {
     }
   },
 
-  applyFilters() {
-    this.render();
-  },
-
   render() {
-    const budgetView = document.querySelector('[data-view="budget"]');
-    if (!budgetView) return;
-
+    const view = document.querySelector('[data-view="budget"]');
+    if (!view) return;
     this.renderSummary();
-    this.renderCategoryBreakdown();
-    this.renderExpenseTable();
+    this.renderExpenseList();
   },
 
   renderSummary() {
-    const budgetView = document.querySelector('[data-view="budget"]');
-    const summaryContainer = budgetView?.querySelector('.budget-summary');
-    if (!summaryContainer) return;
+    const view = document.querySelector('[data-view="budget"]');
+    const container = view?.querySelector('.budget-summary');
+    if (!container) return;
 
-    const summary = budgetModule.getSummary();
-    const remaining = (summary.totalBudgeted || 0) - (summary.totalActual || 0);
-    const percentSpent = summary.totalBudgeted ? ((summary.totalActual / summary.totalBudgeted) * 100).toFixed(1) : 0;
+    const s = budgetModule.summary;
+    const totalCost      = s.totalCost      || 0;
+    const totalPaid      = s.totalPaid      || 0;
+    const totalRemaining = s.totalRemaining ?? (totalCost - totalPaid);
+    const pct = totalCost > 0 ? ((totalPaid / totalCost) * 100).toFixed(1) : 0;
 
-    summaryContainer.innerHTML = `
+    container.innerHTML = `
       <div class="stat-card">
-        <div class="stat-value">₹${(summary.totalBudgeted / 100000).toFixed(1)}L</div>
-        <div class="stat-label">Total Budgeted</div>
+        <div class="stat-value">$${totalCost.toFixed(2)}</div>
+        <div class="stat-label">Total Cost</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" style="color: #f39c12;">₹${(summary.totalActual / 100000).toFixed(1)}L</div>
-        <div class="stat-label">Amount Spent</div>
+        <div class="stat-value" style="color:#27ae60;">$${totalPaid.toFixed(2)}</div>
+        <div class="stat-label">Total Paid</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" style="color: ${remaining >= 0 ? '#27ae60' : '#c0392b'};">₹${(remaining / 100000).toFixed(1)}L</div>
-        <div class="stat-label">${remaining >= 0 ? 'Remaining' : 'Over Budget'}</div>
+        <div class="stat-value" style="color:${totalRemaining >= 0 ? '#f39c12' : '#c0392b'};">$${Math.abs(totalRemaining).toFixed(2)}</div>
+        <div class="stat-label">${totalRemaining >= 0 ? 'Remaining' : 'Over Budget'}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${percentSpent}%</div>
-        <div class="stat-label">Budget Used</div>
-        <div class="progress-bar" style="margin-top: 0.5rem; height: 6px;">
-          <div class="progress-fill" style="width: ${percentSpent}%; background: ${percentSpent > 100 ? '#c0392b' : 'var(--gold)'}; height: 100%;"></div>
+        <div class="stat-value">${pct}%</div>
+        <div class="stat-label">Paid</div>
+        <div class="progress-bar" style="margin-top:0.5rem;height:6px;">
+          <div class="progress-fill" style="width:${Math.min(pct,100)}%;background:${pct > 100 ? '#c0392b' : 'var(--gold)'};height:100%;"></div>
         </div>
       </div>
     `;
   },
 
-  renderCategoryBreakdown() {
-    const budgetView = document.querySelector('[data-view="budget"]');
-    const breakdownContainer = budgetView?.querySelector('.budget-breakdown');
-    if (!breakdownContainer) return;
+  renderExpenseList() {
+    const view = document.querySelector('[data-view="budget"]');
+    // Use budget-breakdown for category cards + budget-table-container for the expense list
+    const breakdownEl = view?.querySelector('.budget-breakdown');
+    const tableEl     = view?.querySelector('.budget-table-container');
+    if (!tableEl) return;
 
-    const summary = budgetModule.getSummary();
-    const categories = summary.byCategory || {};
+    let expenses = [...budgetModule.expenses];
+    if (this.currentFilters.category) expenses = expenses.filter(e => e.category === this.currentFilters.category);
+    if (this.currentFilters.status)   expenses = expenses.filter(e => e.status   === this.currentFilters.status);
 
-    const breakdown = document.createElement('div');
-    breakdown.style.cssText = `
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-    `;
+    // Category summary cards
+    if (breakdownEl) {
+      const byCategory = {};
+      budgetModule.expenses.forEach(e => {
+        if (!byCategory[e.category]) byCategory[e.category] = { totalCost: 0, paid: 0, count: 0 };
+        byCategory[e.category].totalCost += parseFloat(e.totalCost) || 0;
+        byCategory[e.category].paid      += e.paidAmount || 0;
+        byCategory[e.category].count++;
+      });
 
-    Object.entries(categories).forEach(([cat, data]) => {
-      if (data.budgeted === 0) return; // Skip empty categories
-
-      const card = document.createElement('div');
-      card.className = 'category-card';
-      card.style.cssText = `
-        background: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid var(--gold);
-        box-shadow: var(--shadow-sm);
-      `;
-
-      const percentUsed = data.budgeted ? ((data.actual / data.budgeted) * 100).toFixed(0) : 0;
-      const statusColor = data.status === 'paid' ? '#27ae60' : data.status === 'partial' ? '#f39c12' : '#95a5a6';
-
-      card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <h5 style="color: var(--blue); margin: 0; text-transform: capitalize;">${cat}</h5>
-          <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">
-            ${data.status.toUpperCase()}
-          </span>
-        </div>
-        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-          ₹${(data.actual / 100000).toFixed(1)}L / ₹${(data.budgeted / 100000).toFixed(1)}L
-        </div>
-        <div class="progress-bar" style="height: 6px; margin-bottom: 0.5rem;">
-          <div class="progress-fill" style="width: ${Math.min(percentUsed, 100)}%; background: ${percentUsed > 100 ? '#c0392b' : 'var(--gold)'}; height: 100%;"></div>
-        </div>
-        <div style="font-size: 0.85rem; color: ${percentUsed > 100 ? '#c0392b' : 'var(--text-muted)'}; font-weight: ${percentUsed > 100 ? '600' : '400'};">
-          ${percentUsed}% ${percentUsed > 100 ? '(OVER)' : 'used'}
-        </div>
-      `;
-
-      breakdown.appendChild(card);
-    });
-
-    breakdownContainer.innerHTML = '';
-    breakdownContainer.appendChild(breakdown);
-  },
-
-  renderExpenseTable() {
-    const budgetView = document.querySelector('[data-view="budget"]');
-    const tableContainer = budgetView?.querySelector('.budget-table-container');
-    if (!tableContainer) return;
-
-    let filtered = budgetModule.expenses;
-
-    if (this.currentFilters.category && this.currentFilters.category !== 'all') {
-      filtered = filtered.filter(e => e.category === this.currentFilters.category);
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;';
+      Object.entries(byCategory).forEach(([cat, d]) => {
+        const rem   = d.totalCost - d.paid;
+        const pct   = d.totalCost > 0 ? ((d.paid / d.totalCost) * 100).toFixed(0) : 0;
+        const card  = document.createElement('div');
+        card.style.cssText = 'background:white;padding:1rem;border-radius:0.5rem;border-left:4px solid var(--gold);box-shadow:var(--shadow-sm);';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <h5 style="margin:0;color:var(--blue);text-transform:capitalize;">${cat}</h5>
+            <span style="font-size:0.75rem;color:#888;">${d.count} item${d.count !== 1 ? 's' : ''}</span>
+          </div>
+          <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">Paid: <strong>$${d.paid.toFixed(2)}</strong> / $${d.totalCost.toFixed(2)}</div>
+          <div class="progress-bar" style="height:5px;margin-bottom:0.4rem;"><div class="progress-fill" style="width:${Math.min(pct,100)}%;background:${pct >= 100 ? '#27ae60' : 'var(--gold)'};height:100%;"></div></div>
+          <div style="font-size:0.8rem;color:${rem > 0 ? '#f39c12' : '#27ae60'};">Remaining: $${rem.toFixed(2)}</div>
+        `;
+        grid.appendChild(card);
+      });
+      breakdownEl.innerHTML = '';
+      breakdownEl.appendChild(grid);
     }
 
-    if (this.currentFilters.status && this.currentFilters.status !== 'all') {
-      filtered = filtered.filter(e => e.status === this.currentFilters.status);
-    }
-
-    if (filtered.length === 0) {
-      tableContainer.innerHTML = '<p class="empty-state">No expenses found.</p>';
+    if (expenses.length === 0) {
+      tableEl.innerHTML = '<p class="empty-state">No expenses yet. Add your first expense to get started.</p>';
       return;
     }
 
-    const table = document.createElement('table');
-    table.className = 'budget-table';
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;flex-direction:column;gap:1.5rem;';
 
-    const thead = document.createElement('thead');
-    thead.innerHTML = `
-      <tr>
-        <th>Description</th>
-        <th>Category</th>
-        <th>Budgeted</th>
-        <th>Actual</th>
-        <th>Status</th>
-        <th>Vendor</th>
-        <th>Actions</th>
-      </tr>
-    `;
-    table.appendChild(thead);
+    expenses.forEach(expense => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:white;border-radius:0.75rem;box-shadow:var(--shadow-sm);overflow:hidden;border-left:4px solid var(--gold);';
 
-    const tbody = document.createElement('tbody');
-    filtered.forEach(expense => {
-      const tr = document.createElement('tr');
-      const statusColor = {
-        paid: '#27ae60',
-        partial: '#f39c12',
-        pending: '#95a5a6'
-      }[expense.status] || '#95a5a6';
+      const statusColor = { paid: '#27ae60', partial: '#f39c12', unpaid: '#95a5a6' }[expense.status] || '#95a5a6';
+      const pct = expense.totalCost > 0 ? Math.min((expense.paidAmount / expense.totalCost) * 100, 100).toFixed(0) : 0;
 
-      tr.innerHTML = `
-        <td><strong>${expense.description}</strong></td>
-        <td><span style="text-transform: capitalize;">${expense.category}</span></td>
-        <td>₹${(expense.budgeted / 100000).toFixed(2)}L</td>
-        <td style="font-weight: 600;">₹${(expense.actual / 100000).toFixed(2)}L</td>
-        <td>
-          <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
-            ${expense.status}
-          </span>
-        </td>
-        <td>${expense.vendor || '-'}</td>
-        <td>
-          <button class="btn-icon edit-expense" data-id="${expense.id}" title="Edit">✎</button>
-          <button class="btn-icon delete-expense" data-id="${expense.id}" title="Delete">✕</button>
-        </td>
+      card.innerHTML = `
+        <div style="padding:1.25rem;">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.75rem;">
+            <div>
+              <h4 style="color:var(--blue);margin:0 0 0.25rem 0;">${expense.description}</h4>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <span style="background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;text-transform:capitalize;">${expense.category}</span>
+                ${expense.vendor ? `<span style="background:#e8f4fd;color:#2a5f7f;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">🏢 ${expense.vendor}</span>` : ''}
+              </div>
+            </div>
+            <span style="background:${statusColor};color:white;padding:0.25rem 0.6rem;border-radius:0.25rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;white-space:nowrap;">${expense.status}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.75rem;">
+            <div style="text-align:center;padding:0.5rem;background:#f8f9fa;border-radius:0.4rem;">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--blue);">$${(expense.totalCost||0).toFixed(2)}</div>
+              <div style="font-size:0.75rem;color:#888;">Total Cost</div>
+            </div>
+            <div style="text-align:center;padding:0.5rem;background:#f0fdf4;border-radius:0.4rem;">
+              <div style="font-size:1.1rem;font-weight:700;color:#27ae60;">$${(expense.paidAmount||0).toFixed(2)}</div>
+              <div style="font-size:0.75rem;color:#888;">Paid</div>
+            </div>
+            <div style="text-align:center;padding:0.5rem;background:${expense.remaining > 0 ? '#fff8f0' : '#f0fdf4'};border-radius:0.4rem;">
+              <div style="font-size:1.1rem;font-weight:700;color:${expense.remaining > 0 ? '#f39c12' : '#27ae60'};">$${Math.abs(expense.remaining||0).toFixed(2)}</div>
+              <div style="font-size:0.75rem;color:#888;">${expense.remaining > 0 ? 'Remaining' : 'Fully Paid'}</div>
+            </div>
+          </div>
+
+          <div class="progress-bar" style="height:6px;margin-bottom:1rem;">
+            <div class="progress-fill" style="width:${pct}%;background:${pct >= 100 ? '#27ae60' : 'var(--gold)'};height:100%;border-radius:3px;transition:width 0.3s;"></div>
+          </div>
+
+          <!-- Payment history -->
+          <div class="payment-history" style="margin-bottom:0.75rem;">
+            ${(expense.payments||[]).length > 0 ? `
+              <div style="font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:0.4rem;">Payment History</div>
+              ${(expense.payments||[]).map(p => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.6rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;font-size:0.82rem;">
+                  <span style="color:#555;">${new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+                  <span style="font-weight:600;color:#27ae60;">+$${(p.amount||0).toFixed(2)}</span>
+                  ${p.notes ? `<span style="color:#888;font-style:italic;">${p.notes}</span>` : ''}
+                </div>
+              `).join('')}
+            ` : '<div style="font-size:0.8rem;color:#aaa;">No payments logged yet.</div>'}
+          </div>
+
+          <!-- Log new payment -->
+          <div class="log-payment-form" style="background:#f8f9fa;border-radius:0.5rem;padding:0.75rem;margin-bottom:0.75rem;">
+            <div style="font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:0.5rem;">+ Log a Payment</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:0.5rem;align-items:end;">
+              <div>
+                <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Amount ($)</label>
+                <input type="number" class="pay-amount" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Date</label>
+                <input type="date" class="pay-date" value="${new Date().toISOString().split('T')[0]}" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Notes (optional)</label>
+                <input type="text" class="pay-notes" placeholder="e.g. Advance payment" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;">
+              </div>
+              <button class="log-payment-btn" style="background:var(--blue);color:white;border:none;padding:0.45rem 0.75rem;border-radius:0.3rem;cursor:pointer;font-size:0.85rem;white-space:nowrap;">Log</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+            <button class="edit-expense-btn" style="background:none;border:1px solid var(--blue);color:var(--blue);padding:0.3rem 0.75rem;border-radius:0.3rem;cursor:pointer;font-size:0.8rem;">✎ Edit</button>
+            <button class="delete-expense-btn" style="background:none;border:1px solid #c0392b;color:#c0392b;padding:0.3rem 0.75rem;border-radius:0.3rem;cursor:pointer;font-size:0.8rem;">✕ Delete</button>
+          </div>
+        </div>
       `;
 
-      tr.querySelector('.edit-expense').addEventListener('click', () => {
-        this.openEditExpenseModal(expense);
+      // Log payment
+      card.querySelector('.log-payment-btn').addEventListener('click', () => {
+        const amount = card.querySelector('.pay-amount').value;
+        const date   = card.querySelector('.pay-date').value;
+        const notes  = card.querySelector('.pay-notes').value;
+        this.logPayment(expense.id, { amount, date, notes });
       });
 
-      tr.querySelector('.delete-expense').addEventListener('click', () => {
-        if (confirm(`Delete "${expense.description}"?`)) {
-          this.deleteExpense(expense.id);
-        }
+      // Edit
+      card.querySelector('.edit-expense-btn').addEventListener('click', () => this.openEditExpenseModal(expense));
+
+      // Delete
+      card.querySelector('.delete-expense-btn').addEventListener('click', () => {
+        if (confirm(`Delete "${expense.description}"?`)) this.deleteExpense(expense.id);
       });
 
-      tbody.appendChild(tr);
+      wrapper.appendChild(card);
     });
-    table.appendChild(tbody);
 
-    tableContainer.innerHTML = '';
-    tableContainer.appendChild(table);
+    tableEl.innerHTML = '';
+    tableEl.appendChild(wrapper);
   },
 
   openAddExpenseModal() {
     const modal = document.querySelector('[data-modal="addExpense"]');
-    if (modal) {
-      const form = modal.querySelector('form');
-      if (form) form.reset();
-      modal.style.display = 'flex';
+    if (!modal) return;
+    modal.querySelector('form')?.reset();
+    modal.style.display = 'flex';
+
+    const btn = modal.querySelector('button[type="submit"]');
+    if (btn) {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', (e) => { e.preventDefault(); this.submitAddExpense(modal); });
     }
   },
 
@@ -276,20 +253,12 @@ const budgetPage = {
     const form = modal.querySelector('form');
     const data = {
       description: form.querySelector('[name="description"]')?.value,
-      category: form.querySelector('[name="category"]')?.value,
-      budgeted: parseFloat(form.querySelector('[name="budgeted"]')?.value) * 100000 || 0,
-      actual: parseFloat(form.querySelector('[name="actual"]')?.value) * 100000 || 0,
-      status: form.querySelector('[name="status"]')?.value,
-      vendor: form.querySelector('[name="vendor"]')?.value,
-      dueDate: form.querySelector('[name="dueDate"]')?.value,
-      notes: form.querySelector('[name="notes"]')?.value
+      category:    form.querySelector('[name="category"]')?.value,
+      totalCost:   parseFloat(form.querySelector('[name="totalCost"]')?.value) || 0,
+      vendor:      form.querySelector('[name="vendor"]')?.value,
+      notes:       form.querySelector('[name="notes"]')?.value
     };
-
-    if (!data.description || !data.category) {
-      showNotification('Description and category required', 'error');
-      return;
-    }
-
+    if (!data.description || !data.category) { showNotification('Description and category required', 'error'); return; }
     try {
       await budgetModule.addExpense(data);
       showNotification('Expense added', 'success');
@@ -303,37 +272,36 @@ const budgetPage = {
 
   openEditExpenseModal(expense) {
     const modal = document.querySelector('[data-modal="editExpense"]');
-    if (modal) {
-      const form = modal.querySelector('form');
-      if (form) {
-        form.querySelector('[name="description"]').value = expense.description;
-        form.querySelector('[name="category"]').value = expense.category;
-        form.querySelector('[name="budgeted"]').value = (expense.budgeted / 100000).toFixed(2);
-        form.querySelector('[name="actual"]').value = (expense.actual / 100000).toFixed(2);
-        form.querySelector('[name="status"]').value = expense.status;
-        form.querySelector('[name="vendor"]').value = expense.vendor || '';
-        form.querySelector('[name="dueDate"]').value = expense.dueDate || '';
-        form.querySelector('[name="notes"]').value = expense.notes || '';
-      }
-      modal.dataset.expenseId = expense.id;
-      modal.style.display = 'flex';
+    if (!modal) return;
+    const form = modal.querySelector('form');
+    if (form) {
+      form.querySelector('[name="description"]').value = expense.description;
+      form.querySelector('[name="category"]').value    = expense.category;
+      form.querySelector('[name="totalCost"]').value   = (expense.totalCost || 0).toFixed(2);
+      form.querySelector('[name="vendor"]').value      = expense.vendor || '';
+      form.querySelector('[name="notes"]').value       = expense.notes  || '';
+    }
+    modal.dataset.expenseId = expense.id;
+    modal.style.display = 'flex';
+
+    const btn = modal.querySelector('button[type="submit"]');
+    if (btn) {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', (e) => { e.preventDefault(); this.submitEditExpense(modal); });
     }
   },
 
   async submitEditExpense(modal) {
     const expenseId = modal.dataset.expenseId;
-    const form = modal.querySelector('form');
+    const form      = modal.querySelector('form');
     const data = {
       description: form.querySelector('[name="description"]')?.value,
-      category: form.querySelector('[name="category"]')?.value,
-      budgeted: parseFloat(form.querySelector('[name="budgeted"]')?.value) * 100000 || 0,
-      actual: parseFloat(form.querySelector('[name="actual"]')?.value) * 100000 || 0,
-      status: form.querySelector('[name="status"]')?.value,
-      vendor: form.querySelector('[name="vendor"]')?.value,
-      dueDate: form.querySelector('[name="dueDate"]')?.value,
-      notes: form.querySelector('[name="notes"]')?.value
+      category:    form.querySelector('[name="category"]')?.value,
+      totalCost:   parseFloat(form.querySelector('[name="totalCost"]')?.value) || 0,
+      vendor:      form.querySelector('[name="vendor"]')?.value,
+      notes:       form.querySelector('[name="notes"]')?.value
     };
-
     try {
       await budgetModule.updateExpense(expenseId, data);
       showNotification('Expense updated', 'success');
@@ -342,6 +310,19 @@ const budgetPage = {
       this.render();
     } catch (error) {
       showNotification('Failed to update expense', 'error');
+    }
+  },
+
+  async logPayment(expenseId, paymentData) {
+    if (!paymentData.amount || paymentData.amount <= 0) { showNotification('Enter a valid amount', 'error'); return; }
+    if (!paymentData.date)  { showNotification('Select a payment date', 'error'); return; }
+    try {
+      await budgetModule.addPayment(expenseId, paymentData);
+      showNotification('Payment logged!', 'success');
+      await this.loadBudget();
+      this.render();
+    } catch (error) {
+      showNotification('Failed to log payment', 'error');
     }
   },
 
@@ -366,6 +347,4 @@ const budgetPage = {
   }
 };
 
-if (typeof window !== 'undefined') {
-  window.budgetPage = budgetPage;
-}
+if (typeof window !== 'undefined') window.budgetPage = budgetPage;

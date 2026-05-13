@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'GET')                            return handleListTasks(sp, res);
     if (req.method === 'POST' && !id)                    return handleAddTask(req, res);
-    if (req.method === 'PUT'    && id && action === 'subtasks') return handleUpdateSubtask(id, subId, req, res);
+    if (req.method === 'PUT'    && id && (action === 'subtasks' || action === 'subtask')) return handleUpdateSubtask(id, subId, req, res);
     if (req.method === 'POST'   && id && action === 'subtasks') return handleAddSubtask(id, req, res);
     if (req.method === 'PUT'    && id)                   return handleUpdateTask(id, req, res);
     if (req.method === 'DELETE' && id)                   return handleDeleteTask(id, res);
@@ -147,6 +147,8 @@ async function handleUpdateSubtask(taskId, subtaskId, req, res) {
   const b = req.body || {};
   if (b.completed !== undefined) subtask.completed = b.completed;
   if (b.title     !== undefined) subtask.title     = b.title;
+  if (b.response  !== undefined) subtask.response  = b.response;
+  if (b.notes     !== undefined) subtask.notes     = b.notes;
   task.updatedAt = new Date().toISOString();
   await kv.set(TASKS_KEY, tasks);
   res.json(subtask);

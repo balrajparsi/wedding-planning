@@ -103,6 +103,9 @@ const guestListPage = {
     const pending     = g.filter(x => x.rsvpStatus === 'pending').length;
     const declined    = g.filter(x => x.rsvpStatus === 'declined').length;
     const partySize   = g.reduce((s, x) => s + (parseInt(x.partySize) || 1), 0);
+    const veg         = g.filter(x => x.dietaryRestrictions === 'vegetarian' || x.dietaryRestrictions === 'vegan').length;
+    const nonVeg      = g.filter(x => x.dietaryRestrictions === 'non-vegetarian').length;
+    const apane       = g.filter(x => x.dietaryRestrictions === 'apane').length;
 
     container.innerHTML = `
       <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total Guests</div></div>
@@ -110,6 +113,9 @@ const guestListPage = {
       <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#2a5f7f">${partySize}</div><div class="stat-label">Total Party Size</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#27ae60">🌿 ${veg}</div><div class="stat-label">Vegetarian</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#e74c3c">🍗 ${nonVeg}</div><div class="stat-label">Non-Vegetarian</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">👨‍👩‍👧 ${apane}</div><div class="stat-label">Apane (Family)</div></div>
     `;
   },
 
@@ -129,20 +135,25 @@ const guestListPage = {
       return;
     }
 
-    const tbody = guests.map(g => `
+    const tbody = guests.map(g => {
+      const dietaryIcon = { vegetarian: '🌿', 'non-vegetarian': '🍗', vegan: '🌱', 'gluten-free': '🌾', apane: '👨‍👩‍👧', other: '❓', none: '' }[g.dietaryRestrictions] || '';
+      const eventTags = (g.events || []).map(ev => `<span style="display:inline-block;background:#e8f0fe;color:#2a5f7f;padding:0.15rem 0.4rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;">${ev}</span>`).join('');
+      return `
       <tr>
         <td><strong>${g.name || '—'}</strong></td>
         <td>${g.email || '—'}</td>
         <td>${g.phone || '—'}</td>
         <td>${g.relationship || '—'}</td>
         <td style="text-align:center">${g.partySize || 1}</td>
-        <td>${g.dietaryRestrictions || 'None'}</td>
+        <td>${dietaryIcon} ${g.dietaryRestrictions || 'None'}</td>
+        <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
         <td>
           <button class="btn-icon" onclick="guestListPage.openEditGuestModal(${JSON.stringify(g).replace(/"/g, '&quot;')})" title="Edit">✎</button>
           <button class="btn-icon" style="color:#c0392b" onclick="guestListPage.deleteGuest('${g.id}')" title="Delete">✕</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
 
     container.innerHTML = `
       <table class="guest-table" style="width:100%;border-collapse:collapse;">
@@ -154,6 +165,7 @@ const guestListPage = {
             <th>Relationship</th>
             <th>Party Size</th>
             <th>Dietary</th>
+            <th>Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
             <th>Actions</th>
           </tr>
@@ -193,6 +205,7 @@ const guestListPage = {
 
   async submitAddGuest(modal) {
     const form = modal.querySelector('form');
+    const events = [...form.querySelectorAll('[name="events"]:checked')].map(cb => cb.value);
     const data = {
       name:                 form.querySelector('[name="name"]')?.value?.trim(),
       email:                form.querySelector('[name="email"]')?.value?.trim(),
@@ -200,6 +213,7 @@ const guestListPage = {
       relationship:         form.querySelector('[name="relationship"]')?.value?.trim(),
       partySize:            parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
       dietaryRestrictions:  form.querySelector('[name="dietary"]')?.value,
+      events:               events,
       notes:                form.querySelector('[name="notes"]')?.value?.trim()
     };
 
@@ -230,6 +244,11 @@ const guestListPage = {
       form.querySelector('[name="dietary"]').value     = guest.dietaryRestrictions || 'none';
       form.querySelector('[name="rsvpStatus"]').value  = guest.rsvpStatus || 'pending';
       form.querySelector('[name="notes"]').value       = guest.notes || '';
+      // Populate event checkboxes
+      const guestEvents = guest.events || [];
+      form.querySelectorAll('[name="events"]').forEach(cb => {
+        cb.checked = guestEvents.includes(cb.value);
+      });
     }
 
     modal.style.display = 'flex';
@@ -249,6 +268,7 @@ const guestListPage = {
   async submitEditGuest(modal) {
     const guestId = modal.dataset.guestId;
     const form = modal.querySelector('form');
+    const events = [...form.querySelectorAll('[name="events"]:checked')].map(cb => cb.value);
     const data = {
       name:                form.querySelector('[name="name"]')?.value?.trim(),
       email:               form.querySelector('[name="email"]')?.value?.trim(),
@@ -257,6 +277,7 @@ const guestListPage = {
       partySize:           parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
       dietaryRestrictions: form.querySelector('[name="dietary"]')?.value,
       rsvpStatus:          form.querySelector('[name="rsvpStatus"]')?.value,
+      events:              events,
       notes:               form.querySelector('[name="notes"]')?.value?.trim()
     };
 
