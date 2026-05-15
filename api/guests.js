@@ -28,7 +28,11 @@ module.exports = async function handler(req, res) {
       return handleListGuests(req, res);
     }
 
-    if (req.method === 'POST' && req.url.includes('/guests') && !req.url.includes('/bulk-invite') && !req.url.includes('/export')) {
+    if (req.method === 'POST' && (req.url.includes('action=bulk-invite') || req.url.includes('/bulk-invite'))) {
+      return handleBulkInvite(req, res);
+    }
+
+    if (req.method === 'POST' && req.url.includes('/guests') && !req.url.includes('/export')) {
       return handleAddGuest(req, res);
     }
 
@@ -38,10 +42,6 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       return handleDeleteGuest(req, res);
-    }
-
-    if (req.method === 'POST' && req.url.includes('/bulk-invite')) {
-      return handleBulkInvite(req, res);
     }
 
     if (req.method === 'GET' && req.url.includes('/export')) {
@@ -217,29 +217,47 @@ async function handleDeleteGuest(req, res) {
 }
 
 async function handleBulkInvite(req, res) {
-  const { guestIds, subject, message } = req.body;
-
-  if (!guestIds || !Array.isArray(guestIds) || guestIds.length === 0) {
-    return res.status(400).json({ error: 'Guest IDs required' });
-  }
+  const body = req.body || {};
+  const { filterStatus = 'all', subject = '', message = '' } = body;
+  let guestIds = body.guestIds;
 
   // Get guests
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
-  const selectedGuests = guests.filter(g => guestIds.includes(g.id));
 
-  if (selectedGuests.length === 0) {
-    return res.status(404).json({ error: 'No guests found' });
+  // If no explicit IDs, derive from filter
+  let selectedGuests;
+  if (Array.isArray(guestIds) && guestIds.length > 0) {
+    selectedGuests = guests.filter(g => guestIds.includes(g.id));
+  } else {
+    selectedGuests = filterStatus === 'all'
+      ? guests
+      : guests.filter(g => g.rsvpStatus === filterStatus);
   }
 
-  // In production, send emails via Vercel Resend API
-  // For now, just return the guests that would be invited
-  const invitedCount = selectedGuests.filter(g => g.email).length;
+  if (selectedGuests.length === 0) {
+    return res.status(404).json({ error: 'No matching guests' });
+  }
+
+  const withEmail = selectedGuests.filter(g => g.email);
+  const now = new Date().toISOString();
+
+  // Mark invitedDate so we can track who's been invited
+  withEmail.forEach(g => {
+    const idx = guests.findIndex(x => x.id === g.id);
+    if (idx !== -1) {
+      guests[idx].invitedDate = now;
+      guests[idx].updatedAt = now;
+    }
+  });
+  await kv.set(guestsKey, guests);
 
   res.json({
     success: true,
-    message: `Invite would be sent to ${invitedCount} guests`,
-    invitedGuests: selectedGuests.filter(g => g.email)
+    message: `Invites prepared for ${withEmail.length} of ${selectedGuests.length} guests (those with email)`,
+    invitedCount: withEmail.length,
+    totalMatched: selectedGuests.length,
+    invitedGuests: withEmail.map(g => ({ id: g.id, name: g.name, email: g.email }))
   });
 }
 

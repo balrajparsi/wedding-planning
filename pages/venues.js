@@ -94,7 +94,7 @@ const venuesPage = {
     statsContainer.innerHTML = `
       <div class="stat-card"><div class="stat-value">${summary.total}</div><div class="stat-label">Total Venues</div></div>
       <div class="stat-card"><div class="stat-value" style="color: #27ae60;">${summary.byStatus.confirmed}</div><div class="stat-label">Confirmed</div></div>
-      <div class="stat-card"><div class="stat-value">₹${(summary.totalActual / 100000).toFixed(1)}L</div><div class="stat-label">Amount Paid</div></div>
+      <div class="stat-card"><div class="stat-value">$${(summary.totalActual||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="stat-label">Amount Paid <span style="font-size:0.7rem;color:#888;">≈ ₹${(((summary.totalActual||0)*83)/100000).toFixed(1)}L</span></div></div>
       <div class="stat-card"><div class="stat-value">${summary.totalCapacity}</div><div class="stat-label">Total Capacity</div></div>
     `;
   },
@@ -137,7 +137,7 @@ const venuesPage = {
       ${venue.capacity ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">👥 Capacity: ${venue.capacity}</p>` : ''}
       ${venue.eventDate ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📅 ${new Date(venue.eventDate).toLocaleDateString()}</p>` : ''}
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-        <div style="font-size: 0.85rem; color: var(--text-muted);">₹${(venue.costActual / 100000).toFixed(1)}L paid</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">$${(venue.costActual||0).toLocaleString('en-US',{maximumFractionDigits:0})} paid <span style="color:#aaa;">· ≈ ₹${(((venue.costActual||0)*83)/100000).toFixed(1)}L</span></div>
         <div style="display: flex; gap: 0.5rem;">
           <button class="btn-icon edit-venue" data-id="${venue.id}" title="Edit">✎</button>
           <button class="btn-icon delete-venue" data-id="${venue.id}" title="Delete">✕</button>

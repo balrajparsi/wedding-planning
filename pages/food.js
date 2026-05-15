@@ -94,7 +94,7 @@ const foodPage = {
       <div class="stat-card"><div class="stat-value">${summary.total}</div><div class="stat-label">Menu Items</div></div>
       <div class="stat-card"><div class="stat-value">${summary.byVegType.veg}</div><div class="stat-label">Vegetarian</div></div>
       <div class="stat-card"><div class="stat-value">${summary.byVegType['non-veg']}</div><div class="stat-label">Non-Vegetarian</div></div>
-      <div class="stat-card"><div class="stat-value">₹${(summary.totalCost / 100000).toFixed(1)}L</div><div class="stat-label">Total Cost</div></div>
+      <div class="stat-card"><div class="stat-value">$${(summary.totalCost||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="stat-label">Total Cost <span style="font-size:0.7rem;color:#888;">≈ ₹${(((summary.totalCost||0)*83)/100000).toFixed(1)}L</span></div></div>
     `;
   },
 
@@ -125,7 +125,7 @@ const foodPage = {
               <span style="background: var(--gold); color: white; padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${item.courseType}</span>
             </h5>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.25rem 0;">
-              ${item.eventType} • ${item.cuisine} • ₹${(item.cost / 100000).toFixed(2)}L • ${item.portionSize}
+              ${item.eventType} • ${item.cuisine} • $${(item.cost||0).toLocaleString('en-US',{maximumFractionDigits:2})} • ${item.portionSize}
             </p>
             ${item.guestAccommodations?.length ? `<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0;">👥 ${item.guestAccommodations.length} guest accommodation(s)</p>` : ''}
           </div>

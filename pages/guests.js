@@ -319,7 +319,36 @@ const guestListPage = {
 
   openBulkInviteModal() {
     const modal = document.querySelector('[data-modal="bulkInvite"]');
-    if (modal) modal.style.display = 'flex';
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    // Use cloneNode to clear any stacked listeners
+    const btn = modal.querySelector('button[type="submit"]');
+    if (btn) {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.submitBulkInvite(modal);
+      });
+    }
+  },
+
+  async submitBulkInvite(modal) {
+    const form = modal.querySelector('form');
+    const filterStatus = form.querySelector('[name="filterStatus"]')?.value || 'all';
+    const subject = form.querySelector('[name="subject"]')?.value || `You're invited — Akhila & Akshay's Wedding`;
+    const message = form.querySelector('[name="message"]')?.value || '';
+
+    try {
+      const res = await apiCall('/api/guests?action=bulk-invite', 'POST', { filterStatus, subject, message });
+      showNotification(res.message || `Invites prepared for ${res.invitedCount || 0} guests`, 'success');
+      modal.style.display = 'none';
+      await this.loadGuests();
+      this.render();
+    } catch (err) {
+      showNotification('Failed to prepare invites', 'error');
+    }
   },
 
   async exportGuests() {

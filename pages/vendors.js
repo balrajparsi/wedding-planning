@@ -111,7 +111,7 @@ const vendorPage = {
       <div class="stat-card"><div class="stat-value">${summary.total}</div><div class="stat-label">Total Vendors</div></div>
       <div class="stat-card"><div class="stat-value" style="color: #27ae60;">${summary.byStatus.confirmed}</div><div class="stat-label">Confirmed</div></div>
       <div class="stat-card"><div class="stat-value" style="color: #f39c12;">${summary.byStatus.negotiating}</div><div class="stat-label">Negotiating</div></div>
-      <div class="stat-card"><div class="stat-value">₹${(summary.totalActual / 100000).toFixed(1)}L</div><div class="stat-label">Amount Paid</div></div>
+      <div class="stat-card"><div class="stat-value">$${(summary.totalActual||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="stat-label">Amount Paid <span style="font-size:0.7rem;color:#888;">≈ ₹${(((summary.totalActual||0)*83)/100000).toFixed(1)}L</span></div></div>
     `;
   },
 

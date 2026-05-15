@@ -167,7 +167,7 @@ class WeddingPlanningApp {
     const minutesLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
 
     const weddingDateStr = weddingDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const location = (this.wedding && this.wedding.location) || 'Udaipur, Rajasthan';
+    const location = (this.wedding && this.wedding.location) || 'To Be Announced';
     const coupleName = (this.wedding && this.wedding.coupleName) || 'Akhila & Akshay';
 
     mainContent.innerHTML = `
@@ -218,12 +218,12 @@ class WeddingPlanningApp {
 
         <div class="stat-card" onclick="app.navigateTo('budget')">
           <div class="stat-icon">💰</div>
-          <div class="stat-number">₹${(budgetSpent/100000).toFixed(1)}<span class="stat-total">L</span></div>
+          <div class="stat-number">$${(budgetSpent).toLocaleString('en-US',{maximumFractionDigits:0})}</div>
           <div class="stat-label">Budget Spent</div>
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${budgetTotal > 0 ? Math.min(100,(budgetSpent/budgetTotal)*100) : 0}%"></div>
           </div>
-          <div class="stat-sub">of ₹${(budgetTotal/100000).toFixed(1)}L budgeted</div>
+          <div class="stat-sub">of $${(budgetTotal).toLocaleString('en-US',{maximumFractionDigits:0})} budgeted &nbsp;·&nbsp; ≈ ₹${((budgetTotal*83)/100000).toFixed(1)}L</div>
         </div>
 
         <div class="stat-card" onclick="app.navigateTo('vendors')">

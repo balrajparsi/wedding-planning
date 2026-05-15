@@ -12,8 +12,8 @@ const DEFAULT_CONFIG = {
   id: WEDDING_ID,
   coupleName: 'Akhila & Akshay',
   weddingDate: '2026-08-15',
-  location: 'Udaipur, Rajasthan',
-  currency: 'INR',
+  location: 'To Be Announced',
+  currency: 'USD',
   createdAt: new Date().toISOString()
 };
 

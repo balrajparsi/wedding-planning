@@ -51,7 +51,7 @@ const guestModule = {
   // Update guest or RSVP status
   async updateGuest(guestId, updates) {
     try {
-      const response = await apiCall(`/api/guests/${guestId}`, 'PUT', updates);
+      const response = await apiCall(`/api/guests?id=${guestId}`, 'PUT', updates);
       const index = this.guests.findIndex(g => g.id === guestId);
       if (index !== -1) {
         this.guests[index] = response;
@@ -66,7 +66,7 @@ const guestModule = {
   // Delete guest
   async deleteGuest(guestId) {
     try {
-      await apiCall(`/api/guests/${guestId}`, 'DELETE');
+      await apiCall(`/api/guests?id=${guestId}`, 'DELETE');
       this.guests = this.guests.filter(g => g.id !== guestId);
       return true;
     } catch (error) {
@@ -76,13 +76,10 @@ const guestModule = {
   },
 
   // Send bulk invites
-  async sendBulkInvites(guestIds, subject = '', message = '') {
+  async sendBulkInvites(payload = {}) {
+    // payload: { guestIds?, filterStatus?, subject?, message? }
     try {
-      const response = await apiCall('/api/guests/bulk-invite', 'POST', {
-        guestIds,
-        subject,
-        message
-      });
+      const response = await apiCall('/api/guests?action=bulk-invite', 'POST', payload);
       return response;
     } catch (error) {
       console.error('Failed to send invites:', error);

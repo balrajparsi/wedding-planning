@@ -56,23 +56,65 @@ body {
   width: 280vw;
   height: 100%;
   background:
-    url('https://images.unsplash.com/photo-1477587458883-47145ed94245?w=3000&q=85&fit=crop&crop=center')
+    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=3200&q=90&fit=crop')
     left center / cover no-repeat;
   will-change: transform;
   transform: translateX(0);
   transition: transform 0.05s linear;
 }
 
-/* Dark cinematic overlay — thinner at middle to show more image */
-#rolling-overlay {
+/* Warm color wash to amplify the wedding vibe */
+#rolling-tint {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%);
+    radial-gradient(ellipse 80% 60% at 30% 30%, rgba(184,30,30,0.20), transparent 70%),
+    radial-gradient(ellipse 70% 70% at 75% 75%, rgba(212,160,23,0.22), transparent 75%),
+    linear-gradient(180deg, rgba(40,4,4,0.35) 0%, rgba(10,2,2,0.55) 100%);
+}
+
+/* Dark cinematic overlay — thinner at middle to show more image */
+#rolling-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.55) 100%);
   /* Vignette edges */
-  box-shadow: inset 0 0 140px rgba(0,0,0,0.55);
+  box-shadow: inset 0 0 160px rgba(0,0,0,0.6);
+}
+
+/* Marigold garland — stays at top, gives the marriage vibe */
+.marigold-garland {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 14px at 20px 28px, #f4a200 0 8px, transparent 9px),
+    radial-gradient(circle 12px at 60px 22px, #d97706 0 7px, transparent 8px),
+    radial-gradient(circle 14px at 100px 30px, #f4a200 0 8px, transparent 9px),
+    radial-gradient(circle 12px at 140px 22px, #c2410c 0 7px, transparent 8px),
+    radial-gradient(circle 14px at 180px 28px, #f4a200 0 8px, transparent 9px),
+    radial-gradient(circle 12px at 220px 22px, #d97706 0 7px, transparent 8px),
+    radial-gradient(circle 14px at 260px 30px, #f4a200 0 8px, transparent 9px),
+    radial-gradient(circle 12px at 300px 22px, #c2410c 0 7px, transparent 8px),
+    linear-gradient(180deg, rgba(20,4,0,0.85), rgba(20,4,0,0.0));
+  background-repeat: repeat-x;
+  background-size: 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 100% 56px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+.marigold-garland::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #b8860b 20%, #d4a017 50%, #b8860b 80%, transparent);
+  opacity: 0.7;
 }
 
 /* Film grain */
@@ -156,11 +198,18 @@ body {
 .hero-frame {
   max-width: 800px;
   width: 100%;
-  border: 1px solid rgba(184,134,11,0.45);
+  border: 1px solid rgba(212,160,23,0.55);
   padding: 3.5rem 4rem;
   position: relative;
-  background: rgba(0,0,0,0.18);
-  backdrop-filter: blur(1px);
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(184,30,30,0.18), transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(212,160,23,0.18), transparent 60%),
+    rgba(0,0,0,0.32);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(212,160,23,0.08) inset,
+    0 0 80px rgba(212,160,23,0.08) inset;
 }
 
 .hero-frame::before {
@@ -198,10 +247,13 @@ body {
   font-family: var(--serif);
   font-size: clamp(3.2rem, 9vw, 6.5rem);
   font-weight: 400;
-  color: white;
+  background: linear-gradient(135deg, #fff5d6 0%, #f4d27a 30%, #e8b04a 55%, #c87a2f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   line-height: 1;
   letter-spacing: 0.02em;
-  text-shadow: 0 4px 30px rgba(0,0,0,0.6), 0 0 80px rgba(184,134,11,0.1);
+  filter: drop-shadow(0 4px 30px rgba(0,0,0,0.6)) drop-shadow(0 0 80px rgba(212,160,23,0.25));
   margin: 0.2rem 0;
   opacity: 0;
   animation: riseIn 1.2s 0.5s ease forwards;
@@ -209,7 +261,21 @@ body {
 
 .hero-names .amp {
   font-style: italic;
+  background: linear-gradient(135deg, #ff7b3a, #c0392b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ganesh / auspicious symbol above names */
+.hero-symbol {
+  display: block;
+  font-size: 2rem;
   color: var(--gold-pale);
+  margin-bottom: 0.6rem;
+  opacity: 0;
+  animation: riseIn 1s 0.1s ease forwards;
+  text-shadow: 0 0 20px rgba(212,160,23,0.45);
 }
 
 .hero-date {
@@ -321,15 +387,16 @@ body {
   position: fixed;
   z-index: 5;
   pointer-events: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
   animation: petalFall linear infinite;
   opacity: 0;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
 }
 
 @keyframes petalFall {
   0%   { top: -50px; opacity: 0; transform: rotate(0deg) translateX(0); }
-  5%   { opacity: 0.55; }
-  88%  { opacity: 0.3; }
+  5%   { opacity: 0.85; }
+  88%  { opacity: 0.55; }
   100% { top: 105vh; opacity: 0; transform: rotate(600deg) translateX(60px); }
 }
 
@@ -894,7 +961,11 @@ footer::before {
 <div id="rolling-stage">
   <div id="rolling-img"></div>
 </div>
+<div id="rolling-tint"></div>
 <div id="rolling-overlay"></div>
+
+<!-- ═══ MARIGOLD GARLAND (top) ═══ -->
+<div class="marigold-garland"></div>
 
 <!-- ═══ PETALS (fixed, always visible) ═══ -->
 <span class="petal p1">🌸</span>
@@ -931,7 +1002,8 @@ footer::before {
       <span class="frame-corner fc-bl">✦</span>
       <span class="frame-corner fc-br">✦</span>
 
-      <p class="hero-eyebrow">You are cordially invited to celebrate the union of</p>
+      <span class="hero-symbol">☸</span>
+      <p class="hero-eyebrow">श्री गणेशाय नमः · You are cordially invited to celebrate the union of</p>
 
       <div class="gold-rule">
         <span class="rule-bar"></span>

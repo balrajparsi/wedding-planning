@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 700px; height: 500px;
+    overflow: hidden;
+    background: #0d0b09;
+  }
+
+  .wrap {
+    width: 700px; height: 500px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse 60% 55% at 50% 48%, #1c160a 0%, #0d0b09 100%);
+  }
+
+  /* Shimmer sweep overlay */
+  .wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 35%,
+      rgba(255, 235, 160, 0.055) 50%,
+      transparent 65%
+    );
+    animation: shimmer 5s ease-in-out infinite;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg id="logo" width="700" height="500" viewBox="0 0 700 500"
+     xmlns="http://www.w3.org/2000/svg" style="display:block;">
+<defs>
+
+  <!-- Warm metallic foil — diagonal, symmetric -->
+  <linearGradient id="foil" x1="120" y1="60" x2="580" y2="450"
+                  gradientUnits="userSpaceOnUse">
+    <stop offset="0%"   stop-color="#2e1800"/>
+    <stop offset="14%"  stop-color="#7c480e"/>
+    <stop offset="30%"  stop-color="#c88828"/>
+    <stop offset="43%"  stop-color="#ecca6a"/>
+    <stop offset="50%"  stop-color="#fef3c0"/>
+    <stop offset="57%"  stop-color="#ecca6a"/>
+    <stop offset="70%"  stop-color="#c88828"/>
+    <stop offset="86%"  stop-color="#7c480e"/>
+    <stop offset="100%" stop-color="#2e1800"/>
+  </linearGradient>
+
+  <!-- Dimmer gold for the behind-layer -->
+  <linearGradient id="foilDim" x1="120" y1="60" x2="580" y2="450"
+                  gradientUnits="userSpaceOnUse">
+    <stop offset="0%"   stop-color="#120900"/>
+    <stop offset="30%"  stop-color="#4a2808"/>
+    <stop offset="50%"  stop-color="#8a5818"/>
+    <stop offset="70%"  stop-color="#4a2808"/>
+    <stop offset="100%" stop-color="#120900"/>
+  </linearGradient>
+
+  <!-- Vignette -->
+  <radialGradient id="vig" cx="350" cy="250" r="370"
+                  gradientUnits="userSpaceOnUse">
+    <stop offset="60%"  stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
+  </radialGradient>
+
+  <!-- Clip: left half  -->
+  <clipPath id="cL"><rect x="0"   y="0" width="350" height="500"/></clipPath>
+  <!-- Clip: right half -->
+  <clipPath id="cR"><rect x="350" y="0" width="350" height="500"/></clipPath>
+
+  <!-- Soft bloom glow -->
+  <filter id="bloom" x="-25%" y="-25%" width="150%" height="150%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/>
+    <feBlend in="SourceGraphic" in2="b" mode="screen"/>
+  </filter>
+
+</defs>
+
+<!-- ── Background ─────────────────────────────────────── -->
+<rect width="700" height="500" fill="#0d0b09"/>
+<rect width="700" height="500" fill="url(#vig)" opacity="0"/><!-- drawn last -->
+
+<!-- ── Glow bloom (very soft, behind letters) ─────────── -->
+<text x="252" y="415"
+  font-family="'Cormorant Garamond','Times New Roman',serif"
+  font-size="388" font-weight="300" text-anchor="middle"
+  fill="url(#foil)" opacity="0.10" filter="url(#bloom)">A</text>
+<g transform="translate(700,0) scale(-1,1)">
+  <text x="252" y="415"
+    font-family="'Cormorant Garamond','Times New Roman',serif"
+    font-size="388" font-weight="300" text-anchor="middle"
+    fill="url(#foil)" opacity="0.10" filter="url(#bloom)">A</text>
+</g>
+
+<!-- ──────────────────────────────────────────────────────
+     INTERTWINED MONOGRAM
+
+     Left A  → centered at x=252 (natural coords)
+     Right A → mirrored, same x=252 in local, appears at x=448 on canvas
+     Overlap zone ≈ 104 px wide, centered at x=350
+
+     Weave:  left A in front on LEFT half
+             right A in front on RIGHT half
+     ────────────────────────────────────────────────────── -->
+
+<!-- LAYER 1 — Right A, dimmed (recedes at crossing) -->
+<g transform="translate(700,0) scale(-1,1)">
+  <text x="252" y="415"
+    font-family="'Cormorant Garamond','Times New Roman',serif"
+    font-size="388" font-weight="300" text-anchor="middle"
+    fill="url(#foilDim)">A</text>
+</g>
+
+<!-- LAYER 2 — Left A, full bright, clipped to left half (pops in front at crossing) -->
+<g clip-path="url(#cL)">
+  <text x="252" y="415"
+    font-family="'Cormorant Garamond','Times New Roman',serif"
+    font-size="388" font-weight="300" text-anchor="middle"
+    fill="url(#foil)">A</text>
+</g>
+
+<!-- LAYER 3 — Right A, full bright, clipped to right half (its right leg in front) -->
+<g clip-path="url(#cR)">
+  <g transform="translate(700,0) scale(-1,1)">
+    <text x="252" y="415"
+      font-family="'Cormorant Garamond','Times New Roman',serif"
+      font-size="388" font-weight="300" text-anchor="middle"
+      fill="url(#foil)">A</text>
+  </g>
+</g>
+
+<!-- ── Hairline rule ──────────────────────────────────── -->
+<line x1="155" y1="448" x2="545" y2="448"
+      stroke="url(#foil)" stroke-width="0.75" opacity="0.75"/>
+
+<!-- Diamond ornament -->
+<polygon points="350,441.5 355.5,448 350,454.5 344.5,448"
+         fill="url(#foil)" opacity="0.9"/>
+
+<!-- Flanking micro-dots -->
+<circle cx="218" cy="448" r="1.6" fill="url(#foil)" opacity="0.45"/>
+<circle cx="482" cy="448" r="1.6" fill="url(#foil)" opacity="0.45"/>
+
+<!-- ── Vignette overlay ───────────────────────────────── -->
+<rect width="700" height="500" fill="url(#vig)"/>
+
+</svg>
+</div>
+
+<script>
+// Force repaint once Google Font is loaded so glyphs render sharp
+document.fonts.ready.then(() => {
+  const svg = document.getElementById('logo');
+  svg.style.opacity = '0.9999';
+  requestAnimationFrame(() => svg.style.opacity = '1');
+});
+</script>
+</body>
+</html>
