@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Akhila &amp; Akshay · A Royal Wedding · August 2026</title>
-<meta name="description" content="The wedding of Akhila & Akshay — a celebration of love, family & tradition.">
+<meta name="description" content="The wedding of Akhila & Akshay — a royal celebration of love, family & tradition.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,20 +12,20 @@
 
 <style>
 /* ════════════════════════════════════════════════════════════════════
-   ROYAL WEDDING LANDING — Editorial × Liquid Glass × Indian Royal
-   Pattern: Scroll-Triggered Storytelling (UI/UX Pro Max)
-   Style:   Editorial Grid + Liquid Glass overlay
-   Type:    Italianno (script) · Cormorant Garamond (serif) · Jost (sans)
-   Art:     100% SVG — no remote images. Local overrides at /assets/images/.
+   ROYAL WEDDING LANDING — Rolling Palace Panorama
+   Pattern: Cinematic horizontal pan tied to vertical scroll (v1 style)
+   Motion: Lerped translateX — smooth, flowing, never abrupt
+   Art:    Wide SVG palace panorama (no remote images)
+   Type:   Cormorant Garamond + Italianno + Jost
 ═══════════════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  /* Indian Royal palette */
-  --maroon-deep:   #3a0d14;
-  --maroon:        #5c1a26;
-  --crimson:       #8c1d2e;
+  /* Palette — palace gold, sandstone, deep wine */
+  --maroon-deep:   #2a0810;
+  --maroon:        #4a1322;
+  --crimson:       #7a1a2c;
   --rust:          #a44a2e;
   --gold-deep:     #8a6611;
   --gold:          #b8860b;
@@ -36,29 +36,23 @@
   --cream:         #f5e6c8;
   --ivory:         #fdf8ee;
   --parchment:     #efdfb8;
-  --ink:           #1f0808;
-  --ink-soft:      #3d1a1a;
+  --ink:           #1a0608;
+  --ink-soft:      #2d1010;
 
-  /* Type */
   --font-script:  'Italianno', 'Great Vibes', cursive;
   --font-serif:   'Cormorant Garamond', Georgia, serif;
-  --font-sans:    'Jost', system-ui, -apple-system, sans-serif;
+  --font-sans:    'Jost', system-ui, sans-serif;
 
-  /* Motion */
   --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-soft:    cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Shadows */
-  --shadow-sm: 0 2px 12px rgba(31,8,8,0.18);
-  --shadow-md: 0 16px 40px rgba(31,8,8,0.28);
-  --shadow-lg: 0 40px 80px rgba(0,0,0,0.45);
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: var(--font-serif);
-  background: var(--maroon-deep);
+  background: #0a0204;
   color: var(--ivory);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -66,39 +60,83 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-  .parallax-stage { transform: none !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  #panorama { transform: none !important; }
 }
 
 /* ════════════════════════════════════════════════════
-   PAGE-WIDE NOISE / TEXTURE
+   THE ROLLING PANORAMA STAGE (fixed background)
 ═══════════════════════════════════════════════════════ */
-body::before {
-  content: '';
+.panorama-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a0810 0%, #1a0608 100%);
+}
+
+/* The wide panorama — translates left as you scroll down */
+#panorama {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 360vw;          /* 3.6× viewport so we have room to travel */
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  /* user image override — set as background, falls through to SVG below */
+}
+
+#panorama .panorama-img-override {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/images/fort-panorama.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Only visible if image actually loads */
+  opacity: 1;
+}
+/* When image fails to load, the SVG below is the canvas */
+
+.panorama-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Cinematic vignette + grain on top of the panorama */
+.panorama-vignette {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.4'/></svg>");
-  opacity: 0.18;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, rgba(10,2,4,0.5) 80%, rgba(10,2,4,0.85) 100%);
+  box-shadow: inset 0 0 160px rgba(10,2,4,0.7);
+}
+.panorama-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.4'/></svg>");
+  opacity: 0.16;
   mix-blend-mode: overlay;
 }
 
-.page-wrap { position: relative; z-index: 2; }
-
 /* ════════════════════════════════════════════════════
-   TOP MARIGOLD GARLAND
+   MARIGOLD GARLAND (fixed top)
 ═══════════════════════════════════════════════════════ */
 .garland-svg {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 60px;
-  z-index: 60;
+  height: 56px;
+  z-index: 50;
   pointer-events: none;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5));
 }
 
 /* ════════════════════════════════════════════════════
@@ -108,34 +146,32 @@ body::before {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: rgba(0,0,0,0.4);
-  z-index: 70;
+  background: rgba(0,0,0,0.5);
+  z-index: 60;
 }
 .progress-fill {
   height: 100%;
-  width: 0%;
+  width: 0;
   background: linear-gradient(90deg, var(--gold-bright), var(--crimson), var(--gold-bright));
   box-shadow: 0 0 12px var(--gold-bright);
-  transition: width 0.06s linear;
 }
 
 /* ════════════════════════════════════════════════════
-   CHAPTER NAV RAIL
+   NAV DOTS
 ═══════════════════════════════════════════════════════ */
-.chapter-nav {
+.nav-dots {
   position: fixed;
-  right: 1.4rem;
-  top: 50%;
+  right: 1.4rem; top: 50%;
   transform: translateY(-50%);
-  z-index: 65;
+  z-index: 55;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 .dot {
   width: 9px; height: 9px;
   border-radius: 50%;
-  border: 1.5px solid rgba(244,210,122,0.5);
+  border: 1.5px solid rgba(244,210,122,0.55);
   background: transparent;
   cursor: pointer;
   transition: all 0.4s var(--ease-out);
@@ -144,7 +180,8 @@ body::before {
 .dot::before {
   content: attr(data-label);
   position: absolute;
-  right: 22px; top: 50%; transform: translateY(-50%);
+  right: 22px; top: 50%;
+  transform: translateY(-50%);
   font-family: var(--font-sans);
   font-size: 0.55rem;
   letter-spacing: 3px;
@@ -164,34 +201,41 @@ body::before {
 }
 
 /* ════════════════════════════════════════════════════
-   FALLING MARIGOLD PETALS
+   FALLING PETALS
 ═══════════════════════════════════════════════════════ */
-.petals { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.petals { position: fixed; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
 .petal {
   position: absolute;
-  width: 11px; height: 11px;
+  width: 10px; height: 10px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffb066 0%, #d65b14 65%, #8b2c0a 100%);
+  background: radial-gradient(circle at 35% 35%, #ffb066 0%, #d65b14 65%, #7a2c0a 100%);
   opacity: 0;
-  animation: petalDrift linear infinite;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+  animation: drift linear infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
 }
 .petal.rose {
   width: 12px; height: 14px;
   border-radius: 60% 40% 60% 40%;
   background: radial-gradient(ellipse at 40% 40%, #ff8aa5, #a51e2c 80%);
 }
-@keyframes petalDrift {
+@keyframes drift {
   0%   { top: -30px; opacity: 0; transform: rotate(0) translateX(0); }
-  8%   { opacity: 0.9; }
-  92%  { opacity: 0.55; }
+  8%   { opacity: 0.85; }
+  92%  { opacity: 0.5; }
   100% { top: 110vh; opacity: 0; transform: rotate(540deg) translateX(80px); }
 }
 
-/* ════════════════════════════════════════════════════════════
-   SECTION 1 — HERO (Intro Hook)
-   SVG palace silhouette + glass card + couple monogram
-═══════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   CONTENT LAYER (sits above the panorama)
+═══════════════════════════════════════════════════════ */
+.content {
+  position: relative;
+  z-index: 10;
+}
+
+/* ════════════════════════════════════════════════════
+   SECTION 1 — HERO
+═══════════════════════════════════════════════════════ */
 .hero {
   position: relative;
   min-height: 100vh;
@@ -199,82 +243,26 @@ body::before {
   align-items: center;
   justify-content: center;
   padding: 6rem 1.5rem 4rem;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% 40%, #6a2a35 0%, transparent 70%),
-    linear-gradient(180deg, #3a0d14 0%, #1c0608 100%);
 }
 
-.hero-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* User image override (when /assets/images/fort.jpg exists) */
-.hero-photo {
-  position: absolute;
-  inset: 0;
-  background-image: url('/assets/images/fort.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.55;
-  filter: saturate(1.15) contrast(1.05);
-  /* Will only render if image actually loads */
-}
-.hero-photo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(28,4,4,0.4) 0%, rgba(58,13,20,0.7) 100%);
-}
-
-/* SVG fort silhouette - drawn behind */
-.hero-svg-bg {
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 100%; height: 70%;
-  z-index: 1;
-}
-
-/* Subtle diyas glowing in the night */
-.diya {
-  position: absolute;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffd86e 0%, #ff8c19 50%, transparent 100%);
-  box-shadow: 0 0 16px rgba(255,140,25,0.7), 0 0 32px rgba(255,140,25,0.35);
-  animation: diyaFlicker 2.6s ease-in-out infinite;
-}
-@keyframes diyaFlicker {
-  0%, 100% { opacity: 0.85; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.15); }
-}
-
-/* HERO CARD - Liquid Glass with editorial typography */
 .hero-card {
   position: relative;
-  z-index: 10;
   max-width: 720px;
   width: 100%;
-  padding: 4.5rem 4rem 4rem;
+  padding: 4rem 3.6rem 3.6rem;
   text-align: center;
   background:
-    linear-gradient(135deg, rgba(245,230,200,0.08), rgba(212,160,23,0.04)),
-    rgba(28,6,8,0.55);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+    linear-gradient(135deg, rgba(245,230,200,0.06), rgba(212,160,23,0.03)),
+    rgba(10,2,4,0.45);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
   border: 1px solid rgba(244,210,122,0.30);
   box-shadow:
-    0 40px 100px rgba(0,0,0,0.55),
+    0 50px 120px rgba(0,0,0,0.6),
     0 0 0 1px rgba(244,210,122,0.05) inset,
     0 0 120px rgba(212,160,23,0.10) inset;
-  animation: heroEntry 1.4s var(--ease-out) both;
+  animation: heroIn 1.4s var(--ease-out) both;
 }
-
-/* Decorative corner brackets */
 .hero-card::before,
 .hero-card::after {
   content: '';
@@ -285,15 +273,14 @@ body::before {
 .hero-card::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
 .hero-card::after  { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
-@keyframes heroEntry {
+@keyframes heroIn {
   from { opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(8px); }
   to   { opacity: 1; transform: none; filter: none; }
 }
 
-/* Top ornament — small SVG mandala */
 .hero-mandala {
-  width: 64px; height: 64px;
-  margin: 0 auto 1.4rem;
+  width: 60px; height: 60px;
+  margin: 0 auto 1.2rem;
   display: block;
   color: var(--gold-bright);
   filter: drop-shadow(0 0 16px rgba(212,160,23,0.5));
@@ -301,41 +288,38 @@ body::before {
 
 .hero-eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 6px;
   text-transform: uppercase;
   color: rgba(244,210,122,0.75);
-  margin-bottom: 1.6rem;
+  margin-bottom: 1.4rem;
 }
 
-/* Couple Names — Editorial serif treatment (not full script — readable) */
-.couple-block {
-  position: relative;
-  padding: 1.2rem 0 1.6rem;
-  margin: 0.5rem 0 1.4rem;
-}
+.couple-block { padding: 0.6rem 0 1.2rem; }
 
 .name {
   display: block;
   font-family: var(--font-serif);
   font-weight: 300;
-  font-size: clamp(3.4rem, 8vw, 5.8rem);
+  font-size: clamp(3.2rem, 7.5vw, 5.4rem);
   line-height: 1;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   background: linear-gradient(180deg, #fff5d6 0%, #f4d27a 50%, #c87a2f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4));
-  text-transform: uppercase;
+  filter: drop-shadow(0 2px 14px rgba(0,0,0,0.45));
+  /* room for descenders */
+  padding-bottom: 0.08em;
 }
 
 .amp-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.2rem;
-  margin: 0.4rem 0;
+  gap: 1rem;
+  margin: 0.5rem 0;
 }
 .amp-line {
   flex: 1;
@@ -343,33 +327,29 @@ body::before {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold-bright));
 }
-.amp-line.r {
-  background: linear-gradient(90deg, var(--gold-bright), transparent);
-}
+.amp-line.r { background: linear-gradient(90deg, var(--gold-bright), transparent); }
 .amp {
   font-family: var(--font-script);
-  font-size: clamp(3rem, 6vw, 4.4rem);
-  /* Script font has descenders — give it room */
-  line-height: 1.4;
-  padding: 0 0.2rem;
+  font-size: clamp(2.8rem, 5.5vw, 4rem);
+  line-height: 1.5;
+  padding: 0 0.2rem 0.15em;
   background: linear-gradient(180deg, #f4d27a, #c0392b);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 18px rgba(212,160,23,0.4));
+  filter: drop-shadow(0 0 18px rgba(212,160,23,0.45));
   font-style: italic;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .hero-tagline {
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.05rem;
-  color: rgba(244,210,122,0.75);
-  letter-spacing: 0.02em;
-  margin-bottom: 1.8rem;
-  /* Important: room for italic descenders */
+  color: rgba(244,210,122,0.78);
   line-height: 1.5;
+  margin-bottom: 1.6rem;
+  padding-bottom: 0.1rem;
 }
 
 .hero-date-chip {
@@ -378,23 +358,21 @@ body::before {
   border: 1px solid rgba(244,210,122,0.4);
   background: rgba(212,160,23,0.06);
   font-family: var(--font-sans);
-  font-size: 0.62rem;
-  font-weight: 500;
+  font-size: 0.6rem;
   letter-spacing: 6px;
   text-transform: uppercase;
   color: var(--gold-pale);
-  margin-bottom: 2rem;
+  margin-bottom: 1.8rem;
 }
 
-/* COUNTDOWN */
 .countdown {
   display: flex;
   justify-content: center;
-  margin-bottom: 2.4rem;
+  margin-bottom: 2.2rem;
 }
 .cd-cell {
   flex: 1; max-width: 110px;
-  padding: 0.4rem 0.6rem;
+  padding: 0.3rem 0.5rem;
   border-right: 1px solid rgba(244,210,122,0.18);
 }
 .cd-cell:last-child { border-right: none; }
@@ -402,27 +380,25 @@ body::before {
   display: block;
   font-family: var(--font-serif);
   font-weight: 300;
-  font-size: clamp(2.2rem, 4.8vw, 3.2rem);
+  font-size: clamp(2.2rem, 4.6vw, 3rem);
   line-height: 1;
   color: var(--ivory);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 18px rgba(212,160,23,0.35);
-  /* CRITICAL: padding-bottom for numerals' baseline */
   padding-bottom: 4px;
 }
 .cd-lbl {
   display: block;
+  margin-top: 0.4rem;
   font-family: var(--font-sans);
   font-size: 0.55rem;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--gold-pale);
   opacity: 0.85;
-  margin-top: 0.4rem;
 }
 
-/* Primary CTA */
 .cta-gold {
   display: inline-flex;
   align-items: center;
@@ -437,27 +413,24 @@ body::before {
   text-transform: uppercase;
   text-decoration: none;
   border: 1px solid rgba(244,210,122,0.4);
-  position: relative;
-  overflow: hidden;
   transition: all 0.4s var(--ease-out);
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(165,30,44,0.35), 0 0 50px rgba(212,160,23,0.15);
+  box-shadow: 0 10px 30px rgba(122,26,44,0.4), 0 0 50px rgba(212,160,23,0.18);
 }
 .cta-gold:hover {
   transform: translateY(-2px);
   letter-spacing: 6px;
-  box-shadow: 0 16px 40px rgba(165,30,44,0.5), 0 0 70px rgba(212,160,23,0.25);
+  box-shadow: 0 16px 40px rgba(122,26,44,0.55), 0 0 70px rgba(212,160,23,0.3);
 }
 .cta-gold:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
-.cta-gold .arrow { transition: transform 0.3s var(--ease-out); }
+.cta-gold .arrow { transition: transform 0.3s; }
 .cta-gold:hover .arrow { transform: translateX(6px); }
 
-/* Scroll hint */
 .scroll-hint {
   position: absolute;
   bottom: 1.6rem; left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 11;
   display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
   font-family: var(--font-sans);
   font-size: 0.55rem;
@@ -477,20 +450,28 @@ body::before {
   50%      { transform: translate(-50%, 8px); }
 }
 
-/* ════════════════════════════════════════════════════════════
-   CHAPTER WRAPPERS
-═══════════════════════════════════════════════════════════════ */
-.chapter {
+/* ════════════════════════════════════════════════════
+   SECTION WRAPPER
+═══════════════════════════════════════════════════════ */
+.section {
   position: relative;
-  padding: 7rem 1.5rem 7rem;
-  overflow: hidden;
+  min-height: 100vh;
+  padding: 7rem 1.5rem;
+  display: flex;
+  align-items: center;
 }
 
-.chapter-header { text-align: center; margin-bottom: 4rem; }
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
 
-.chapter-eyebrow {
+.section-header { text-align: center; margin-bottom: 3.5rem; }
+
+.section-tag {
   font-family: var(--font-sans);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 8px;
   text-transform: uppercase;
   color: var(--gold-bright);
@@ -499,73 +480,52 @@ body::before {
   align-items: center;
   gap: 0.8rem;
 }
-.chapter-eyebrow::before,
-.chapter-eyebrow::after {
+.section-tag::before, .section-tag::after {
   content: '';
   width: 30px; height: 1px;
   background: var(--gold-bright);
 }
 
-.chapter-title {
+.section-title {
   font-family: var(--font-serif);
   font-weight: 300;
-  font-size: clamp(2.6rem, 5.5vw, 4.6rem);
-  line-height: 1.1;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1.15;
   background: linear-gradient(180deg, #fff5d6, #f4d27a 50%, #c87a2f);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.6rem;
   letter-spacing: 0.02em;
-  /* Generous padding to clear any descenders */
-  padding-bottom: 0.4rem;
-}
-.chapter-title .script {
-  font-family: var(--font-script);
-  font-size: 1.4em;
-  font-style: italic;
-  line-height: 1.3;
-  display: inline-block;
-  padding-bottom: 0.15em;
-  vertical-align: middle;
+  padding-bottom: 0.3rem;
 }
 
-.chapter-sub {
+.section-sub {
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.1rem;
   color: rgba(244,210,122,0.75);
   max-width: 580px;
-  margin: 0 auto;
+  margin: 0.8rem auto 0;
   line-height: 1.7;
-  padding-bottom: 0.3rem;
+  padding-bottom: 0.15rem;
 }
 
-/* ════════════════════════════════════════════════════════════
-   CHAPTER 1 — OUR STORY (Editorial split)
-═══════════════════════════════════════════════════════════════ */
-#chapter-story {
-  background:
-    radial-gradient(ellipse 40% 30% at 80% 30%, rgba(212,160,23,0.10), transparent 70%),
-    linear-gradient(180deg, #1c0608 0%, #3a0d14 40%, #1c0608 100%);
-}
-
+/* ════════════════════════════════════════════════════
+   STORY (editorial parchment)
+═══════════════════════════════════════════════════════ */
 .story-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.1fr 1fr;
   gap: 4rem;
-  max-width: 1200px;
-  margin: 0 auto;
   align-items: center;
 }
 
-/* Editorial parchment plate */
 .story-plate {
   position: relative;
-  padding: 3.2rem 3rem 3rem;
+  padding: 3.4rem 3rem;
   background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment) 100%);
   color: var(--ink);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
 }
 .story-plate::before {
   content: '';
@@ -594,24 +554,19 @@ body::before {
 .story-head {
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  line-height: 1.15;
+  font-size: clamp(2rem, 3.4vw, 2.6rem);
+  line-height: 1.2;
   color: var(--maroon);
   margin-bottom: 1.4rem;
-  /* Room for descenders */
   padding-bottom: 0.2rem;
 }
-.story-head em {
-  font-style: italic;
-  color: var(--crimson);
-}
+.story-head em { font-style: italic; color: var(--crimson); }
 
-/* Editorial drop cap */
 .story-body {
   font-family: var(--font-serif);
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   line-height: 1.85;
-  color: rgba(31,8,8,0.78);
+  color: rgba(26,6,8,0.78);
   margin-bottom: 1.4rem;
 }
 .story-body::first-letter {
@@ -624,15 +579,13 @@ body::before {
   color: var(--crimson);
 }
 
-/* Pull quote */
 .pull-quote {
   font-family: var(--font-script);
   font-size: 1.7rem;
   line-height: 1.5;
   color: var(--maroon);
-  font-style: italic;
   text-align: center;
-  padding: 0.6rem 0 1rem;
+  padding: 0.6rem 0 0.9rem;
   margin: 1.2rem 0;
   border-top: 1px solid rgba(184,134,11,0.3);
   border-bottom: 1px solid rgba(184,134,11,0.3);
@@ -641,13 +594,10 @@ body::before {
 .detail-strip {
   display: flex;
   gap: 2rem;
-  margin-top: 1.6rem;
   padding-top: 1.4rem;
   border-top: 1px solid rgba(184,134,11,0.2);
 }
-.detail-item {
-  flex: 1;
-}
+.detail-item { flex: 1; }
 .detail-label {
   display: block;
   font-family: var(--font-sans);
@@ -655,7 +605,7 @@ body::before {
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--sand);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 .detail-value {
   font-family: var(--font-serif);
@@ -664,56 +614,49 @@ body::before {
   font-weight: 500;
 }
 
-/* Right side — SVG palace courtyard art with optional photo override */
+/* Right side — framed image / SVG */
 .story-art {
   position: relative;
   aspect-ratio: 4/5;
-  background:
-    /* User image override — only renders if file exists */
-    url('/assets/images/palace.jpg') center/cover no-repeat,
-    /* SVG fallback — palace courtyard pattern */
-    linear-gradient(180deg, #6a2a35 0%, #3a0d14 100%);
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  background:
+    /* local image override */
+    url('/assets/images/palace.jpg') center/cover no-repeat,
+    /* SVG fallback already inside via <svg> below */
+    var(--maroon-deep);
 }
 .story-art::before {
   content: '';
   position: absolute;
   inset: 12px;
   border: 1px solid var(--gold-bright);
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
 }
 .story-art-svg {
   position: absolute;
   inset: 0;
   width: 100%; height: 100%;
+  z-index: 1;
 }
 
-/* ════════════════════════════════════════════════════════════
-   CHAPTER 2 — THE CELEBRATIONS
-═══════════════════════════════════════════════════════════════ */
-#chapter-events {
-  background:
-    radial-gradient(circle 800px at 50% 0%, rgba(212,160,23,0.10), transparent 70%),
-    linear-gradient(180deg, #1c0608, #3a0d14 60%, #1c0608);
-}
-
+/* ════════════════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════════════════ */
 .events-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .event-card {
   position: relative;
-  padding: 2.6rem 1.6rem 1.8rem;
-  background: linear-gradient(180deg, rgba(245,230,200,0.08), rgba(212,160,23,0.04));
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
-  border: 1px solid rgba(244,210,122,0.22);
+  padding: 2.4rem 1.6rem 1.8rem;
+  background: linear-gradient(180deg, rgba(245,230,200,0.10), rgba(212,160,23,0.04));
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid rgba(244,210,122,0.25);
   transition: all 0.55s var(--ease-out);
   overflow: hidden;
 }
@@ -728,65 +671,57 @@ body::before {
 }
 .event-card:hover {
   transform: translateY(-10px);
-  background: linear-gradient(180deg, rgba(245,230,200,0.14), rgba(212,160,23,0.08));
+  background: linear-gradient(180deg, rgba(245,230,200,0.16), rgba(212,160,23,0.08));
   border-color: rgba(244,210,122,0.55);
-  box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 60px rgba(212,160,23,0.18);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 60px rgba(212,160,23,0.2);
 }
 .event-card:hover::before { opacity: 1; }
 
 .event-num {
   font-family: var(--font-script);
   font-style: italic;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   line-height: 1.3;
   color: var(--gold-bright);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
   display: block;
-  /* Room for script descenders */
-  padding-bottom: 0.15em;
+  padding-bottom: 0.1em;
 }
-
 .event-icon {
   width: 44px; height: 44px;
-  margin-bottom: 1rem;
   color: var(--gold-bright);
+  margin-bottom: 1rem;
 }
-
 .event-name {
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 1.55rem;
+  font-size: 1.5rem;
   color: var(--ivory);
-  line-height: 1.1;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
+  line-height: 1.15;
   padding-bottom: 0.1rem;
 }
-
 .event-script {
   font-family: var(--font-script);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-style: italic;
   color: var(--gold-pale);
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.1rem;
   line-height: 1.4;
   padding-bottom: 0.1em;
 }
-
 .event-rule {
   width: 28px; height: 1px;
   background: var(--gold);
   margin-bottom: 0.9rem;
 }
-
 .event-meta {
   font-family: var(--font-sans);
   font-size: 0.72rem;
-  letter-spacing: 0.05em;
   color: rgba(244,210,122,0.65);
   line-height: 1.7;
   margin-bottom: 1.2rem;
 }
-
 .event-status {
   display: inline-block;
   padding: 0.3rem 0.8rem;
@@ -802,115 +737,30 @@ body::before {
   color: var(--maroon-deep);
 }
 
-/* ════════════════════════════════════════════════════════════
-   CHAPTER 3 — THE MANDAP (SVG showpiece)
-═══════════════════════════════════════════════════════════════ */
-#chapter-mandap {
-  background:
-    radial-gradient(ellipse 60% 40% at 50% 30%, #6a2a35 0%, #3a0d14 60%, #1c0608 100%);
-  min-height: 95vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mandap-stage {
-  position: relative;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* User photo override */
-.mandap-photo {
-  position: absolute;
-  inset: 0;
-  background-image: url('/assets/images/mandap.jpg');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.7;
-  z-index: 1;
-}
-
-.mandap-svg {
-  width: 100%;
-  height: auto;
-  display: block;
-  position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 30px 60px rgba(0,0,0,0.5));
-}
-
-.mandap-quote {
-  position: absolute;
-  bottom: -2rem;
-  left: 50%;
-  transform: translate(-50%, 50%);
-  z-index: 3;
-  max-width: 680px;
-  width: 92%;
-  text-align: center;
-  padding: 2.4rem 2.4rem 2.2rem;
-  background: rgba(28,6,8,0.7);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border-top: 1px solid var(--gold-bright);
-  border-bottom: 1px solid var(--gold-bright);
-}
-.mandap-quote .script {
-  font-family: var(--font-script);
-  font-size: clamp(2.4rem, 4.5vw, 3.4rem);
-  line-height: 1.25;
-  background: linear-gradient(180deg, #fff5d6, #c87a2f);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.2em;
-  display: block;
-}
-.mandap-quote-text {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--gold-pale);
-  max-width: 460px;
-  margin: 0 auto;
-}
-
-/* ════════════════════════════════════════════════════════════
-   CHAPTER 4 — THE PLANNER
-═══════════════════════════════════════════════════════════════ */
-#chapter-planner {
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(212,160,23,0.15), transparent 70%),
-    linear-gradient(180deg, var(--maroon-deep), #1c0608);
-  padding-top: 10rem;
-}
-
+/* ════════════════════════════════════════════════════
+   PLANNER (gazette parchment)
+═══════════════════════════════════════════════════════ */
 .gazette {
   max-width: 1100px;
   margin: 0 auto;
   background: linear-gradient(180deg, var(--ivory), var(--parchment));
   color: var(--ink);
-  padding: 4.5rem 4rem 4rem;
+  padding: 4rem 3.6rem 3.6rem;
   position: relative;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 50px 100px rgba(0,0,0,0.5);
 }
 .gazette::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 6px;
+  height: 5px;
   background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold));
 }
 
 .gazette-head {
   text-align: center;
   padding-bottom: 1.8rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2.6rem;
   border-bottom: 3px double rgba(184,134,11,0.4);
 }
 .gazette-pre {
@@ -920,12 +770,12 @@ body::before {
   text-transform: uppercase;
   color: var(--crimson);
   opacity: 0.75;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 .gazette-title {
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-size: clamp(2.2rem, 4.4vw, 3.4rem);
   color: var(--maroon);
   line-height: 1.1;
   margin-bottom: 0.5rem;
@@ -934,9 +784,8 @@ body::before {
 .gazette-deck {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 1.05rem;
-  color: rgba(31,8,8,0.6);
-  padding-bottom: 0.15rem;
+  font-size: 1rem;
+  color: rgba(26,6,8,0.6);
 }
 
 .feature-grid {
@@ -944,10 +793,10 @@ body::before {
   grid-template-columns: repeat(3, 1fr);
   gap: 0;
   border: 1px solid rgba(184,134,11,0.22);
-  margin-bottom: 3rem;
+  margin-bottom: 2.6rem;
 }
 .feature-cell {
-  padding: 2rem 1.6rem;
+  padding: 1.8rem 1.4rem;
   border-right: 1px solid rgba(184,134,11,0.15);
   border-bottom: 1px solid rgba(184,134,11,0.15);
   transition: background 0.3s;
@@ -959,40 +808,33 @@ body::before {
 .feature-num {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--sand);
-  letter-spacing: 0.05em;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
   display: block;
-  padding-bottom: 0.1em;
 }
-.feature-icon {
-  width: 36px; height: 36px;
-  color: var(--gold-deep);
-  margin-bottom: 0.8rem;
-}
+.feature-icon { width: 34px; height: 34px; color: var(--gold-deep); margin-bottom: 0.7rem; }
 .feature-title {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--maroon);
-  margin-bottom: 0.45rem;
-  padding-bottom: 0.1rem;
+  margin-bottom: 0.4rem;
 }
 .feature-body {
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 300;
   line-height: 1.7;
-  color: rgba(31,8,8,0.6);
+  color: rgba(26,6,8,0.6);
 }
 
-.cta-wrap-center { text-align: center; }
+.cta-center { text-align: center; }
 .cta-dark {
   display: inline-flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.1rem 3.6rem;
+  padding: 1.05rem 3.4rem;
   background: var(--maroon-deep);
   color: var(--gold-pale);
   font-family: var(--font-sans);
@@ -1008,15 +850,15 @@ body::before {
 .cta-dark:hover {
   background: var(--maroon);
   letter-spacing: 7px;
-  box-shadow: 0 16px 40px rgba(58,13,20,0.5);
+  box-shadow: 0 16px 40px rgba(74,19,34,0.5);
 }
 .cta-dark:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
 .cta-dark .arrow { transition: transform 0.3s; }
 .cta-dark:hover .arrow { transform: translateX(6px); }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    FOOTER
-═══════════════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════ */
 footer {
   position: relative;
   background: var(--ink);
@@ -1038,13 +880,13 @@ footer::before {
   font-weight: 300;
   font-size: clamp(2.4rem, 5vw, 3.4rem);
   letter-spacing: 0.05em;
+  text-transform: uppercase;
   background: linear-gradient(180deg, var(--gold-pale), var(--rust));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
   padding-bottom: 0.2rem;
-  text-transform: uppercase;
 }
 .ft-detail {
   font-family: var(--font-sans);
@@ -1068,13 +910,13 @@ footer::before {
   letter-spacing: 0.05em;
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    SCROLL REVEAL
-═══════════════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════ */
 .reveal {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+  transform: translateY(28px);
+  transition: opacity 1.1s var(--ease-out), transform 1.1s var(--ease-out);
 }
 .reveal.in { opacity: 1; transform: none; }
 .d1 { transition-delay: 0.08s; }
@@ -1084,15 +926,14 @@ footer::before {
 .d5 { transition-delay: 0.48s; }
 .d6 { transition-delay: 0.58s; }
 
-/* Focus visibility */
 a:focus-visible, button:focus-visible {
   outline: 2px solid var(--gold-bright);
   outline-offset: 4px;
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    RESPONSIVE
-═══════════════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .events-grid  { grid-template-columns: repeat(2, 1fr); }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1100,665 +941,625 @@ a:focus-visible, button:focus-visible {
   .feature-cell:nth-child(2n) { border-right: none; }
   .feature-cell:nth-last-child(-n+3) { border-bottom: 1px solid rgba(184,134,11,0.15); }
   .feature-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .story-grid { grid-template-columns: 1fr; gap: 2.4rem; }
+  .story-art  { aspect-ratio: 4/3; }
 }
-
 @media (max-width: 768px) {
-  .chapter-nav { display: none; }
-  .hero-card   { padding: 2.6rem 1.6rem 2.4rem; }
-  .story-grid  { grid-template-columns: 1fr; gap: 2.4rem; }
-  .story-art   { aspect-ratio: 4/3; }
-  .story-plate { padding: 2rem 1.6rem; }
-  .gazette     { padding: 2.6rem 1.5rem 2rem; }
+  .nav-dots    { display: none; }
+  .hero-card   { padding: 2.4rem 1.6rem 2.2rem; }
   .events-grid { grid-template-columns: 1fr; }
   .feature-grid { grid-template-columns: 1fr; }
   .feature-cell { border-right: none !important; border-bottom: 1px solid rgba(184,134,11,0.15) !important; }
   .feature-cell:last-child { border-bottom: none !important; }
-  .chapter     { padding: 5rem 1.2rem; }
+  .gazette     { padding: 2.4rem 1.5rem 2rem; }
+  .section     { padding: 5rem 1.2rem; min-height: auto; }
   .cd-cell     { padding: 0 0.4rem; }
   .detail-strip { flex-direction: column; gap: 1rem; }
-  .mandap-quote { width: 96%; bottom: 0; padding: 1.8rem 1.4rem 1.6rem; }
+  /* On mobile, scale back the panorama width so it pans less */
+  #panorama { width: 240vw; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ GARLAND (SVG) ═══ -->
-<svg class="garland-svg" preserveAspectRatio="none" viewBox="0 0 1200 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<!-- ════════════════════════════════════════════
+     ROLLING PANORAMA (fixed background)
+═══════════════════════════════════════════════ -->
+<div class="panorama-stage">
+  <div id="panorama">
+    <!-- Optional user image override -->
+    <div class="panorama-img-override" aria-hidden="true"></div>
+
+    <!-- SVG Royal Palace Panorama -->
+    <svg class="panorama-svg" viewBox="0 0 3600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <!-- Sunset/twilight sky -->
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#4a1322"/>
+          <stop offset="25%"  stop-color="#7a1a2c"/>
+          <stop offset="50%"  stop-color="#a44a2e"/>
+          <stop offset="75%"  stop-color="#c97a3a"/>
+          <stop offset="100%" stop-color="#5c1a26"/>
+        </linearGradient>
+
+        <!-- Sandstone palace gradient -->
+        <linearGradient id="sandstone" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#c97a3a" stop-opacity="0.95"/>
+          <stop offset="40%"  stop-color="#a44a2e" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#4a1322" stop-opacity="1"/>
+        </linearGradient>
+
+        <!-- Distant mountains -->
+        <linearGradient id="mountains" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#5c1a26" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#2a0810" stop-opacity="0.9"/>
+        </linearGradient>
+
+        <!-- Reflecting water -->
+        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#5c1a26" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#1a0608" stop-opacity="0.95"/>
+        </linearGradient>
+
+        <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#ffe4a8"/>
+          <stop offset="60%" stop-color="#ffb066"/>
+          <stop offset="100%" stop-color="#ffb066" stop-opacity="0"/>
+        </radialGradient>
+
+        <radialGradient id="diya" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ffe4a8"/>
+          <stop offset="40%"  stop-color="#ffb066"/>
+          <stop offset="100%" stop-color="#ffb066" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- SKY (full width) -->
+      <rect width="3600" height="700" fill="url(#sky)"/>
+
+      <!-- SUN (positioned ~1/4 in) -->
+      <circle cx="850" cy="380" r="180" fill="url(#sun)"/>
+      <circle cx="850" cy="380" r="90"  fill="#ffd86e" opacity="0.95"/>
+      <circle cx="850" cy="380" r="50"  fill="#fff5d6"/>
+
+      <!-- Stars in the further sky (right side, evening side) -->
+      <g fill="#fdf8ee" opacity="0.7">
+        <circle cx="2800" cy="120" r="1.5"/>
+        <circle cx="2900" cy="200" r="1"/>
+        <circle cx="3050" cy="80"  r="1.5"/>
+        <circle cx="3150" cy="150" r="1"/>
+        <circle cx="3250" cy="220" r="1.5"/>
+        <circle cx="3350" cy="100" r="1"/>
+        <circle cx="3450" cy="180" r="1.5"/>
+        <circle cx="3550" cy="60"  r="1"/>
+        <circle cx="2700" cy="280" r="1"/>
+        <circle cx="3000" cy="320" r="1.2"/>
+        <circle cx="3200" cy="290" r="1"/>
+        <circle cx="3400" cy="240" r="1.3"/>
+      </g>
+
+      <!-- DISTANT MOUNTAIN RANGE -->
+      <path d="M 0 600
+               L 200 500 L 350 540 L 500 480 L 700 520 L 900 470 L 1100 510
+               L 1300 460 L 1500 500 L 1700 470 L 1900 510 L 2100 480
+               L 2300 520 L 2500 490 L 2700 530 L 2900 500 L 3100 470
+               L 3300 510 L 3500 480 L 3600 500 L 3600 700 L 0 700 Z"
+            fill="url(#mountains)" opacity="0.75"/>
+
+      <!-- MID PALACE SKYLINE (sandstone silhouette) -->
+      <g fill="url(#sandstone)" opacity="0.92">
+        <!-- Far-left palace cluster -->
+        <path d="M 0 700 L 0 540 L 60 540 L 60 500 L 120 500 L 120 540 L 180 540
+                 L 180 460 Q 200 410 220 460 L 220 540 L 280 540 L 280 510 L 340 510
+                 L 340 480 L 400 480 L 400 540 L 0 540 Z"/>
+
+        <!-- Left palace with onion dome (sandstone fort feel) -->
+        <path d="M 400 540 L 400 420 L 440 420 L 440 380 L 500 380
+                 L 500 340 Q 510 280 540 340
+                 L 540 320 Q 560 250 580 250
+                 Q 600 250 620 320
+                 L 620 340 Q 650 280 660 340
+                 L 660 380 L 720 380 L 720 420 L 760 420 L 760 540 L 400 540 Z"/>
+        <!-- Main dome -->
+        <ellipse cx="580" cy="250" rx="50" ry="32" fill="#d4a017" opacity="0.85"/>
+        <ellipse cx="580" cy="250" rx="50" ry="32" fill="none" stroke="#8a6611" stroke-width="2"/>
+        <!-- Dome finial -->
+        <line x1="580" y1="218" x2="580" y2="195" stroke="#d4a017" stroke-width="2"/>
+        <circle cx="580" cy="192" r="4" fill="#d4a017"/>
+        <circle cx="580" cy="180" r="2" fill="#d4a017"/>
+
+        <!-- Connecting walls -->
+        <rect x="760" y="500" width="200" height="200" fill="url(#sandstone)"/>
+        <rect x="760" y="500" width="200" height="6" fill="#d4a017" opacity="0.6"/>
+
+        <!-- Mid palace tower with arches -->
+        <path d="M 960 700 L 960 360 L 1020 360 L 1020 320
+                 Q 1030 280 1060 320
+                 Q 1075 270 1090 270
+                 Q 1105 270 1120 320
+                 Q 1150 280 1160 320
+                 L 1160 360 L 1220 360 L 1220 700 Z"/>
+        <ellipse cx="1090" cy="280" rx="36" ry="24" fill="#d4a017" opacity="0.85"/>
+        <line x1="1090" y1="256" x2="1090" y2="240" stroke="#d4a017" stroke-width="2"/>
+        <circle cx="1090" cy="237" r="3" fill="#d4a017"/>
+
+        <!-- Connecting wall -->
+        <rect x="1220" y="500" width="280" height="200" fill="url(#sandstone)"/>
+        <rect x="1220" y="500" width="280" height="6" fill="#d4a017" opacity="0.6"/>
+
+        <!-- Center grand palace with three domes -->
+        <path d="M 1500 700 L 1500 440 L 1550 440 L 1550 400 L 1610 400
+                 L 1610 360 Q 1625 320 1650 360
+                 L 1650 340 Q 1670 290 1690 290 Q 1710 290 1730 340
+                 L 1730 320 Q 1750 270 1770 240 Q 1790 230 1810 240 Q 1830 270 1850 320
+                 L 1850 340 Q 1870 290 1890 290 Q 1910 290 1930 340
+                 L 1930 360 Q 1955 320 1970 360
+                 L 1970 400 L 2030 400 L 2030 440 L 2080 440 L 2080 700 Z"/>
+
+        <!-- Center grand dome (largest) -->
+        <ellipse cx="1790" cy="240" rx="80" ry="55" fill="#d4a017" opacity="0.95"/>
+        <ellipse cx="1790" cy="240" rx="80" ry="55" fill="none" stroke="#8a6611" stroke-width="2.5"/>
+        <ellipse cx="1790" cy="240" rx="80" ry="55" fill="none" stroke="#fff5d6" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.6"/>
+        <line x1="1790" y1="185" x2="1790" y2="155" stroke="#d4a017" stroke-width="3"/>
+        <circle cx="1790" cy="150" r="6" fill="#d4a017"/>
+        <circle cx="1790" cy="135" r="3" fill="#d4a017"/>
+        <!-- Side domes -->
+        <ellipse cx="1690" cy="290" rx="44" ry="30" fill="#d4a017" opacity="0.85"/>
+        <line x1="1690" y1="260" x2="1690" y2="240" stroke="#d4a017" stroke-width="2"/>
+        <circle cx="1690" cy="237" r="3" fill="#d4a017"/>
+        <ellipse cx="1890" cy="290" rx="44" ry="30" fill="#d4a017" opacity="0.85"/>
+        <line x1="1890" y1="260" x2="1890" y2="240" stroke="#d4a017" stroke-width="2"/>
+        <circle cx="1890" cy="237" r="3" fill="#d4a017"/>
+
+        <!-- Connecting wall right -->
+        <rect x="2080" y="500" width="280" height="200" fill="url(#sandstone)"/>
+        <rect x="2080" y="500" width="280" height="6" fill="#d4a017" opacity="0.6"/>
+
+        <!-- Right palace cluster -->
+        <path d="M 2360 700 L 2360 380 L 2420 380 L 2420 340
+                 Q 2440 290 2470 340
+                 Q 2490 270 2510 270 Q 2530 270 2550 340
+                 Q 2580 290 2600 340
+                 L 2600 380 L 2660 380 L 2660 700 Z"/>
+        <ellipse cx="2510" cy="280" rx="42" ry="28" fill="#d4a017" opacity="0.85"/>
+        <line x1="2510" y1="252" x2="2510" y2="232" stroke="#d4a017" stroke-width="2"/>
+        <circle cx="2510" cy="229" r="3" fill="#d4a017"/>
+
+        <!-- Distant right minarets / fort wall -->
+        <rect x="2660" y="500" width="940" height="200" fill="url(#sandstone)"/>
+        <rect x="2660" y="500" width="940" height="6" fill="#d4a017" opacity="0.6"/>
+        <!-- Minarets -->
+        <g>
+          <path d="M 2740 700 L 2740 380 L 2780 380 L 2780 700 Z"/>
+          <ellipse cx="2760" cy="380" rx="22" ry="16" fill="#d4a017" opacity="0.85"/>
+          <line x1="2760" y1="364" x2="2760" y2="348" stroke="#d4a017" stroke-width="1.5"/>
+
+          <path d="M 2920 700 L 2920 360 L 2970 360 L 2970 700 Z"/>
+          <ellipse cx="2945" cy="360" rx="28" ry="20" fill="#d4a017" opacity="0.9"/>
+          <line x1="2945" y1="340" x2="2945" y2="320" stroke="#d4a017" stroke-width="1.5"/>
+          <circle cx="2945" cy="317" r="2.5" fill="#d4a017"/>
+
+          <path d="M 3120 700 L 3120 400 L 3160 400 L 3160 700 Z"/>
+          <ellipse cx="3140" cy="400" rx="22" ry="16" fill="#d4a017" opacity="0.85"/>
+          <line x1="3140" y1="384" x2="3140" y2="368" stroke="#d4a017" stroke-width="1.5"/>
+
+          <path d="M 3300 700 L 3300 380 L 3350 380 L 3350 700 Z"/>
+          <ellipse cx="3325" cy="380" rx="26" ry="18" fill="#d4a017" opacity="0.9"/>
+          <line x1="3325" y1="362" x2="3325" y2="344" stroke="#d4a017" stroke-width="1.5"/>
+          <circle cx="3325" cy="341" r="2.5" fill="#d4a017"/>
+
+          <path d="M 3480 700 L 3480 420 L 3520 420 L 3520 700 Z"/>
+          <ellipse cx="3500" cy="420" rx="22" ry="16" fill="#d4a017" opacity="0.85"/>
+
+          <!-- Final dome at the right edge -->
+          <path d="M 3580 700 L 3580 380 L 3600 380 L 3600 700 Z"/>
+        </g>
+      </g>
+
+      <!-- ARCHED OPENINGS with warm interior glow -->
+      <g opacity="0.7">
+        <!-- Left palace arches -->
+        <path d="M 460 540 L 460 460 Q 475 430 490 460 L 490 540 Z" fill="#ffb066" opacity="0.35"/>
+        <path d="M 670 540 L 670 460 Q 685 430 700 460 L 700 540 Z" fill="#ffb066" opacity="0.35"/>
+
+        <!-- Mid palace arches -->
+        <path d="M 1050 700 L 1050 600 Q 1075 560 1100 600 L 1100 700 Z" fill="#ffb066" opacity="0.4"/>
+        <path d="M 1140 700 L 1140 600 Q 1165 560 1190 600 L 1190 700 Z" fill="#ffb066" opacity="0.4"/>
+
+        <!-- Center palace large arches -->
+        <path d="M 1570 700 L 1570 580 Q 1605 530 1640 580 L 1640 700 Z" fill="#ffb066" opacity="0.45"/>
+        <path d="M 1680 700 L 1680 560 Q 1720 500 1760 560 L 1760 700 Z" fill="#ffb066" opacity="0.5"/>
+        <path d="M 1820 700 L 1820 500 Q 1860 430 1900 500 L 1900 700 Z" fill="#ffe4a8" opacity="0.4"/>
+        <path d="M 1940 700 L 1940 560 Q 1980 500 2020 560 L 2020 700 Z" fill="#ffb066" opacity="0.5"/>
+        <path d="M 2050 700 L 2050 580 Q 2085 530 2120 580 L 2120 700 Z" fill="#ffb066" opacity="0.45"/>
+
+        <!-- Right palace arches -->
+        <path d="M 2400 700 L 2400 600 Q 2425 560 2450 600 L 2450 700 Z" fill="#ffb066" opacity="0.4"/>
+        <path d="M 2570 700 L 2570 600 Q 2595 560 2620 600 L 2620 700 Z" fill="#ffb066" opacity="0.4"/>
+
+        <!-- Far right wall arches -->
+        <path d="M 2790 700 L 2790 600 Q 2815 560 2840 600 L 2840 700 Z" fill="#ffb066" opacity="0.35"/>
+        <path d="M 3020 700 L 3020 600 Q 3045 560 3070 600 L 3070 700 Z" fill="#ffb066" opacity="0.35"/>
+        <path d="M 3200 700 L 3200 600 Q 3225 560 3250 600 L 3250 700 Z" fill="#ffb066" opacity="0.35"/>
+        <path d="M 3400 700 L 3400 600 Q 3425 560 3450 600 L 3450 700 Z" fill="#ffb066" opacity="0.35"/>
+      </g>
+
+      <!-- WATER / REFLECTION at the bottom -->
+      <rect y="700" width="3600" height="300" fill="url(#water)"/>
+      <!-- Faint reflections -->
+      <g opacity="0.25" transform="translate(0, 1400) scale(1, -0.5)">
+        <use href="#palaceMirror"/>
+      </g>
+
+      <!-- DIYAS — scattered throughout, glowing warm spots -->
+      <g>
+        <!-- Left section diyas -->
+        <circle cx="200" cy="660" r="14" fill="url(#diya)"/>
+        <circle cx="200" cy="660" r="4"  fill="#ffd86e"/>
+        <circle cx="420" cy="680" r="12" fill="url(#diya)"/>
+        <circle cx="420" cy="680" r="3"  fill="#ffd86e"/>
+        <circle cx="700" cy="660" r="14" fill="url(#diya)"/>
+        <circle cx="700" cy="660" r="4"  fill="#ffd86e"/>
+
+        <!-- Mid section -->
+        <circle cx="980"  cy="680" r="14" fill="url(#diya)"/>
+        <circle cx="980"  cy="680" r="4"  fill="#ffd86e"/>
+        <circle cx="1280" cy="660" r="12" fill="url(#diya)"/>
+        <circle cx="1280" cy="660" r="3"  fill="#ffd86e"/>
+
+        <!-- Center palace -->
+        <circle cx="1620" cy="670" r="14" fill="url(#diya)"/>
+        <circle cx="1620" cy="670" r="4"  fill="#ffd86e"/>
+        <circle cx="1790" cy="680" r="18" fill="url(#diya)"/>
+        <circle cx="1790" cy="680" r="5"  fill="#ffd86e"/>
+        <circle cx="1960" cy="670" r="14" fill="url(#diya)"/>
+        <circle cx="1960" cy="670" r="4"  fill="#ffd86e"/>
+
+        <!-- Right section -->
+        <circle cx="2280" cy="660" r="12" fill="url(#diya)"/>
+        <circle cx="2280" cy="660" r="3"  fill="#ffd86e"/>
+        <circle cx="2510" cy="680" r="14" fill="url(#diya)"/>
+        <circle cx="2510" cy="680" r="4"  fill="#ffd86e"/>
+        <circle cx="2820" cy="660" r="12" fill="url(#diya)"/>
+        <circle cx="2820" cy="660" r="3"  fill="#ffd86e"/>
+        <circle cx="3120" cy="680" r="14" fill="url(#diya)"/>
+        <circle cx="3120" cy="680" r="4"  fill="#ffd86e"/>
+        <circle cx="3380" cy="660" r="12" fill="url(#diya)"/>
+        <circle cx="3380" cy="660" r="3"  fill="#ffd86e"/>
+      </g>
+
+      <!-- Floating fireflies (small dots in the sky) -->
+      <g fill="#ffd86e" opacity="0.75">
+        <circle cx="450"  cy="200" r="2"/>
+        <circle cx="780"  cy="180" r="1.5"/>
+        <circle cx="1320" cy="220" r="2"/>
+        <circle cx="1580" cy="160" r="1.5"/>
+        <circle cx="2150" cy="200" r="2"/>
+        <circle cx="2470" cy="180" r="1.5"/>
+        <circle cx="2750" cy="240" r="2"/>
+        <circle cx="3030" cy="200" r="1.5"/>
+        <circle cx="3280" cy="170" r="2"/>
+      </g>
+
+      <!-- Subtle gold horizon line -->
+      <line x1="0" y1="700" x2="3600" y2="700" stroke="#d4a017" stroke-width="1" opacity="0.4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Vignette + grain over the panorama -->
+<div class="panorama-vignette" aria-hidden="true"></div>
+<div class="panorama-grain" aria-hidden="true"></div>
+
+<!-- ════════════════════════════════════════════
+     MARIGOLD GARLAND (top)
+═══════════════════════════════════════════════ -->
+<svg class="garland-svg" preserveAspectRatio="none" viewBox="0 0 1200 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
-    <radialGradient id="marigoldA" cx="50%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#ffb066"/>
-      <stop offset="60%" stop-color="#d65b14"/>
-      <stop offset="100%" stop-color="#8b2c0a"/>
+    <radialGradient id="mariA" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffb066"/><stop offset="60%" stop-color="#d65b14"/><stop offset="100%" stop-color="#8b2c0a"/>
     </radialGradient>
-    <radialGradient id="marigoldB" cx="50%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#ffd86e"/>
-      <stop offset="60%" stop-color="#c0392b"/>
-      <stop offset="100%" stop-color="#6b1d1d"/>
+    <radialGradient id="mariB" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffd86e"/><stop offset="60%" stop-color="#c0392b"/><stop offset="100%" stop-color="#6b1d1d"/>
     </radialGradient>
   </defs>
-  <!-- Dark string -->
-  <rect x="0" y="0" width="1200" height="14" fill="#1c0408"/>
-  <!-- Gold thread -->
-  <line x1="0" y1="14" x2="1200" y2="14" stroke="#d4a017" stroke-width="1.2" opacity="0.85"/>
-  <!-- Marigolds (repeated) -->
+  <rect x="0" y="0" width="1200" height="12" fill="#1a0608"/>
+  <line x1="0" y1="12" x2="1200" y2="12" stroke="#d4a017" stroke-width="1" opacity="0.85"/>
   <g>
-    <!-- generated cluster pattern -->
-    <circle cx="30" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="70" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="110" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="150" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="190" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="230" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="270" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="310" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="350" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="390" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="430" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="470" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="510" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="550" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="590" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="630" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="670" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="710" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="750" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="790" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="830" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="870" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="910" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="950" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="990" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="1030" cy="26" r="9" fill="url(#marigoldB)"/>
-    <circle cx="1070" cy="34" r="11" fill="url(#marigoldA)"/>
-    <circle cx="1110" cy="28" r="9" fill="url(#marigoldB)"/>
-    <circle cx="1150" cy="32" r="11" fill="url(#marigoldA)"/>
-    <circle cx="1190" cy="26" r="9" fill="url(#marigoldB)"/>
-  </g>
-  <!-- Hanging tassels -->
-  <g stroke="#b8860b" stroke-width="0.8" opacity="0.7">
-    <line x1="150" y1="35" x2="150" y2="55"/>
-    <line x1="350" y1="35" x2="350" y2="55"/>
-    <line x1="550" y1="35" x2="550" y2="55"/>
-    <line x1="750" y1="35" x2="750" y2="55"/>
-    <line x1="950" y1="35" x2="950" y2="55"/>
-    <line x1="1150" y1="35" x2="1150" y2="55"/>
+    <circle cx="30" cy="28" r="11" fill="url(#mariA)"/><circle cx="70" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="110" cy="30" r="11" fill="url(#mariA)"/><circle cx="150" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="190" cy="28" r="11" fill="url(#mariA)"/><circle cx="230" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="270" cy="30" r="11" fill="url(#mariA)"/><circle cx="310" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="350" cy="28" r="11" fill="url(#mariA)"/><circle cx="390" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="430" cy="30" r="11" fill="url(#mariA)"/><circle cx="470" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="510" cy="28" r="11" fill="url(#mariA)"/><circle cx="550" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="590" cy="30" r="11" fill="url(#mariA)"/><circle cx="630" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="670" cy="28" r="11" fill="url(#mariA)"/><circle cx="710" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="750" cy="30" r="11" fill="url(#mariA)"/><circle cx="790" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="830" cy="28" r="11" fill="url(#mariA)"/><circle cx="870" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="910" cy="30" r="11" fill="url(#mariA)"/><circle cx="950" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="990" cy="28" r="11" fill="url(#mariA)"/><circle cx="1030" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="1070" cy="30" r="11" fill="url(#mariA)"/><circle cx="1110" cy="24" r="9" fill="url(#mariB)"/>
+    <circle cx="1150" cy="28" r="11" fill="url(#mariA)"/><circle cx="1190" cy="24" r="9" fill="url(#mariB)"/>
   </g>
 </svg>
 
 <!-- Progress bar -->
 <div class="progress-rail" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
 
-<!-- Chapter nav -->
-<nav class="chapter-nav" aria-label="Chapter navigation">
-  <button class="dot active" data-target="hero"            data-label="Invitation"   aria-label="Invitation"></button>
-  <button class="dot"        data-target="chapter-story"   data-label="Our Story"    aria-label="Our Story"></button>
-  <button class="dot"        data-target="chapter-events"  data-label="Celebrations" aria-label="Celebrations"></button>
-  <button class="dot"        data-target="chapter-mandap"  data-label="The Mandap"   aria-label="The Mandap"></button>
-  <button class="dot"        data-target="chapter-planner" data-label="Plan"         aria-label="Plan"></button>
+<!-- Nav dots -->
+<nav class="nav-dots" aria-label="Section navigation">
+  <button class="dot active" data-target="hero"    data-label="Welcome"      aria-label="Welcome"></button>
+  <button class="dot"        data-target="story"   data-label="Our Story"    aria-label="Our Story"></button>
+  <button class="dot"        data-target="events"  data-label="Celebrations" aria-label="Celebrations"></button>
+  <button class="dot"        data-target="planner" data-label="Plan"         aria-label="Plan"></button>
 </nav>
 
 <!-- Petals -->
 <div class="petals" id="petals" aria-hidden="true"></div>
 
-<div class="page-wrap">
-
-<!-- ═══════════════════════════════════════════════
-     HERO
+<!-- ════════════════════════════════════════════
+     CONTENT LAYER
 ═══════════════════════════════════════════════ -->
-<section class="hero" id="hero">
+<div class="content">
 
-  <!-- Stage: SVG palace silhouette + diyas -->
-  <div class="hero-stage">
-    <!-- Optional user photo (only shows if file exists) -->
-    <div class="hero-photo" aria-hidden="true"></div>
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-card">
+      <svg class="hero-mandala" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="32" cy="32" r="2.5" fill="currentColor"/>
+        <circle cx="32" cy="32" r="8" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
+        <circle cx="32" cy="32" r="14" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
+        <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+        <g stroke="currentColor" stroke-width="0.6" opacity="0.7">
+          <line x1="32" y1="10" x2="32" y2="22"/><line x1="32" y1="42" x2="32" y2="54"/>
+          <line x1="10" y1="32" x2="22" y2="32"/><line x1="42" y1="32" x2="54" y2="32"/>
+          <line x1="16" y1="16" x2="24" y2="24"/><line x1="40" y1="40" x2="48" y2="48"/>
+          <line x1="48" y1="16" x2="40" y2="24"/><line x1="24" y1="40" x2="16" y2="48"/>
+        </g>
+        <g fill="currentColor" opacity="0.8">
+          <circle cx="32" cy="14" r="1.5"/><circle cx="32" cy="50" r="1.5"/>
+          <circle cx="14" cy="32" r="1.5"/><circle cx="50" cy="32" r="1.5"/>
+          <circle cx="19" cy="19" r="1.2"/><circle cx="45" cy="45" r="1.2"/>
+          <circle cx="45" cy="19" r="1.2"/><circle cx="19" cy="45" r="1.2"/>
+        </g>
+      </svg>
 
-    <!-- SVG fort/palace silhouette -->
-    <svg class="hero-svg-bg" preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="palace-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#5c1a26" stop-opacity="0.2"/>
-          <stop offset="100%" stop-color="#1c0608" stop-opacity="0.95"/>
-        </linearGradient>
-        <linearGradient id="palace-warm" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#a44a2e" stop-opacity="0.45"/>
-          <stop offset="100%" stop-color="#3a0d14" stop-opacity="0.95"/>
-        </linearGradient>
-      </defs>
+      <p class="hero-eyebrow">With love · The families invite you</p>
 
-      <!-- Distant palace silhouette (warm sandstone tone) -->
-      <g fill="url(#palace-warm)" opacity="0.6">
-        <path d="M 0 600 L 0 360 L 60 360 L 60 320 L 90 320 L 90 360 L 130 360 L 130 280 L 150 250 L 170 280 L 170 360 L 220 360 L 220 300 L 260 300 L 260 360 L 310 360 L 310 340 L 360 340 L 360 290 Q 380 240 400 290 L 400 360 L 460 360 L 460 320 L 510 320 L 510 290 L 540 290 L 540 240 Q 560 200 580 240 L 580 290 L 610 290 L 610 320 L 670 320 L 670 360 L 720 360 L 720 300 L 770 300 L 770 360 L 820 360 L 820 280 L 850 280 L 850 240 Q 870 200 890 240 L 890 280 L 920 280 L 920 360 L 970 360 L 970 330 L 1020 330 L 1020 360 L 1080 360 L 1080 290 L 1130 290 L 1130 360 L 1200 360 L 1200 600 Z"/>
-      </g>
-
-      <!-- Foreground palace - more defined -->
-      <g fill="url(#palace-grad)">
-        <!-- Left wing -->
-        <path d="M 0 600 L 0 480 L 80 480 L 80 440 L 110 440 L 110 480 L 160 480 L 160 400 Q 180 360 200 400 L 200 480 L 260 480 L 260 460 L 320 460 L 320 480 L 380 480 L 380 420 L 420 420 L 420 480 L 0 480 Z"/>
-        <!-- Central palace with dome -->
-        <path d="M 420 480 L 420 380 L 460 380 L 460 340 L 500 340 L 500 300 Q 520 240 540 300 L 540 280 Q 560 220 580 220 L 580 240 Q 600 200 620 220 L 620 240 Q 640 220 660 280 L 660 300 L 700 300 L 700 340 L 740 340 L 740 380 L 780 380 L 780 480 Z"/>
-        <!-- Central main dome -->
-        <ellipse cx="600" cy="220" rx="40" ry="22" fill="#a44a2e" opacity="0.7"/>
-        <path d="M 600 200 Q 595 192 600 188 Q 605 192 600 200 Z" fill="#d4a017" opacity="0.8"/>
-        <!-- Right wing -->
-        <path d="M 780 480 L 780 420 L 820 420 L 820 460 L 880 460 L 880 480 L 940 480 L 940 400 Q 960 360 980 400 L 980 480 L 1040 480 L 1040 440 L 1080 440 L 1080 480 L 1140 480 L 1140 460 L 1200 460 L 1200 600 L 0 600 L 0 480 Z"/>
-        <!-- Side domes -->
-        <ellipse cx="180" cy="395" rx="22" ry="14" fill="#5c1a26" opacity="0.65"/>
-        <ellipse cx="960" cy="395" rx="22" ry="14" fill="#5c1a26" opacity="0.65"/>
-      </g>
-
-      <!-- Arch openings - faint warm glow -->
-      <g opacity="0.4">
-        <path d="M 50 480 L 50 440 Q 60 425 70 440 L 70 480 Z" fill="#ffb066" opacity="0.3"/>
-        <path d="M 270 480 L 270 450 Q 280 438 290 450 L 290 480 Z" fill="#ffb066" opacity="0.3"/>
-        <path d="M 480 480 L 480 420 Q 495 400 510 420 L 510 480 Z" fill="#ffb066" opacity="0.4"/>
-        <path d="M 690 480 L 690 420 Q 705 400 720 420 L 720 480 Z" fill="#ffb066" opacity="0.4"/>
-        <path d="M 905 480 L 905 450 Q 915 438 925 450 L 925 480 Z" fill="#ffb066" opacity="0.3"/>
-        <path d="M 1090 480 L 1090 440 Q 1100 425 1110 440 L 1110 480 Z" fill="#ffb066" opacity="0.3"/>
-      </g>
-
-      <!-- Decorative flag/finial on main dome -->
-      <line x1="600" y1="188" x2="600" y2="170" stroke="#d4a017" stroke-width="1.5"/>
-      <circle cx="600" cy="168" r="3" fill="#d4a017"/>
-    </svg>
-
-    <!-- Floating diyas -->
-    <span class="diya" style="top: 62%; left: 8%;"></span>
-    <span class="diya" style="top: 70%; left: 18%; animation-delay: 0.6s;"></span>
-    <span class="diya" style="top: 65%; left: 32%; animation-delay: 1.2s;"></span>
-    <span class="diya" style="top: 68%; left: 48%; animation-delay: 0.3s;"></span>
-    <span class="diya" style="top: 72%; left: 62%; animation-delay: 0.9s;"></span>
-    <span class="diya" style="top: 64%; left: 78%; animation-delay: 1.5s;"></span>
-    <span class="diya" style="top: 70%; left: 92%; animation-delay: 0.4s;"></span>
-  </div>
-
-  <!-- HERO CARD -->
-  <div class="hero-card">
-    <!-- Mandala ornament -->
-    <svg class="hero-mandala" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="32" cy="32" r="2.5" fill="currentColor"/>
-      <circle cx="32" cy="32" r="8" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
-      <circle cx="32" cy="32" r="14" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-      <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-      <!-- 8-point star -->
-      <g stroke="currentColor" stroke-width="0.6" opacity="0.7">
-        <line x1="32" y1="10" x2="32" y2="22"/>
-        <line x1="32" y1="42" x2="32" y2="54"/>
-        <line x1="10" y1="32" x2="22" y2="32"/>
-        <line x1="42" y1="32" x2="54" y2="32"/>
-        <line x1="16" y1="16" x2="24" y2="24"/>
-        <line x1="40" y1="40" x2="48" y2="48"/>
-        <line x1="48" y1="16" x2="40" y2="24"/>
-        <line x1="24" y1="40" x2="16" y2="48"/>
-      </g>
-      <!-- Petal dots -->
-      <g fill="currentColor" opacity="0.8">
-        <circle cx="32" cy="14" r="1.5"/>
-        <circle cx="32" cy="50" r="1.5"/>
-        <circle cx="14" cy="32" r="1.5"/>
-        <circle cx="50" cy="32" r="1.5"/>
-        <circle cx="19" cy="19" r="1.2"/>
-        <circle cx="45" cy="45" r="1.2"/>
-        <circle cx="45" cy="19" r="1.2"/>
-        <circle cx="19" cy="45" r="1.2"/>
-      </g>
-    </svg>
-
-    <p class="hero-eyebrow">With love · The families invite you</p>
-
-    <!-- Names — clean editorial serif, NOT script -->
-    <div class="couple-block">
-      <span class="name">Akhila</span>
-      <div class="amp-wrap">
-        <span class="amp-line"></span>
-        <span class="amp">&amp;</span>
-        <span class="amp-line r"></span>
-      </div>
-      <span class="name">Akshay</span>
-    </div>
-
-    <p class="hero-tagline">on the most beautiful day of their lives</p>
-
-    <span class="hero-date-chip">August · MMXXVI</span>
-
-    <div class="countdown" aria-live="polite">
-      <div class="cd-cell"><span class="cd-num" id="cd-d">000</span><span class="cd-lbl">Days</span></div>
-      <div class="cd-cell"><span class="cd-num" id="cd-h">00</span><span class="cd-lbl">Hours</span></div>
-      <div class="cd-cell"><span class="cd-num" id="cd-m">00</span><span class="cd-lbl">Min</span></div>
-      <div class="cd-cell"><span class="cd-num" id="cd-s">00</span><span class="cd-lbl">Sec</span></div>
-    </div>
-
-    <a href="dashboard.html" class="cta-gold">
-      <span>Enter the Dashboard</span>
-      <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </a>
-  </div>
-
-  <div class="scroll-hint">
-    <span>Scroll to begin</span>
-    <span class="chev" aria-hidden="true"></span>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════
-     CHAPTER 1 — OUR STORY (Editorial)
-═══════════════════════════════════════════════ -->
-<section class="chapter" id="chapter-story">
-  <header class="chapter-header">
-    <span class="chapter-eyebrow reveal">Chapter One</span>
-    <h2 class="chapter-title reveal d1">Our Story</h2>
-    <p class="chapter-sub reveal d2">Two souls, two families, one beautiful journey beginning under the August sky.</p>
-  </header>
-
-  <div class="story-grid">
-    <article class="story-plate reveal d3">
-      <p class="story-tag">— The Royal Union —</p>
-      <h3 class="story-head">A celebration <em>woven slowly,</em><br>thread by golden thread.</h3>
-
-      <p class="story-body">Akhila and Akshay grew up in different corners of the world, yet under the same starlit Indian sky. Their love is the quiet kind &mdash; the kind built over phone calls that lasted past midnight, over morning chai across time zones, over a thousand small kindnesses no one else saw. This August, two families come together to bless the union of these two beautiful hearts.</p>
-
-      <blockquote class="pull-quote">"For you, a thousand times over."</blockquote>
-
-      <div class="detail-strip">
-        <div class="detail-item">
-          <span class="detail-label">The Date</span>
-          <span class="detail-value">August 2026</span>
+      <div class="couple-block">
+        <span class="name">Akhila</span>
+        <div class="amp-wrap">
+          <span class="amp-line"></span>
+          <span class="amp">&amp;</span>
+          <span class="amp-line r"></span>
         </div>
-        <div class="detail-item">
-          <span class="detail-label">The Venue</span>
-          <span class="detail-value">To Be Announced</span>
-        </div>
-      </div>
-    </article>
-
-    <!-- Right: SVG palace courtyard (or user image override) -->
-    <div class="story-art reveal d4" aria-label="Palace courtyard">
-      <svg class="story-art-svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"  stop-color="#ffb066"/>
-            <stop offset="40%" stop-color="#d65b14"/>
-            <stop offset="100%" stop-color="#5c1a26"/>
-          </linearGradient>
-          <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"  stop-color="#a44a2e"/>
-            <stop offset="100%" stop-color="#5c1a26"/>
-          </linearGradient>
-        </defs>
-        <!-- Sunset sky -->
-        <rect width="400" height="500" fill="url(#sky)"/>
-        <!-- Sun -->
-        <circle cx="200" cy="180" r="45" fill="#ffd86e" opacity="0.6"/>
-        <circle cx="200" cy="180" r="30" fill="#ffd86e"/>
-        <!-- Distant minarets -->
-        <g fill="#3a0d14" opacity="0.5">
-          <rect x="40" y="240" width="14" height="80"/>
-          <polygon points="40,240 47,220 54,240"/>
-          <rect x="340" y="240" width="14" height="80"/>
-          <polygon points="340,240 347,220 354,240"/>
-          <rect x="100" y="260" width="12" height="60"/>
-          <polygon points="100,260 106,244 112,260"/>
-          <rect x="288" y="260" width="12" height="60"/>
-          <polygon points="288,260 294,244 300,260"/>
-        </g>
-        <!-- Foreground palace facade with arches -->
-        <rect x="0" y="280" width="400" height="220" fill="url(#sand)"/>
-        <!-- Arch openings (foreground) -->
-        <g fill="#1c0608">
-          <path d="M 30 500 L 30 360 Q 60 320 90 360 L 90 500 Z"/>
-          <path d="M 130 500 L 130 350 Q 160 305 190 350 L 190 500 Z"/>
-          <path d="M 210 500 L 210 350 Q 240 305 270 350 L 270 500 Z"/>
-          <path d="M 310 500 L 310 360 Q 340 320 370 360 L 370 500 Z"/>
-        </g>
-        <!-- Inner glow in arches -->
-        <g opacity="0.7">
-          <path d="M 35 500 L 35 365 Q 60 327 85 365 L 85 500 Z" fill="#ffb066" opacity="0.3"/>
-          <path d="M 135 500 L 135 355 Q 160 312 185 355 L 185 500 Z" fill="#ffb066" opacity="0.3"/>
-          <path d="M 215 500 L 215 355 Q 240 312 265 355 L 265 500 Z" fill="#ffb066" opacity="0.3"/>
-          <path d="M 315 500 L 315 365 Q 340 327 365 365 L 365 500 Z" fill="#ffb066" opacity="0.3"/>
-        </g>
-        <!-- Diyas on the ledge -->
-        <g>
-          <circle cx="60"  cy="345" r="3" fill="#ffd86e"/>
-          <circle cx="60"  cy="345" r="6" fill="#ffd86e" opacity="0.3"/>
-          <circle cx="160" cy="335" r="3" fill="#ffd86e"/>
-          <circle cx="160" cy="335" r="6" fill="#ffd86e" opacity="0.3"/>
-          <circle cx="240" cy="335" r="3" fill="#ffd86e"/>
-          <circle cx="240" cy="335" r="6" fill="#ffd86e" opacity="0.3"/>
-          <circle cx="340" cy="345" r="3" fill="#ffd86e"/>
-          <circle cx="340" cy="345" r="6" fill="#ffd86e" opacity="0.3"/>
-        </g>
-        <!-- Decorative top trim -->
-        <g fill="#d4a017" opacity="0.6">
-          <rect x="0" y="276" width="400" height="2"/>
-          <circle cx="50"  cy="278" r="3"/>
-          <circle cx="120" cy="278" r="3"/>
-          <circle cx="200" cy="278" r="3"/>
-          <circle cx="280" cy="278" r="3"/>
-          <circle cx="350" cy="278" r="3"/>
-        </g>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════
-     CHAPTER 2 — THE CELEBRATIONS
-═══════════════════════════════════════════════ -->
-<section class="chapter" id="chapter-events">
-  <header class="chapter-header">
-    <span class="chapter-eyebrow reveal">Chapter Two</span>
-    <h2 class="chapter-title reveal d1">The Celebrations</h2>
-    <p class="chapter-sub reveal d2">Four sacred ceremonies &mdash; one eternal bond.</p>
-  </header>
-
-  <div class="events-grid">
-    <article class="event-card reveal d2">
-      <span class="event-num">no. i</span>
-      <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M24 6c2 4 6 6 12 6-2 4-2 10 0 14-6 0-10 2-12 6-2-4-6-6-12-6 2-4 2-10 0-14 6 0 10-2 12-6z"/>
-        <circle cx="24" cy="24" r="3"/>
-      </svg>
-      <h3 class="event-name">Mehendi</h3>
-      <p class="event-script">a canvas of henna</p>
-      <div class="event-rule"></div>
-      <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-      <span class="event-status">Coming Soon</span>
-    </article>
-
-    <article class="event-card reveal d3">
-      <span class="event-num">no. ii</span>
-      <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M18 36V10l24-4v26"/>
-        <circle cx="12" cy="36" r="6"/>
-        <circle cx="36" cy="32" r="6"/>
-      </svg>
-      <h3 class="event-name">Sangeet</h3>
-      <p class="event-script">an evening of song</p>
-      <div class="event-rule"></div>
-      <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-      <span class="event-status">Coming Soon</span>
-    </article>
-
-    <article class="event-card reveal d4">
-      <span class="event-num">no. iii</span>
-      <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="24" cy="18" r="12"/>
-        <path d="M18 28l-4 14 10-6 10 6-4-14"/>
-      </svg>
-      <h3 class="event-name">The Wedding</h3>
-      <p class="event-script">the sacred vows</p>
-      <div class="event-rule"></div>
-      <p class="event-meta">August 2026<br>Venue · To Be Confirmed</p>
-      <span class="event-status is-confirmed">Confirmed</span>
-    </article>
-
-    <article class="event-card reveal d5">
-      <span class="event-num">no. iv</span>
-      <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M24 4v12m0 0l6-6m-6 6l-6-6M10 28l-4 16h36l-4-16"/>
-        <circle cx="24" cy="28" r="4"/>
-      </svg>
-      <h3 class="event-name">Reception</h3>
-      <p class="event-script">a grand celebration</p>
-      <div class="event-rule"></div>
-      <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-      <span class="event-status">Coming Soon</span>
-    </article>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════
-     CHAPTER 3 — THE MANDAP (SVG showpiece)
-═══════════════════════════════════════════════ -->
-<section class="chapter" id="chapter-mandap">
-  <header class="chapter-header" style="margin-bottom: 2.5rem;">
-    <span class="chapter-eyebrow reveal">Chapter Three</span>
-    <h2 class="chapter-title reveal d1">The Mandap</h2>
-  </header>
-
-  <div class="mandap-stage reveal d2">
-    <!-- User photo override -->
-    <div class="mandap-photo" aria-hidden="true"></div>
-
-    <!-- SVG Mandap art -->
-    <svg class="mandap-svg" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#f4d27a"/>
-          <stop offset="100%" stop-color="#d4a017"/>
-        </linearGradient>
-        <linearGradient id="garland" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffd86e"/>
-          <stop offset="100%" stop-color="#d4a017"/>
-        </linearGradient>
-        <radialGradient id="mandapMarigold" cx="50%" cy="40%" r="60%">
-          <stop offset="0%"  stop-color="#ffd86e"/>
-          <stop offset="100%" stop-color="#c0392b"/>
-        </radialGradient>
-      </defs>
-
-      <!-- Canopy / dome -->
-      <ellipse cx="400" cy="140" rx="280" ry="40" fill="url(#canopy)" opacity="0.95"/>
-      <ellipse cx="400" cy="140" rx="280" ry="40" fill="none" stroke="#8a6611" stroke-width="2"/>
-      <!-- Canopy decorative trim -->
-      <ellipse cx="400" cy="140" rx="280" ry="40" fill="none" stroke="#d4a017" stroke-width="1" stroke-dasharray="2,3" opacity="0.7"/>
-      <!-- Canopy peak -->
-      <path d="M 400 100 Q 400 80 400 100 L 400 110" stroke="#8a6611" stroke-width="2" fill="#d4a017"/>
-      <circle cx="400" cy="95" r="6" fill="#d4a017"/>
-      <circle cx="400" cy="80" r="3" fill="#d4a017"/>
-
-      <!-- Four pillars (just hints — strings hang from them) -->
-      <line x1="135" y1="160" x2="135" y2="540" stroke="#8a6611" stroke-width="3" opacity="0.6"/>
-      <line x1="665" y1="160" x2="665" y2="540" stroke="#8a6611" stroke-width="3" opacity="0.6"/>
-
-      <!-- Hanging marigold strings (across the canopy edge) -->
-      <g>
-        <!-- Each string: vertical line of marigolds -->
-        <g transform="translate(160,170)">
-          <line x1="0" y1="0" x2="0" y2="280" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="20"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="50"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="85"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="120" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="160" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="200" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="240" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="275" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(220,170)">
-          <line x1="0" y1="0" x2="0" y2="300" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="25"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="60"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="95"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="130" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="170" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="210" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="250" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="295" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(280,170)">
-          <line x1="0" y1="0" x2="0" y2="320" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="20"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="55"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="90"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="125" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="165" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="205" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="245" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="285" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="315" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(340,170)">
-          <line x1="0" y1="0" x2="0" y2="340" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="25"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="60"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="95"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="135" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="175" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="215" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="255" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="295" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="335" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(400,170)">
-          <line x1="0" y1="0" x2="0" y2="350" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="25"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="65"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="105" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="145" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="185" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="225" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="265" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="305" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="345" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(460,170)">
-          <line x1="0" y1="0" x2="0" y2="340" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="20"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="55"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="95"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="135" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="175" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="215" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="255" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="295" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="335" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(520,170)">
-          <line x1="0" y1="0" x2="0" y2="320" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="25"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="60"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="95"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="130" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="170" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="210" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="250" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="290" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="315" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(580,170)">
-          <line x1="0" y1="0" x2="0" y2="300" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="25"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="60"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="95"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="135" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="175" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="215" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="250" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="295" r="4" fill="#c0392b"/>
-        </g>
-        <g transform="translate(640,170)">
-          <line x1="0" y1="0" x2="0" y2="280" stroke="#d4a017" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="20"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="50"  r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="85"  r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="120" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="160" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="200" r="5" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="240" r="6" fill="url(#mandapMarigold)"/>
-          <circle cx="0" cy="275" r="4" fill="#c0392b"/>
-        </g>
-      </g>
-
-      <!-- Throne / seats at the bottom -->
-      <g transform="translate(0,460)">
-        <!-- Floor pedestal -->
-        <rect x="270" y="60" width="260" height="14" fill="#8a6611"/>
-        <rect x="265" y="74" width="270" height="8" fill="#5c1a26"/>
-        <!-- Left throne -->
-        <rect x="305" y="20" width="80" height="50" rx="2" fill="#fdf8ee"/>
-        <path d="M 305 20 L 305 0 Q 305 -10 320 -10 L 370 -10 Q 385 -10 385 0 L 385 20 Z" fill="#8a6611"/>
-        <line x1="305" y1="0" x2="385" y2="0" stroke="#d4a017" stroke-width="1.5"/>
-        <!-- Right throne -->
-        <rect x="415" y="20" width="80" height="50" rx="2" fill="#fdf8ee"/>
-        <path d="M 415 20 L 415 0 Q 415 -10 430 -10 L 480 -10 Q 495 -10 495 0 L 495 20 Z" fill="#8a6611"/>
-        <line x1="415" y1="0" x2="495" y2="0" stroke="#d4a017" stroke-width="1.5"/>
-      </g>
-
-      <!-- Red rose accents -->
-      <g fill="#c0392b">
-        <circle cx="200" cy="260" r="4"/>
-        <circle cx="600" cy="260" r="4"/>
-        <circle cx="280" cy="350" r="4"/>
-        <circle cx="520" cy="350" r="4"/>
-        <circle cx="400" cy="280" r="5"/>
-      </g>
-    </svg>
-
-    <div class="mandap-quote">
-      <span class="script">Beneath the marigold canopy</span>
-      <p class="mandap-quote-text">Before the eternal fire, two lives intertwine into one. Every petal, every chant, every flicker of flame &mdash; a vow made beneath the open sky.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════
-     CHAPTER 4 — THE PLANNER
-═══════════════════════════════════════════════ -->
-<section class="chapter" id="chapter-planner">
-  <article class="gazette reveal">
-    <header class="gazette-head">
-      <p class="gazette-pre">✦ The Wedding Gazette ✦</p>
-      <h2 class="gazette-title">Planning the Perfect Day</h2>
-      <p class="gazette-deck">Every detail, beautifully organised &mdash; for the family who cares deeply.</p>
-    </header>
-
-    <div class="feature-grid">
-      <div class="feature-cell reveal d1">
-        <span class="feature-num">i &mdash; guests</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <h4 class="feature-title">Guest List</h4>
-        <p class="feature-body">RSVPs, dietary needs &amp; party-size tracking.</p>
+        <span class="name">Akshay</span>
       </div>
 
-      <div class="feature-cell reveal d2">
-        <span class="feature-num">ii &mdash; tasks</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <h4 class="feature-title">Task Board</h4>
-        <p class="feature-body">Categorised checklists with deadlines &amp; assignees.</p>
+      <p class="hero-tagline">on the most beautiful day of their lives</p>
+
+      <span class="hero-date-chip">August · MMXXVI</span>
+
+      <div class="countdown" aria-live="polite">
+        <div class="cd-cell"><span class="cd-num" id="cd-d">000</span><span class="cd-lbl">Days</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cd-h">00</span><span class="cd-lbl">Hours</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cd-m">00</span><span class="cd-lbl">Min</span></div>
+        <div class="cd-cell"><span class="cd-num" id="cd-s">00</span><span class="cd-lbl">Sec</span></div>
       </div>
 
-      <div class="feature-cell reveal d3">
-        <span class="feature-num">iii &mdash; finance</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <h4 class="feature-title">Budget</h4>
-        <p class="feature-body">Track expenses in dollars &amp; rupees with payment logs.</p>
-      </div>
-
-      <div class="feature-cell reveal d4">
-        <span class="feature-num">iv &mdash; vendors</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 9h6M9 13h6M9 17h6"/></svg>
-        <h4 class="feature-title">Vendors</h4>
-        <p class="feature-body">Bookings, contacts &amp; contracts &mdash; all in one place.</p>
-      </div>
-
-      <div class="feature-cell reveal d5">
-        <span class="feature-num">v &mdash; venues</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <h4 class="feature-title">Venues</h4>
-        <p class="feature-body">Ceremony, sangeet, mehendi &amp; reception locations.</p>
-      </div>
-
-      <div class="feature-cell reveal d6">
-        <span class="feature-num">vi &mdash; dining</span>
-        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11h16a1 1 0 0 1 1 1v.5a6.5 6.5 0 0 1-13 0V12a1 1 0 0 1 1-1z"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-        <h4 class="feature-title">Food &amp; Menu</h4>
-        <p class="feature-body">Menu planning with guest-by-guest dietary notes.</p>
-      </div>
-    </div>
-
-    <div class="cta-wrap-center">
-      <a href="dashboard.html" class="cta-dark">
-        Enter the Dashboard
+      <a href="dashboard.html" class="cta-gold">
+        <span>Enter the Dashboard</span>
         <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
-  </article>
-</section>
 
-<!-- ═══════════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════════ -->
+    <div class="scroll-hint">
+      <span>Scroll to begin</span>
+      <span class="chev" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="section" id="story">
+    <div class="section-inner">
+      <header class="section-header">
+        <span class="section-tag reveal">Our Story</span>
+        <h2 class="section-title reveal d1">A celebration woven<br>thread by golden thread</h2>
+      </header>
+
+      <div class="story-grid">
+        <article class="story-plate reveal d2">
+          <p class="story-tag">— The Royal Union —</p>
+          <h3 class="story-head">Two souls,<br><em>one beautiful journey.</em></h3>
+
+          <p class="story-body">Akhila and Akshay grew up in different corners of the world, yet under the same starlit Indian sky. Their love is the quiet kind &mdash; built over phone calls that lasted past midnight, over morning chai across time zones, over a thousand small kindnesses no one else saw. This August, two families come together to bless the union of these two beautiful hearts.</p>
+
+          <blockquote class="pull-quote">"For you, a thousand times over."</blockquote>
+
+          <div class="detail-strip">
+            <div class="detail-item">
+              <span class="detail-label">The Date</span>
+              <span class="detail-value">August 2026</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">The Venue</span>
+              <span class="detail-value">To Be Announced</span>
+            </div>
+          </div>
+        </article>
+
+        <div class="story-art reveal d3" aria-label="Palace courtyard">
+          <svg class="story-art-svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="storySky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffb066"/><stop offset="50%" stop-color="#d65b14"/><stop offset="100%" stop-color="#5c1a26"/>
+              </linearGradient>
+              <linearGradient id="storySand" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a44a2e"/><stop offset="100%" stop-color="#4a1322"/>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="500" fill="url(#storySky)"/>
+            <circle cx="200" cy="180" r="50" fill="#ffd86e" opacity="0.6"/>
+            <circle cx="200" cy="180" r="32" fill="#fff5d6"/>
+            <g fill="#3a0d14" opacity="0.55">
+              <rect x="40" y="240" width="14" height="80"/><polygon points="40,240 47,220 54,240"/>
+              <rect x="340" y="240" width="14" height="80"/><polygon points="340,240 347,220 354,240"/>
+              <rect x="100" y="260" width="12" height="60"/><polygon points="100,260 106,244 112,260"/>
+              <rect x="288" y="260" width="12" height="60"/><polygon points="288,260 294,244 300,260"/>
+            </g>
+            <rect x="0" y="280" width="400" height="220" fill="url(#storySand)"/>
+            <g fill="#1a0608">
+              <path d="M 30 500 L 30 360 Q 60 320 90 360 L 90 500 Z"/>
+              <path d="M 130 500 L 130 350 Q 160 305 190 350 L 190 500 Z"/>
+              <path d="M 210 500 L 210 350 Q 240 305 270 350 L 270 500 Z"/>
+              <path d="M 310 500 L 310 360 Q 340 320 370 360 L 370 500 Z"/>
+            </g>
+            <g opacity="0.75">
+              <path d="M 35 500 L 35 365 Q 60 327 85 365 L 85 500 Z" fill="#ffb066" opacity="0.4"/>
+              <path d="M 135 500 L 135 355 Q 160 312 185 355 L 185 500 Z" fill="#ffb066" opacity="0.4"/>
+              <path d="M 215 500 L 215 355 Q 240 312 265 355 L 265 500 Z" fill="#ffb066" opacity="0.4"/>
+              <path d="M 315 500 L 315 365 Q 340 327 365 365 L 365 500 Z" fill="#ffb066" opacity="0.4"/>
+            </g>
+            <g>
+              <circle cx="60" cy="345" r="3" fill="#ffd86e"/><circle cx="60" cy="345" r="6" fill="#ffd86e" opacity="0.3"/>
+              <circle cx="160" cy="335" r="3" fill="#ffd86e"/><circle cx="160" cy="335" r="6" fill="#ffd86e" opacity="0.3"/>
+              <circle cx="240" cy="335" r="3" fill="#ffd86e"/><circle cx="240" cy="335" r="6" fill="#ffd86e" opacity="0.3"/>
+              <circle cx="340" cy="345" r="3" fill="#ffd86e"/><circle cx="340" cy="345" r="6" fill="#ffd86e" opacity="0.3"/>
+            </g>
+            <g fill="#d4a017" opacity="0.7">
+              <rect x="0" y="276" width="400" height="2"/>
+              <circle cx="50" cy="278" r="3"/><circle cx="120" cy="278" r="3"/>
+              <circle cx="200" cy="278" r="3"/><circle cx="280" cy="278" r="3"/><circle cx="350" cy="278" r="3"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="section" id="events">
+    <div class="section-inner">
+      <header class="section-header">
+        <span class="section-tag reveal">The Celebrations</span>
+        <h2 class="section-title reveal d1">Four sacred ceremonies,<br>one eternal bond</h2>
+      </header>
+
+      <div class="events-grid">
+        <article class="event-card reveal d2">
+          <span class="event-num">no. i</span>
+          <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M24 6c2 4 6 6 12 6-2 4-2 10 0 14-6 0-10 2-12 6-2-4-6-6-12-6 2-4 2-10 0-14 6 0 10-2 12-6z"/><circle cx="24" cy="24" r="3"/>
+          </svg>
+          <h3 class="event-name">Mehendi</h3>
+          <p class="event-script">a canvas of henna</p>
+          <div class="event-rule"></div>
+          <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+          <span class="event-status">Coming Soon</span>
+        </article>
+
+        <article class="event-card reveal d3">
+          <span class="event-num">no. ii</span>
+          <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 36V10l24-4v26"/><circle cx="12" cy="36" r="6"/><circle cx="36" cy="32" r="6"/>
+          </svg>
+          <h3 class="event-name">Sangeet</h3>
+          <p class="event-script">an evening of song</p>
+          <div class="event-rule"></div>
+          <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+          <span class="event-status">Coming Soon</span>
+        </article>
+
+        <article class="event-card reveal d4">
+          <span class="event-num">no. iii</span>
+          <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="24" cy="18" r="12"/><path d="M18 28l-4 14 10-6 10 6-4-14"/>
+          </svg>
+          <h3 class="event-name">The Wedding</h3>
+          <p class="event-script">the sacred vows</p>
+          <div class="event-rule"></div>
+          <p class="event-meta">August 2026<br>Venue · To Be Confirmed</p>
+          <span class="event-status is-confirmed">Confirmed</span>
+        </article>
+
+        <article class="event-card reveal d5">
+          <span class="event-num">no. iv</span>
+          <svg class="event-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M24 4v12m0 0l6-6m-6 6l-6-6M10 28l-4 16h36l-4-16"/><circle cx="24" cy="28" r="4"/>
+          </svg>
+          <h3 class="event-name">Reception</h3>
+          <p class="event-script">a grand celebration</p>
+          <div class="event-rule"></div>
+          <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+          <span class="event-status">Coming Soon</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANNER -->
+  <section class="section" id="planner">
+    <div class="section-inner">
+      <article class="gazette reveal">
+        <header class="gazette-head">
+          <p class="gazette-pre">✦ The Wedding Gazette ✦</p>
+          <h2 class="gazette-title">Planning the Perfect Day</h2>
+          <p class="gazette-deck">Every detail, beautifully organised &mdash; for the family who cares deeply.</p>
+        </header>
+
+        <div class="feature-grid">
+          <div class="feature-cell reveal d1">
+            <span class="feature-num">i &mdash; guests</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h4 class="feature-title">Guest List</h4>
+            <p class="feature-body">RSVPs, dietary needs &amp; party-size tracking.</p>
+          </div>
+          <div class="feature-cell reveal d2">
+            <span class="feature-num">ii &mdash; tasks</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <h4 class="feature-title">Task Board</h4>
+            <p class="feature-body">Categorised checklists with deadlines &amp; assignees.</p>
+          </div>
+          <div class="feature-cell reveal d3">
+            <span class="feature-num">iii &mdash; finance</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <h4 class="feature-title">Budget</h4>
+            <p class="feature-body">Track expenses in dollars &amp; rupees with payment logs.</p>
+          </div>
+          <div class="feature-cell reveal d4">
+            <span class="feature-num">iv &mdash; vendors</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 9h6M9 13h6M9 17h6"/></svg>
+            <h4 class="feature-title">Vendors</h4>
+            <p class="feature-body">Bookings, contacts &amp; contracts &mdash; all in one place.</p>
+          </div>
+          <div class="feature-cell reveal d5">
+            <span class="feature-num">v &mdash; venues</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <h4 class="feature-title">Venues</h4>
+            <p class="feature-body">Ceremony, sangeet, mehendi &amp; reception locations.</p>
+          </div>
+          <div class="feature-cell reveal d6">
+            <span class="feature-num">vi &mdash; dining</span>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11h16a1 1 0 0 1 1 1v.5a6.5 6.5 0 0 1-13 0V12a1 1 0 0 1 1-1z"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            <h4 class="feature-title">Food &amp; Menu</h4>
+            <p class="feature-body">Menu planning with guest-by-guest dietary notes.</p>
+          </div>
+        </div>
+
+        <div class="cta-center">
+          <a href="dashboard.html" class="cta-dark">
+            Enter the Dashboard
+            <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</div><!-- /content -->
+
+<!-- FOOTER -->
 <footer>
   <h2 class="ft-names">Akhila &nbsp;&amp;&nbsp; Akshay</h2>
   <p class="ft-detail">August 2026 · With Love</p>
@@ -1766,13 +1567,11 @@ a:focus-visible, button:focus-visible {
   <p class="ft-credit">Made with love for the most beautiful day</p>
 </footer>
 
-</div><!-- /page-wrap -->
-
 <script>
 /* ════════════════════════════════════════════════════
-   PETAL GENERATOR
+   PETALS
 ═══════════════════════════════════════════════════════ */
-(function makePetals() {
+(function petals() {
   const root = document.getElementById('petals');
   if (!root) return;
   const types = ['', '', 'rose'];
@@ -1800,8 +1599,8 @@ a:focus-visible, button:focus-visible {
     const diff = Math.max(0, target - Date.now());
     const D = Math.floor(diff / 86400000);
     const H = Math.floor((diff % 86400000) / 3600000);
-    const M = Math.floor((diff % 3600000)  / 60000);
-    const S = Math.floor((diff % 60000)    / 1000);
+    const M = Math.floor((diff % 3600000) / 60000);
+    const S = Math.floor((diff % 60000) / 1000);
     if (d) d.textContent = String(D).padStart(3,'0');
     if (h) h.textContent = String(H).padStart(2,'0');
     if (m) m.textContent = String(M).padStart(2,'0');
@@ -1812,22 +1611,58 @@ a:focus-visible, button:focus-visible {
 })();
 
 /* ════════════════════════════════════════════════════
-   SCROLL PROGRESS
+   THE BUTTERY ROLLING PANORAMA
+   - Target X computed from scroll position
+   - Current X lerps toward target every frame
+   - Result: smooth, flowing, never abrupt
 ═══════════════════════════════════════════════════════ */
-(function progress() {
+(function rollingPanorama() {
+  const panorama = document.getElementById('panorama');
   const fill = document.getElementById('progressFill');
-  if (!fill) return;
-  let scheduled = false;
-  function update() {
-    scheduled = false;
-    const sc = window.scrollY;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    fill.style.width = (Math.min(1, sc / Math.max(1, max)) * 100) + '%';
+  if (!panorama) return;
+
+  let targetX = 0;
+  let currentX = 0;
+  let panoramaWidth = panorama.offsetWidth;
+  let viewportWidth = window.innerWidth;
+  let maxTravel = panoramaWidth - viewportWidth;
+  let scrollMax = 1;
+  let scrollNow = 0;
+  let progress  = 0;
+
+  function recalcDims() {
+    panoramaWidth = panorama.offsetWidth;
+    viewportWidth = window.innerWidth;
+    maxTravel = panoramaWidth - viewportWidth;
+    scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    onScroll();
   }
-  window.addEventListener('scroll', () => {
-    if (!scheduled) { requestAnimationFrame(update); scheduled = true; }
-  }, { passive: true });
-  update();
+
+  function onScroll() {
+    scrollNow = window.scrollY;
+    progress  = Math.min(1, scrollNow / scrollMax);
+    targetX   = -progress * maxTravel;
+    if (fill) fill.style.width = (progress * 100) + '%';
+  }
+
+  // Lerp loop — runs every frame, smooths motion
+  const LERP = 0.085;
+  function frame() {
+    const delta = targetX - currentX;
+    if (Math.abs(delta) > 0.1) {
+      currentX += delta * LERP;
+      panorama.style.transform = 'translate3d(' + currentX.toFixed(2) + 'px, 0, 0)';
+    } else if (currentX !== targetX) {
+      currentX = targetX;
+      panorama.style.transform = 'translate3d(' + currentX.toFixed(2) + 'px, 0, 0)';
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', recalcDims);
+  recalcDims();
+  frame();
 })();
 
 /* ════════════════════════════════════════════════════
@@ -1846,7 +1681,7 @@ a:focus-visible, button:focus-visible {
 })();
 
 /* ════════════════════════════════════════════════════
-   CHAPTER NAV
+   NAV DOTS
 ═══════════════════════════════════════════════════════ */
 (function nav() {
   const dots = document.querySelectorAll('.dot');
