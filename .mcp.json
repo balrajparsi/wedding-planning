@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aidesigner": {
+      "command": "node",
+      "args": [
+        "D:\\Claude local\\aidesigner-workspace\\node_modules\\aidesigner\\dist\\mcp\\mcp\\server.js"
+      ],
+      "disabled": false
+    }
+  }
+}
