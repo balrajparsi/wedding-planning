@@ -3,1283 +3,1458 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Akhila & Akshay — August 2026</title>
+<title>Akhila &amp; Akshay · A Royal Wedding · August 2026</title>
+<meta name="description" content="The wedding of Akhila & Akshay — a celebration of love, tradition, and family.">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
+/* ════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Indian Royal Wedding
+   Pattern: Scroll-Triggered Storytelling (5 chapters)
+   Style:   Liquid Glass + warm regal palette
+   Type:    Great Vibes (script) · Cormorant Infant (serif) · Jost (sans)
+═══════════════════════════════════════════════════════════════ */
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --gold:      #b8860b;
-  --gold-lt:   #d4a017;
-  --gold-pale: #e8c84a;
-  --sand:      #c9a96e;
-  --parchment: #f5e6c8;
-  --parchment-dk: #e8d5a8;
-  --ink:       #1a0f00;
-  --crimson:   #7a1a1a;
-  --rust:      #8b3a1a;
-  --navy:      #1a3a52;
-  --serif:     'IM Fell English', 'Cormorant Garamond', Georgia, serif;
-  --display:   'Cormorant Garamond', Georgia, serif;
-  --sans:      'Poppins', sans-serif;
+  /* Indian Royal palette */
+  --maroon:        #6b1d2f;
+  --maroon-deep:   #4a1322;
+  --crimson:       #a51e2c;
+  --gold:          #b8860b;
+  --gold-bright:   #d4a017;
+  --gold-pale:     #f4d27a;
+  --gold-soft:     #ecc97a;
+  --sand:          #c9a96e;
+  --cream:         #f5e6c8;
+  --ivory:         #fdf8ee;
+  --parchment:     #efdfb8;
+  --ink:           #2a0a0a;
+  --ink-soft:      #4a1c1c;
+  --rose:          #d97a8e;
+
+  /* Fonts */
+  --font-script:  'Great Vibes', cursive;
+  --font-serif:   'Cormorant Infant', Georgia, serif;
+  --font-sans:    'Jost', system-ui, sans-serif;
+
+  /* Spacing rhythm (4/8) */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem;    --space-6: 1.5rem; --space-8: 2rem;
+  --space-12: 3rem;   --space-16: 4rem;  --space-24: 6rem;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(74,19,34,0.12);
+  --shadow-md: 0 12px 40px rgba(74,19,34,0.20);
+  --shadow-lg: 0 30px 80px rgba(0,0,0,0.45);
+  --shadow-gold: 0 0 60px rgba(212,160,23,0.25);
+
+  /* Motion */
+  --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--display);
-  background: #0a0600;
-  color: white;
+  font-family: var(--font-serif);
+  background: var(--maroon-deep);
+  color: var(--ivory);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ═══════════════════════════════════════
-   ROLLING BACKGROUND ENGINE
-   The fort panorama travels left-to-right
-   as you scroll top-to-bottom.
-═══════════════════════════════════════ */
-#rolling-stage {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .parallax-img { transform: none !important; }
 }
 
-/* The panoramic fort image — 3× wider than viewport */
-#rolling-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  /* wide enough to travel across: starts left, ends right */
-  width: 280vw;
-  height: 100%;
-  background:
-    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=3200&q=90&fit=crop')
-    left center / cover no-repeat;
-  will-change: transform;
-  transform: translateX(0);
-  transition: transform 0.05s linear;
-}
-
-/* Warm color wash to amplify the wedding vibe */
-#rolling-tint {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 30%, rgba(184,30,30,0.20), transparent 70%),
-    radial-gradient(ellipse 70% 70% at 75% 75%, rgba(212,160,23,0.22), transparent 75%),
-    linear-gradient(180deg, rgba(40,4,4,0.35) 0%, rgba(10,2,2,0.55) 100%);
-}
-
-/* Dark cinematic overlay — thinner at middle to show more image */
-#rolling-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.55) 100%);
-  /* Vignette edges */
-  box-shadow: inset 0 0 160px rgba(0,0,0,0.6);
-}
-
-/* Marigold garland — stays at top, gives the marriage vibe */
-.marigold-garland {
+/* ════════════════════════════════════════════════════════════
+   FIXED MARIGOLD GARLAND (top crown)
+═══════════════════════════════════════════════════════════════ */
+.garland {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 56px;
-  z-index: 50;
+  height: 64px;
+  z-index: 60;
   pointer-events: none;
   background:
-    radial-gradient(circle 14px at 20px 28px, #f4a200 0 8px, transparent 9px),
-    radial-gradient(circle 12px at 60px 22px, #d97706 0 7px, transparent 8px),
-    radial-gradient(circle 14px at 100px 30px, #f4a200 0 8px, transparent 9px),
-    radial-gradient(circle 12px at 140px 22px, #c2410c 0 7px, transparent 8px),
-    radial-gradient(circle 14px at 180px 28px, #f4a200 0 8px, transparent 9px),
-    radial-gradient(circle 12px at 220px 22px, #d97706 0 7px, transparent 8px),
-    radial-gradient(circle 14px at 260px 30px, #f4a200 0 8px, transparent 9px),
-    radial-gradient(circle 12px at 300px 22px, #c2410c 0 7px, transparent 8px),
-    linear-gradient(180deg, rgba(20,4,0,0.85), rgba(20,4,0,0.0));
+    /* marigolds */
+    radial-gradient(circle 13px at 24px 30px, #ff8c19 0 9px, transparent 10px),
+    radial-gradient(circle 11px at 64px 24px, #d65b14 0 7px, transparent 8px),
+    radial-gradient(circle 13px at 104px 32px, #ffa940 0 9px, transparent 10px),
+    radial-gradient(circle 10px at 144px 26px, #c0392b 0 7px, transparent 8px),
+    radial-gradient(circle 13px at 184px 30px, #ff8c19 0 9px, transparent 10px),
+    radial-gradient(circle 11px at 224px 24px, #d65b14 0 7px, transparent 8px),
+    radial-gradient(circle 13px at 264px 32px, #ffa940 0 9px, transparent 10px),
+    radial-gradient(circle 10px at 304px 26px, #c0392b 0 7px, transparent 8px),
+    /* string */
+    linear-gradient(180deg, rgba(28,4,4,0.95) 0%, rgba(28,4,4,0.6) 60%, transparent 100%);
   background-repeat: repeat-x;
-  background-size: 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 320px 56px, 100% 56px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  background-size: 340px 64px, 340px 64px, 340px 64px, 340px 64px, 340px 64px, 340px 64px, 340px 64px, 340px 64px, 100% 64px;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
 }
-.marigold-garland::after {
+.garland::after {
   content: '';
   position: absolute;
-  top: 14px; left: 0; right: 0;
+  top: 18px; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #b8860b 20%, #d4a017 50%, #b8860b 80%, transparent);
-  opacity: 0.7;
+  background: linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold-bright) 50%, var(--gold) 85%, transparent);
+  opacity: 0.85;
 }
 
-/* Film grain */
-#rolling-overlay::after {
+/* ════════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR (Storytelling pattern)
+═══════════════════════════════════════════════════════════════ */
+.progress-track {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(0,0,0,0.3);
+  z-index: 70;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-bright), var(--crimson), var(--gold-bright));
+  transition: width 0.05s linear;
+  box-shadow: 0 0 12px var(--gold-bright);
+}
+
+/* ════════════════════════════════════════════════════════════
+   CHAPTER NAV DOTS (right rail)
+═══════════════════════════════════════════════════════════════ */
+.chapter-nav {
+  position: fixed;
+  right: 1.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 65;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.chapter-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-pale);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.35s var(--ease-out);
+  position: relative;
+}
+.chapter-dot::before {
+  content: attr(data-label);
+  position: absolute;
+  right: 22px; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-pale);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.chapter-dot:hover::before { opacity: 0.85; }
+.chapter-dot.active {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  transform: scale(1.5);
+  box-shadow: 0 0 12px var(--gold-bright);
+}
+
+/* ════════════════════════════════════════════════════════════
+   FALLING PETALS (decorative — always present)
+═══════════════════════════════════════════════════════════════ */
+.petals { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.petal {
+  position: absolute;
+  width: 12px; height: 14px;
+  background: radial-gradient(ellipse at 30% 30%, #ffb066, #c0392b 80%);
+  border-radius: 60% 40% 60% 40%;
+  opacity: 0;
+  animation: petalDrift linear infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.petal.marigold { background: radial-gradient(circle, #ffa940 0%, #d65b14 70%); border-radius: 50%; width: 10px; height: 10px; }
+.petal.rose { background: radial-gradient(ellipse, #ff7b9c, #a51e2c); }
+
+@keyframes petalDrift {
+  0%   { top: -30px; opacity: 0; transform: rotate(0deg) translateX(0); }
+  8%   { opacity: 0.85; }
+  92%  { opacity: 0.55; }
+  100% { top: 110vh; opacity: 0; transform: rotate(540deg) translateX(80px); }
+}
+
+/* ════════════════════════════════════════════════════════════
+   SECTION 1 — INTRO HOOK (Hero with Fort)
+═══════════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6rem 1.5rem 3rem;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    /* Use local user image first; fall back to high-quality Unsplash Mehrangarh/Rajasthani fort */
+    url('/assets/images/fort.jpg'),
+    url('https://images.unsplash.com/photo-1599661046827-dacde6976549?w=2400&q=85'),
+    url('https://images.unsplash.com/photo-1477587458883-47145ed94245?w=2400&q=85');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: contrast(1.05) saturate(1.15);
+  transform: scale(1.05);
+  will-change: transform;
+}
+
+.hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
-  opacity: 0.4;
-}
-
-/* All page content sits above */
-.page-content {
-  position: relative;
-  z-index: 10;
-}
-
-/* ═══════════════════════════════════════
-   NAV DOTS (right side)
-═══════════════════════════════════════ */
-.nav-dots {
-  position: fixed;
-  right: 1.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 900;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.nav-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(184,134,11,0.5);
-  cursor: pointer;
-  transition: all 0.4s ease;
-  background: transparent;
-}
-
-.nav-dot.active {
-  background: var(--gold);
-  border-color: var(--gold);
-  transform: scale(1.5);
-}
-
-/* ═══════════════════════════════════════
-   SECTION 1 — HERO
-═══════════════════════════════════════ */
-#hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  position: relative;
-}
-
-/* Gold horizontal rule divider */
-.gold-rule {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-  margin: 1rem 0;
-}
-
-.rule-bar {
-  flex: 1;
-  max-width: 100px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.8));
-}
-
-.rule-bar.r { background: linear-gradient(90deg, rgba(212,160,23,0.8), transparent); }
-.rule-gem { color: var(--gold-lt); font-size: 0.65rem; letter-spacing: 6px; }
-
-/* Ornate border frame around hero text */
-.hero-frame {
-  max-width: 800px;
-  width: 100%;
-  border: 1px solid rgba(212,160,23,0.55);
-  padding: 3.5rem 4rem;
-  position: relative;
   background:
-    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(184,30,30,0.18), transparent 60%),
-    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(212,160,23,0.18), transparent 60%),
-    rgba(0,0,0,0.32);
-  backdrop-filter: blur(3px);
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(28,4,4,0.55) 80%),
+    linear-gradient(180deg, rgba(28,4,4,0.5) 0%, rgba(74,19,34,0.4) 50%, rgba(28,4,4,0.85) 100%);
+}
+
+/* Liquid Glass hero plate */
+.hero-glass {
+  position: relative;
+  z-index: 5;
+  max-width: 880px;
+  width: 100%;
+  padding: 4rem 4.5rem 3.5rem;
+  background:
+    linear-gradient(135deg, rgba(245,230,200,0.10), rgba(212,160,23,0.06)),
+    rgba(28,4,4,0.40);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(244,210,122,0.35);
+  border-radius: 2px;
   box-shadow:
     0 30px 80px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(212,160,23,0.08) inset,
-    0 0 80px rgba(212,160,23,0.08) inset;
+    0 0 0 1px rgba(244,210,122,0.08) inset,
+    0 0 100px rgba(212,160,23,0.12) inset;
+  text-align: center;
+  animation: heroRise 1.4s var(--ease-out) both;
 }
 
-.hero-frame::before {
+.hero-glass::before,
+.hero-glass::after {
   content: '';
   position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(184,134,11,0.15);
-  pointer-events: none;
+  width: 60px; height: 60px;
+  border: 1px solid var(--gold-bright);
+}
+.hero-glass::before { top: -8px; left: -8px; border-right: 0; border-bottom: 0; }
+.hero-glass::after  { bottom: -8px; right: -8px; border-left: 0; border-top: 0; }
+
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    filter: blur(0); }
 }
 
-.frame-corner {
-  position: absolute;
-  font-size: 1.2rem;
-  color: var(--gold-lt);
-  line-height: 1;
+.hero-symbol {
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  color: var(--gold-bright);
+  text-shadow: 0 0 30px rgba(212,160,23,0.6);
+  margin-bottom: 0.4rem;
+  display: block;
 }
 
-.fc-tl { top: -4px; left: -4px; }
-.fc-tr { top: -4px; right: -4px; }
-.fc-bl { bottom: -4px; left: -4px; }
-.fc-br { bottom: -4px; right: -4px; }
+.hero-sanskrit {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--gold-pale);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.8rem;
+}
 
 .hero-eyebrow {
-  font-family: var(--sans);
-  font-size: 0.58rem;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  color: rgba(212,160,23,0.8);
-  margin-bottom: 1.5rem;
-  opacity: 0;
-  animation: riseIn 1s 0.2s ease forwards;
-}
-
-.hero-names {
-  font-family: var(--serif);
-  font-size: clamp(3.2rem, 9vw, 6.5rem);
-  font-weight: 400;
-  background: linear-gradient(135deg, #fff5d6 0%, #f4d27a 30%, #e8b04a 55%, #c87a2f 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  filter: drop-shadow(0 4px 30px rgba(0,0,0,0.6)) drop-shadow(0 0 80px rgba(212,160,23,0.25));
-  margin: 0.2rem 0;
-  opacity: 0;
-  animation: riseIn 1.2s 0.5s ease forwards;
-}
-
-.hero-names .amp {
-  font-style: italic;
-  background: linear-gradient(135deg, #ff7b3a, #c0392b);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Ganesh / auspicious symbol above names */
-.hero-symbol {
-  display: block;
-  font-size: 2rem;
-  color: var(--gold-pale);
-  margin-bottom: 0.6rem;
-  opacity: 0;
-  animation: riseIn 1s 0.1s ease forwards;
-  text-shadow: 0 0 20px rgba(212,160,23,0.45);
-}
-
-.hero-date {
-  display: inline-block;
-  padding: 0.45rem 1.8rem;
-  border: 1px solid rgba(184,134,11,0.35);
-  background: rgba(184,134,11,0.08);
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   font-size: 0.62rem;
-  letter-spacing: 4px;
+  letter-spacing: 7px;
   text-transform: uppercase;
-  color: rgba(212,160,23,0.9);
-  margin: 0.8rem 0 1.8rem;
-  opacity: 0;
-  animation: riseIn 1s 0.8s ease forwards;
+  color: rgba(244,210,122,0.7);
+  margin-bottom: 1.6rem;
+}
+
+.gold-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem auto;
+  max-width: 360px;
+}
+.gold-divider .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+}
+.gold-divider .gem {
+  width: 8px; height: 8px;
+  background: var(--gold-bright);
+  transform: rotate(45deg);
+  box-shadow: 0 0 12px var(--gold-bright);
+}
+
+.couple-names {
+  font-family: var(--font-script);
+  font-size: clamp(4rem, 11vw, 8rem);
+  font-weight: 400;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff5d6 0%, #f4d27a 25%, #e8b04a 55%, #c87a2f 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5)) drop-shadow(0 0 40px rgba(212,160,23,0.3));
+  margin: 0.5rem 0;
+  letter-spacing: 0.01em;
+}
+.couple-names .amp {
+  font-style: italic;
+  background: linear-gradient(135deg, #ff9a3a, #c0392b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 0.7em;
+  margin: 0 0.15em;
+}
+
+.hero-date-chip {
+  display: inline-block;
+  margin: 1rem 0 2rem;
+  padding: 0.5rem 1.8rem;
+  border: 1px solid rgba(244,210,122,0.5);
+  background: rgba(212,160,23,0.08);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold-pale);
+  border-radius: 1px;
 }
 
 /* Countdown */
-.countdown-wrap {
-  opacity: 0;
-  animation: riseIn 1s 1s ease forwards;
-  margin-bottom: 2rem;
-}
-
-.cd-pre {
-  font-family: var(--sans);
-  font-size: 0.5rem;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-  margin-bottom: 1rem;
-}
-
 .countdown {
   display: flex;
   justify-content: center;
+  gap: 0;
+  margin: 1rem 0 2.4rem;
 }
-
 .cd-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 1.5rem;
-  border-right: 1px solid rgba(184,134,11,0.2);
+  flex: 1;
+  max-width: 110px;
+  padding: 0 0.8rem;
+  border-right: 1px solid rgba(244,210,122,0.18);
 }
-
 .cd-block:last-child { border-right: none; }
-
 .cd-num {
-  font-family: var(--serif);
-  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
   font-weight: 300;
-  color: white;
+  color: var(--ivory);
   line-height: 1;
-  text-shadow: 0 0 40px rgba(212,160,23,0.35);
   letter-spacing: -0.02em;
-  min-width: 2.5ch;
-  text-align: center;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 20px rgba(212,160,23,0.4);
 }
-
 .cd-lbl {
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 3px;
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--gold-lt);
-  margin-top: 0.5rem;
-  opacity: 0.75;
+  color: var(--gold-pale);
+  opacity: 0.85;
 }
 
-/* CTA */
-.hero-cta {
+/* Primary CTA — Liquid Glass button */
+.cta-primary {
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0.95rem 2.8rem;
-  border: 1px solid rgba(184,134,11,0.7);
-  color: var(--gold-pale);
-  font-family: var(--sans);
-  font-size: 0.62rem;
+  padding: 1rem 2.8rem;
+  background: linear-gradient(135deg, var(--gold), var(--crimson));
+  color: var(--ivory);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   text-transform: uppercase;
   text-decoration: none;
-  transition: all 0.5s ease;
+  border: 1px solid rgba(244,210,122,0.4);
+  border-radius: 2px;
   position: relative;
   overflow: hidden;
-  opacity: 0;
-  animation: riseIn 1s 1.2s ease forwards;
+  transition: all 0.4s var(--ease-out);
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(165,30,44,0.35), 0 0 40px rgba(212,160,23,0.15);
 }
-
-.hero-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, var(--gold), var(--rust));
-  transform: translateX(-101%);
-  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+.cta-primary:hover {
+  transform: translateY(-2px);
+  letter-spacing: 6px;
+  box-shadow: 0 14px 40px rgba(165,30,44,0.5), 0 0 60px rgba(212,160,23,0.25);
 }
+.cta-primary:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
+.cta-primary .arrow { transition: transform 0.3s var(--ease-out); }
+.cta-primary:hover .arrow { transform: translateX(6px); }
 
-.hero-cta:hover { color: white; border-color: transparent; letter-spacing: 5px; }
-.hero-cta:hover::before { transform: translateX(0); }
-.hero-cta span { position: relative; z-index: 1; }
-.hero-cta .arr { transition: transform 0.3s; }
-.hero-cta:hover .arr { transform: translateX(5px); }
-
-/* Petals */
-.petal {
-  position: fixed;
-  z-index: 5;
-  pointer-events: none;
-  font-size: 1.1rem;
-  animation: petalFall linear infinite;
-  opacity: 0;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
-}
-
-@keyframes petalFall {
-  0%   { top: -50px; opacity: 0; transform: rotate(0deg) translateX(0); }
-  5%   { opacity: 0.85; }
-  88%  { opacity: 0.55; }
-  100% { top: 105vh; opacity: 0; transform: rotate(600deg) translateX(60px); }
-}
-
-.p1  { left:3%;  animation-duration:9s;   animation-delay:0s;    font-size:0.85rem; }
-.p2  { left:12%; animation-duration:12s;  animation-delay:1.5s; }
-.p3  { left:22%; animation-duration:8.5s; animation-delay:0.8s;  font-size:1.1rem; }
-.p4  { left:34%; animation-duration:11s;  animation-delay:2.8s;  font-size:0.75rem; }
-.p5  { left:48%; animation-duration:9.5s; animation-delay:0.4s; }
-.p6  { left:61%; animation-duration:13s;  animation-delay:1.9s;  font-size:0.9rem; }
-.p7  { left:73%; animation-duration:8s;   animation-delay:0.6s; }
-.p8  { left:84%; animation-duration:10s;  animation-delay:3.3s;  font-size:1.1rem; }
-.p9  { left:93%; animation-duration:11.5s;animation-delay:1s;   font-size:0.8rem; }
-.p10 { left:42%; animation-duration:10.5s;animation-delay:4.5s; }
-.p11 { left:7%;  animation-duration:14s;  animation-delay:5.5s;  font-size:0.9rem; }
-.p12 { left:77%; animation-duration:9s;   animation-delay:3.8s;  font-size:1.2rem; }
-
-/* Scroll indicator */
+/* Scroll hint */
 .scroll-hint {
   position: absolute;
-  bottom: 2.5rem;
-  left: 50%;
+  bottom: 2rem; left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0;
-  animation: riseIn 1s 2s ease forwards;
-}
-
-.sh-text {
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.25);
-}
-
-.sh-chevrons span {
-  display: block;
-  width: 14px; height: 14px;
-  border-right: 1px solid rgba(184,134,11,0.5);
-  border-bottom: 1px solid rgba(184,134,11,0.5);
-  transform: rotate(45deg);
-  margin: -5px auto 0;
-  animation: chevPulse 1.6s infinite;
-}
-
-.sh-chevrons span:nth-child(2) { animation-delay: 0.2s; opacity: 0.6; }
-.sh-chevrons span:nth-child(3) { animation-delay: 0.4s; opacity: 0.3; }
-
-@keyframes chevPulse {
-  0%,100% { opacity: 0.8; } 50% { opacity: 0.15; }
-}
-
-/* ═══════════════════════════════════════
-   SECTION 2 — THE STORY
-   Semi-transparent parchment panel
-═══════════════════════════════════════ */
-#story {
-  min-height: 100vh;
-  display: flex;
-  align-items: stretch;
-}
-
-/* Left: transparent / shows rolling bg */
-.story-open {
-  flex: 1;
-  min-height: 100vh;
-}
-
-/* Right: frosted parchment panel */
-.story-panel {
-  width: 50%;
-  background: rgba(245,230,200,0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 7rem 4.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-left: 3px solid var(--gold);
-  position: relative;
-}
-
-/* Stamp corner marks */
-.story-panel::before {
-  content: '';
-  position: absolute;
-  top: 2rem; left: 2rem;
-  width: 36px; height: 36px;
-  border-top: 2px solid var(--sand);
-  border-left: 2px solid var(--sand);
-}
-
-.story-panel::after {
-  content: '';
-  position: absolute;
-  bottom: 2rem; right: 2rem;
-  width: 36px; height: 36px;
-  border-bottom: 2px solid var(--sand);
-  border-right: 2px solid var(--sand);
-}
-
-.s-eyebrow {
-  font-family: var(--sans);
-  font-size: 0.58rem;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: var(--rust);
-  margin-bottom: 1.2rem;
-}
-
-.s-heading {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  font-weight: 400;
-  color: var(--ink);
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(139,58,26,0.15);
-}
-
-.s-heading em { font-style: italic; color: var(--crimson); }
-
-.s-body {
-  font-family: var(--display);
-  font-size: 1.05rem;
-  line-height: 1.9;
-  color: rgba(26,15,0,0.62);
-  margin-bottom: 2rem;
-}
-
-/* Formal printed-card block */
-.inv-card {
-  background: rgba(232,213,168,0.6);
-  border: 1px solid var(--sand);
-  padding: 1.5rem 2rem;
-  position: relative;
-}
-
-.inv-card::before {
-  content: '— Invitation —';
-  position: absolute;
-  top: -0.6rem; left: 50%;
-  transform: translateX(-50%);
-  background: rgba(232,213,168,0.95);
-  padding: 0 0.8rem;
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--sand);
-  white-space: nowrap;
-}
-
-.inv-row { margin-bottom: 1rem; }
-.inv-row:last-child { margin-bottom: 0; }
-
-.inv-k {
-  display: block;
-  font-family: var(--sans);
-  font-size: 0.5rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--sand);
-  margin-bottom: 0.2rem;
-}
-
-.inv-v {
-  font-family: var(--serif);
-  font-size: 1.05rem;
-  color: var(--ink);
-}
-
-/* ═══════════════════════════════════════
-   SECTION 3 — EVENTS
-   Transparent / shows rolling bg
-═══════════════════════════════════════ */
-#events {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6rem 2rem;
-}
-
-.ev-header {
-  text-align: center;
-  margin-bottom: 3.5rem;
-}
-
-.ev-rule {
-  height: 1px;
-  max-width: 400px;
-  margin: 0 auto 1.5rem;
-  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.7), transparent);
-}
-
-.ev-title {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 400;
-  color: white;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
-}
-
-.ev-sub {
-  font-family: var(--sans);
+  z-index: 6;
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  color: var(--gold-pale);
+  font-family: var(--font-sans);
   font-size: 0.55rem;
   letter-spacing: 5px;
   text-transform: uppercase;
-  color: rgba(184,134,11,0.7);
-  margin-top: 0.5rem;
+  opacity: 0.6;
+  animation: gentleBob 2.2s ease-in-out infinite;
+}
+.scroll-hint .chev {
+  width: 14px; height: 14px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+@keyframes gentleBob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, 8px); }
 }
 
-/* Cards float over the rolling bg */
-.events-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  max-width: 1100px;
-  width: 100%;
-  background: rgba(184,134,11,0.15);
-  border: 1px solid rgba(184,134,11,0.2);
-}
-
-.ev-card {
-  background: rgba(10,6,0,0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 2.5rem 2rem;
-  transition: all 0.45s ease;
-  cursor: default;
+/* ════════════════════════════════════════════════════════════
+   CHAPTER WRAPPER — Each chapter has its own atmosphere
+═══════════════════════════════════════════════════════════════ */
+.chapter {
   position: relative;
+  min-height: 100vh;
+  padding: var(--space-24) var(--space-6);
+  overflow: hidden;
 }
 
-.ev-card::after {
+.chapter-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+.chapter-bg::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold-lt), transparent);
-  transform: scaleX(0);
-  transition: transform 0.4s ease;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(28,4,4,0.5), rgba(74,19,34,0.7));
 }
 
-.ev-card:hover { background: rgba(10,6,0,0.3); }
-.ev-card:hover::after { transform: scaleX(1); }
-
-.ev-num {
-  display: block;
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 3px;
-  color: rgba(184,134,11,0.4);
-  margin-bottom: 1.5rem;
+.chapter-inner {
+  position: relative;
+  z-index: 5;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
-.ev-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
-
-.ev-name {
-  font-family: var(--serif);
-  font-size: 1.7rem;
-  color: white;
-  font-weight: 400;
-  line-height: 1;
-}
-
-.ev-name-sub {
-  display: block;
-  font-family: var(--sans);
-  font-size: 0.52rem;
-  letter-spacing: 3px;
+.chapter-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  letter-spacing: 8px;
   text-transform: uppercase;
-  color: var(--gold-lt);
-  opacity: 0.7;
-  margin-top: 0.3rem;
-  margin-bottom: 1.5rem;
-}
-
-.ev-sep {
-  width: 30px; height: 1px;
-  background: rgba(184,134,11,0.3);
+  color: var(--gold-bright);
   margin-bottom: 1.2rem;
+  display: block;
+  text-align: center;
 }
 
-.ev-meta {
-  font-family: var(--sans);
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.38);
-  line-height: 1.8;
-  font-weight: 300;
+.chapter-title {
+  font-family: var(--font-script);
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  font-weight: 400;
+  background: linear-gradient(135deg, #fff5d6 0%, #f4d27a 50%, #c87a2f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-align: center;
+  margin-bottom: 0.6rem;
+  filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4));
 }
 
-.ev-badge {
-  display: inline-block;
-  margin-top: 1.2rem;
-  padding: 0.25rem 0.75rem;
-  border: 1px solid rgba(184,134,11,0.3);
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--gold-lt);
-}
-
-.ev-badge.confirmed {
-  border-color: rgba(184,134,11,0.7);
+.chapter-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
   color: var(--gold-pale);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
 
-/* ═══════════════════════════════════════
-   SECTION 4 — PLANNER (parchment)
-═══════════════════════════════════════ */
-#planner {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* ════════════════════════════════════════════════════════════
+   CHAPTER 1 — THE STORY (palace terrace bg, glass card)
+═══════════════════════════════════════════════════════════════ */
+#chapter-1 .chapter-bg {
+  background-image:
+    url('/assets/images/palace.jpg'),
+    url('https://images.unsplash.com/photo-1524613032530-449a5d94c285?w=2400&q=85'),
+    url('https://images.unsplash.com/photo-1568229862060-a6e8389ae08c?w=2400&q=85');
+}
+#chapter-1 .chapter-bg::after {
+  background: linear-gradient(135deg, rgba(28,4,4,0.7) 0%, rgba(74,19,34,0.4) 50%, rgba(28,4,4,0.75) 100%);
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
   align-items: center;
-  justify-content: center;
-  padding: 6rem 2rem;
-  position: relative;
 }
 
-/* Full-width frosted parchment */
-.planner-inner {
-  width: 100%;
-  max-width: 960px;
-  background: rgba(245,230,200,0.93);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 4rem 4rem 3.5rem;
-  border: 1px solid rgba(139,90,26,0.25);
+.story-text-glass {
+  padding: 3rem 3.2rem;
+  background: linear-gradient(135deg, rgba(253,248,238,0.92), rgba(245,230,200,0.88));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(184,134,11,0.35);
+  box-shadow: var(--shadow-md);
+  position: relative;
   color: var(--ink);
+}
+
+.story-text-glass::before {
+  content: '';
+  position: absolute;
+  top: 1.2rem; left: 1.2rem;
+  width: 28px; height: 28px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+.story-text-glass::after {
+  content: '';
+  position: absolute;
+  bottom: 1.2rem; right: 1.2rem;
+  width: 28px; height: 28px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+
+.story-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 0.8rem;
+}
+
+.story-headline {
+  font-family: var(--font-script);
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 400;
+  color: var(--maroon);
+  line-height: 1.05;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.01em;
+}
+
+.story-body {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(42,10,10,0.78);
+  margin-bottom: 1.4rem;
+}
+
+.story-card {
+  padding: 1.2rem 1.4rem;
+  border: 1px solid rgba(184,134,11,0.4);
+  background: rgba(232,213,168,0.5);
+}
+.story-card-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.5rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sand);
+  margin-bottom: 0.3rem;
+}
+.story-card-value {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--maroon);
+  font-weight: 500;
+}
+
+.story-image-frame {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background:
+    url('/assets/images/palace.jpg') center/cover,
+    url('https://images.unsplash.com/photo-1568229862060-a6e8389ae08c?w=1200&q=85') center/cover;
+}
+.story-image-frame::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(244,210,122,0.6);
+  pointer-events: none;
+}
+.story-image-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(28,4,4,0.6) 100%);
+  z-index: 1;
+}
+
+/* ════════════════════════════════════════════════════════════
+   CHAPTER 2 — THE CELEBRATIONS (events grid)
+═══════════════════════════════════════════════════════════════ */
+#chapter-2 {
+  background: linear-gradient(180deg, var(--maroon-deep) 0%, var(--maroon) 50%, var(--maroon-deep) 100%);
+}
+#chapter-2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle 2px at 25% 30%, rgba(212,160,23,0.4) 0, transparent 3px),
+    radial-gradient(circle 1px at 75% 70%, rgba(212,160,23,0.3) 0, transparent 2px),
+    radial-gradient(circle 1.5px at 60% 20%, rgba(212,160,23,0.35) 0, transparent 2px),
+    radial-gradient(circle 1px at 35% 85%, rgba(212,160,23,0.25) 0, transparent 2px);
+  background-size: 240px 240px;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  margin-top: 3rem;
+}
+
+.event-card {
+  position: relative;
+  padding: 2.4rem 1.8rem 2rem;
+  background: linear-gradient(135deg, rgba(253,248,238,0.10), rgba(212,160,23,0.05));
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(244,210,122,0.25);
+  border-radius: 2px;
+  transition: all 0.5s var(--ease-out);
+  overflow: hidden;
+}
+
+.event-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(244,210,122,0.6);
+  background: linear-gradient(135deg, rgba(253,248,238,0.18), rgba(212,160,23,0.10));
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4), var(--shadow-gold);
+}
+.event-card:hover::before { opacity: 1; }
+
+.event-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--gold-bright);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.event-icon {
+  width: 48px; height: 48px;
+  margin-bottom: 1.2rem;
+  color: var(--gold-bright);
+}
+.event-icon svg { width: 100%; height: 100%; }
+
+.event-name {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  color: var(--ivory);
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.event-tagline {
+  font-family: var(--font-script);
+  font-size: 1.1rem;
+  color: var(--gold-pale);
+  margin-bottom: 1.5rem;
+}
+
+.event-divider {
+  width: 30px; height: 1px;
+  background: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.event-meta {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: rgba(244,210,122,0.65);
+  line-height: 1.7;
+  margin-bottom: 1.4rem;
+}
+
+.event-status {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  border-radius: 1px;
+}
+.event-status.confirmed {
+  background: var(--gold);
+  color: var(--maroon-deep);
+}
+
+/* ════════════════════════════════════════════════════════════
+   CHAPTER 3 — THE MANDAP (full-bleed image showpiece)
+═══════════════════════════════════════════════════════════════ */
+#chapter-3 .chapter-bg {
+  background-image:
+    url('/assets/images/mandap.jpg'),
+    url('https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=2400&q=85'),
+    url('https://images.unsplash.com/photo-1519741497674-611481863552?w=2400&q=85');
+  background-position: center top;
+}
+#chapter-3 .chapter-bg::after {
+  background: linear-gradient(180deg, rgba(28,4,4,0.35) 0%, rgba(74,19,34,0.6) 100%);
+}
+
+.mandap-quote {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3.5rem 3rem;
+  background: rgba(28,4,4,0.45);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  border-top: 1px solid var(--gold-bright);
+  border-bottom: 1px solid var(--gold-bright);
   position: relative;
 }
 
-/* Vintage gazette header */
+.mandap-quote::before,
+.mandap-quote::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 20px;
+  background: var(--gold-bright);
+  left: 50%;
+}
+.mandap-quote::before { top: -20px; }
+.mandap-quote::after  { bottom: -20px; }
+
+.mandap-script {
+  font-family: var(--font-script);
+  font-size: clamp(3rem, 6vw, 4.6rem);
+  font-weight: 400;
+  background: linear-gradient(135deg, #fff5d6, #f4d27a 50%, #c87a2f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.05;
+  margin-bottom: 1.4rem;
+  letter-spacing: 0.01em;
+}
+
+.mandap-quote-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--gold-pale);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ════════════════════════════════════════════════════════════
+   CHAPTER 4 / CLIMAX — PLANNER (parchment, premium close)
+═══════════════════════════════════════════════════════════════ */
+#chapter-4 {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(212,160,23,0.18), transparent 70%),
+    linear-gradient(180deg, var(--maroon-deep), #1c0a0a);
+}
+
+.planner-card {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 4rem 3.5rem;
+  background: linear-gradient(180deg, var(--ivory), var(--parchment));
+  border: 1px solid rgba(184,134,11,0.4);
+  position: relative;
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.planner-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold));
+}
+
 .gazette-header {
   text-align: center;
-  padding-bottom: 1.5rem;
-  margin-bottom: 2.5rem;
-  border-bottom: 3px double rgba(139,58,26,0.25);
+  margin-bottom: 3rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 3px double rgba(184,134,11,0.35);
 }
 
-.gazette-tag {
-  font-family: var(--sans);
-  font-size: 0.5rem;
-  letter-spacing: 6px;
+.gazette-pre {
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 8px;
   text-transform: uppercase;
-  color: var(--rust);
-  opacity: 0.6;
+  color: var(--crimson);
+  opacity: 0.75;
   margin-bottom: 0.8rem;
 }
 
 .gazette-title {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 5vw, 3.6rem);
-  font-weight: 400;
-  color: var(--ink);
+  font-family: var(--font-script);
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  color: var(--maroon);
   line-height: 1;
+  margin-bottom: 0.5rem;
 }
 
 .gazette-deck {
-  font-family: var(--display);
+  font-family: var(--font-serif);
   font-style: italic;
   font-size: 1rem;
-  color: rgba(26,15,0,0.45);
-  margin-top: 0.7rem;
+  color: rgba(42,10,10,0.55);
 }
 
-/* Newspaper-style 3×2 grid */
-.feat-grid {
+.feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0;
-  border: 1px solid rgba(139,90,26,0.15);
-  margin-bottom: 2.5rem;
+  border: 1px solid rgba(184,134,11,0.2);
+  margin-bottom: 3rem;
 }
 
-.feat-col {
-  padding: 1.8rem;
-  border-right: 1px solid rgba(139,90,26,0.12);
-  border-bottom: 1px solid rgba(139,90,26,0.12);
-  transition: background 0.3s;
+.feature-cell {
+  padding: 1.8rem 1.6rem;
+  border-right: 1px solid rgba(184,134,11,0.15);
+  border-bottom: 1px solid rgba(184,134,11,0.15);
+  transition: background 0.3s ease;
 }
+.feature-cell:nth-child(3n) { border-right: none; }
+.feature-cell:nth-last-child(-n+3) { border-bottom: none; }
+.feature-cell:hover { background: rgba(184,134,11,0.06); }
 
-.feat-col:nth-child(3), .feat-col:nth-child(6) { border-right: none; }
-.feat-col:nth-child(4), .feat-col:nth-child(5), .feat-col:nth-child(6) { border-bottom: none; }
-.feat-col:hover { background: rgba(139,58,26,0.04); }
-
-.feat-num {
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 2px;
+.feature-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.7rem;
   color: var(--sand);
-  text-transform: uppercase;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.1em;
   display: block;
 }
 
-.feat-icon {
+.feature-icon {
   width: 36px; height: 36px;
-  border: 1px solid rgba(139,90,26,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
+  color: var(--gold);
   margin-bottom: 0.7rem;
 }
+.feature-icon svg { width: 100%; height: 100%; }
 
-.feat-title {
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  color: var(--ink);
+.feature-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
   font-weight: 600;
+  color: var(--maroon);
   margin-bottom: 0.4rem;
 }
 
-.feat-body {
-  font-family: var(--sans);
-  font-size: 0.68rem;
-  color: rgba(26,15,0,0.42);
+.feature-body {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
   line-height: 1.7;
+  color: rgba(42,10,10,0.6);
   font-weight: 300;
 }
 
 .planner-cta-wrap { text-align: center; }
 
-.planner-cta {
+.cta-dark {
   display: inline-flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 3.5rem;
-  background: var(--ink);
+  padding: 1.1rem 3.6rem;
+  background: var(--maroon-deep);
   color: var(--gold-pale);
-  font-family: var(--sans);
-  font-size: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
   font-weight: 500;
-  letter-spacing: 5px;
+  letter-spacing: 6px;
   text-transform: uppercase;
   text-decoration: none;
-  transition: all 0.4s ease;
-  border: 2px solid var(--ink);
+  border: 1px solid var(--maroon-deep);
+  border-radius: 1px;
+  transition: all 0.4s var(--ease-out);
+  cursor: pointer;
 }
-
-.planner-cta:hover {
-  background: transparent;
-  color: var(--ink);
-  letter-spacing: 6px;
+.cta-dark:hover {
+  background: var(--maroon);
+  letter-spacing: 7px;
+  box-shadow: 0 14px 40px rgba(74,19,34,0.4);
 }
+.cta-dark:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
+.cta-dark .arrow { transition: transform 0.3s ease; }
+.cta-dark:hover .arrow { transform: translateX(6px); }
 
-.planner-cta .arr { transition: transform 0.3s; }
-.planner-cta:hover .arr { transform: translateX(5px); }
-
-/* ═══════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    FOOTER
-═══════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════ */
 footer {
   position: relative;
-  z-index: 10;
-  background: rgba(10,6,0,0.9);
-  backdrop-filter: blur(8px);
+  background: var(--maroon-deep);
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 5rem 2rem 3rem;
+  z-index: 10;
+  border-top: 1px solid rgba(212,160,23,0.2);
 }
 
 footer::before {
   content: '';
   display: block;
-  width: 200px;
+  width: 240px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
   margin: 0 auto 3rem;
 }
 
 .ft-names {
-  font-family: var(--serif);
-  font-size: 3rem;
-  font-weight: 300;
-  color: rgba(255,255,255,0.65);
-  letter-spacing: 0.05em;
+  font-family: var(--font-script);
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  color: var(--gold-pale);
   margin-bottom: 0.5rem;
 }
-
-.ft-names span { color: var(--gold-lt); font-style: italic; }
+.ft-names .amp { color: var(--crimson); }
 
 .ft-detail {
-  font-family: var(--sans);
-  font-size: 0.52rem;
-  letter-spacing: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  letter-spacing: 6px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.18);
+  color: rgba(244,210,122,0.5);
   margin-bottom: 2rem;
 }
 
 .ft-orn {
-  font-size: 0.75rem;
-  color: rgba(184,134,11,0.22);
-  letter-spacing: 10px;
   display: block;
+  font-size: 0.85rem;
+  color: rgba(212,160,23,0.3);
+  letter-spacing: 14px;
   margin-bottom: 1.5rem;
 }
 
 .ft-credit {
-  font-family: var(--sans);
-  font-size: 0.58rem;
-  color: rgba(255,255,255,0.13);
-  letter-spacing: 1px;
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  color: rgba(244,210,122,0.25);
+  letter-spacing: 0.05em;
 }
 
-/* ═══════════════════════════════════════
-   REVEAL ANIMATION
-═══════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════════════════════ */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.85s ease, transform 0.85s ease;
+  transform: translateY(32px);
+  transition: opacity 0.95s var(--ease-out), transform 0.95s var(--ease-out);
 }
-
 .reveal.in { opacity: 1; transform: none; }
-.d1 { transition-delay: 0.1s; }
-.d2 { transition-delay: 0.22s; }
-.d3 { transition-delay: 0.34s; }
-.d4 { transition-delay: 0.46s; }
-.d5 { transition-delay: 0.58s; }
-.d6 { transition-delay: 0.7s; }
+.delay-1 { transition-delay: 0.08s; }
+.delay-2 { transition-delay: 0.18s; }
+.delay-3 { transition-delay: 0.28s; }
+.delay-4 { transition-delay: 0.38s; }
+.delay-5 { transition-delay: 0.48s; }
+.delay-6 { transition-delay: 0.58s; }
 
-@keyframes riseIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE (mobile-first scale-back)
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .events-grid     { grid-template-columns: repeat(2, 1fr); }
+  .feature-grid    { grid-template-columns: repeat(2, 1fr); }
+  .feature-cell:nth-child(3n) { border-right: 1px solid rgba(184,134,11,0.15); }
+  .feature-cell:nth-child(2n) { border-right: none; }
+  .feature-cell:nth-last-child(-n+3) { border-bottom: 1px solid rgba(184,134,11,0.15); }
+  .feature-cell:nth-last-child(-n+2) { border-bottom: none; }
 }
 
-/* ═══════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════ */
-@media (max-width: 900px) {
-  #story { flex-direction: column; }
-  .story-open { min-height: 45vh; flex: none; width: 100%; }
-  .story-panel { width: 100%; padding: 4rem 2.5rem; }
-  .events-row { grid-template-columns: repeat(2, 1fr); }
-  .feat-grid { grid-template-columns: repeat(2, 1fr); }
-  .feat-col:nth-child(2) { border-right: none; }
-  .feat-col:nth-child(3) { border-right: 1px solid rgba(139,90,26,0.12); }
-  .nav-dots { display: none; }
-  .planner-inner { padding: 3rem 2rem; }
+@media (max-width: 768px) {
+  .chapter-nav { display: none; }
+  .hero-glass  { padding: 2.5rem 1.6rem 2.2rem; }
+  .story-grid  { grid-template-columns: 1fr; gap: 2.5rem; }
+  .story-image-frame { aspect-ratio: 4/3; }
+  .planner-card { padding: 2.4rem 1.5rem 2rem; }
+  .events-grid  { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .feature-cell { border-right: none !important; border-bottom: 1px solid rgba(184,134,11,0.15) !important; }
+  .feature-cell:last-child { border-bottom: none !important; }
+  .chapter      { padding: 5rem 1.2rem; }
+  .cd-block     { padding: 0 0.4rem; }
+  .mandap-quote { padding: 2.4rem 1.6rem; }
 }
 
-@media (max-width: 600px) {
-  .hero-frame { padding: 2rem 1.5rem; }
-  .hero-names { font-size: 2.8rem; }
-  .events-row { grid-template-columns: 1fr; }
-  .feat-grid { grid-template-columns: 1fr; }
-  .feat-col { border-right: none !important; }
+/* Focus visibility for keyboard nav */
+a:focus-visible, button:focus-visible, .chapter-dot:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 4px;
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ ROLLING BACKGROUND ═══ -->
-<div id="rolling-stage">
-  <div id="rolling-img"></div>
-</div>
-<div id="rolling-tint"></div>
-<div id="rolling-overlay"></div>
+<!-- Marigold garland (crown of page) -->
+<div class="garland" aria-hidden="true"></div>
 
-<!-- ═══ MARIGOLD GARLAND (top) ═══ -->
-<div class="marigold-garland"></div>
+<!-- Scroll progress bar -->
+<div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
 
-<!-- ═══ PETALS (fixed, always visible) ═══ -->
-<span class="petal p1">🌸</span>
-<span class="petal p2">🌹</span>
-<span class="petal p3">✿</span>
-<span class="petal p4">🌺</span>
-<span class="petal p5">🌸</span>
-<span class="petal p6">🌹</span>
-<span class="petal p7">✿</span>
-<span class="petal p8">🌸</span>
-<span class="petal p9">🌺</span>
-<span class="petal p10">🌹</span>
-<span class="petal p11">🌸</span>
-<span class="petal p12">✿</span>
-
-<!-- ═══ NAV DOTS ═══ -->
-<nav class="nav-dots" id="navDots">
-  <div class="nav-dot active" onclick="goTo('hero')"></div>
-  <div class="nav-dot" onclick="goTo('story')"></div>
-  <div class="nav-dot" onclick="goTo('events')"></div>
-  <div class="nav-dot" onclick="goTo('planner')"></div>
+<!-- Chapter nav dots -->
+<nav class="chapter-nav" aria-label="Chapter navigation">
+  <button class="chapter-dot active" data-target="hero"      data-label="Welcome"      aria-label="Welcome"></button>
+  <button class="chapter-dot"        data-target="chapter-1" data-label="Our Story"    aria-label="Our Story"></button>
+  <button class="chapter-dot"        data-target="chapter-2" data-label="Celebrations" aria-label="Celebrations"></button>
+  <button class="chapter-dot"        data-target="chapter-3" data-label="The Mandap"   aria-label="The Mandap"></button>
+  <button class="chapter-dot"        data-target="chapter-4" data-label="Plan"         aria-label="Plan"></button>
 </nav>
 
-<!-- ═══════════════════════════════════
-     PAGE CONTENT
-═══════════════════════════════════ -->
-<div class="page-content">
+<!-- Drifting petals -->
+<div class="petals" aria-hidden="true" id="petals"></div>
 
-  <!-- HERO -->
-  <section id="hero">
-    <div class="hero-frame">
-      <span class="frame-corner fc-tl">✦</span>
-      <span class="frame-corner fc-tr">✦</span>
-      <span class="frame-corner fc-bl">✦</span>
-      <span class="frame-corner fc-br">✦</span>
+<!-- ══════════════════════════════════════
+     SECTION 1 — INTRO HOOK (Hero)
+══════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg parallax-img" id="heroBg"></div>
 
-      <span class="hero-symbol">☸</span>
-      <p class="hero-eyebrow">श्री गणेशाय नमः · You are cordially invited to celebrate the union of</p>
+  <div class="hero-glass">
+    <span class="hero-symbol">☸</span>
+    <p class="hero-sanskrit">श्री गणेशाय नमः</p>
+    <p class="hero-eyebrow">You are cordially invited</p>
 
-      <div class="gold-rule">
-        <span class="rule-bar"></span>
-        <span class="rule-gem">◆ ◆ ◆</span>
-        <span class="rule-bar r"></span>
-      </div>
+    <div class="gold-divider">
+      <span class="line"></span><span class="gem"></span><span class="line"></span>
+    </div>
 
-      <h1 class="hero-names">
-        Akhila <span class="amp">&amp;</span> Akshay
-      </h1>
+    <h1 class="couple-names">Akhila<span class="amp">&amp;</span>Akshay</h1>
 
-      <div class="gold-rule" style="animation-delay:.7s">
-        <span class="rule-bar"></span>
-        <span class="rule-gem">◆ ◆ ◆</span>
-        <span class="rule-bar r"></span>
-      </div>
+    <div class="gold-divider">
+      <span class="line"></span><span class="gem"></span><span class="line"></span>
+    </div>
 
-      <div class="hero-date">August 2026</div>
+    <span class="hero-date-chip">August · MMXXVI</span>
 
-      <div class="countdown-wrap">
-        <p class="cd-pre">Counting down to the celebration</p>
-        <div class="countdown">
-          <div class="cd-block">
-            <span class="cd-num" id="cd-d">000</span>
-            <span class="cd-lbl">Days</span>
+    <div class="countdown" aria-live="polite">
+      <div class="cd-block"><span class="cd-num" id="cd-d">000</span><span class="cd-lbl">Days</span></div>
+      <div class="cd-block"><span class="cd-num" id="cd-h">00</span><span class="cd-lbl">Hours</span></div>
+      <div class="cd-block"><span class="cd-num" id="cd-m">00</span><span class="cd-lbl">Min</span></div>
+      <div class="cd-block"><span class="cd-num" id="cd-s">00</span><span class="cd-lbl">Sec</span></div>
+    </div>
+
+    <a href="dashboard.html" class="cta-primary">
+      <span>Enter the Dashboard</span>
+      <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll to begin</span>
+    <span class="chev" aria-hidden="true"></span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CHAPTER 1 — OUR STORY
+══════════════════════════════════════ -->
+<section class="chapter" id="chapter-1">
+  <div class="chapter-bg parallax-img"></div>
+
+  <div class="chapter-inner">
+    <span class="chapter-eyebrow reveal">Chapter One</span>
+    <h2 class="chapter-title reveal delay-1">Our Story</h2>
+    <p class="chapter-subtitle reveal delay-2">Two souls, two families, one beautiful journey beginning under the August sky.</p>
+
+    <div class="story-grid">
+      <div class="story-text-glass reveal delay-3">
+        <p class="story-eyebrow">The Royal Union</p>
+        <h3 class="story-headline">Written in the<br>stars, lived on earth</h3>
+        <p class="story-body">
+          From the courtyards of family homes to the corridors of every shared dream, Akhila &amp; Akshay's love is a story woven slowly &mdash; thread by gold thread &mdash; into something that will hold for a lifetime. Their families invite you to witness this sacred union.
+        </p>
+        <div class="story-card">
+          <div style="margin-bottom: 1rem;">
+            <span class="story-card-label">The Date</span>
+            <span class="story-card-value">August 2026</span>
           </div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-h">00</span>
-            <span class="cd-lbl">Hours</span>
-          </div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-m">00</span>
-            <span class="cd-lbl">Minutes</span>
-          </div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-s">00</span>
-            <span class="cd-lbl">Seconds</span>
+          <div>
+            <span class="story-card-label">The Venue</span>
+            <span class="story-card-value">To Be Announced</span>
           </div>
         </div>
       </div>
 
-      <a href="dashboard.html" class="hero-cta">
-        <span>Enter Planning Dashboard</span>
-        <span class="arr">→</span>
-      </a>
+      <div class="story-image-frame reveal delay-4" aria-label="Palace terrace at sunset"></div>
     </div>
+  </div>
+</section>
 
-    <div class="scroll-hint">
-      <span class="sh-text">Scroll to explore</span>
-      <div class="sh-chevrons">
-        <span></span><span></span><span></span>
-      </div>
+<!-- ══════════════════════════════════════
+     CHAPTER 2 — THE CELEBRATIONS
+══════════════════════════════════════ -->
+<section class="chapter" id="chapter-2">
+  <div class="chapter-inner">
+    <span class="chapter-eyebrow reveal">Chapter Two</span>
+    <h2 class="chapter-title reveal delay-1">The Celebrations</h2>
+    <p class="chapter-subtitle reveal delay-2">Four sacred ceremonies &mdash; one eternal bond.</p>
+
+    <div class="events-grid">
+      <article class="event-card reveal delay-2">
+        <span class="event-num">I.</span>
+        <div class="event-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2c1 2 3 3 6 3-1 2-1 5 0 7-3 0-5 1-6 3-1-2-3-3-6-3 1-2 1-5 0-7 3 0 5-1 6-3z"/>
+            <circle cx="12" cy="12" r="1.5"/>
+          </svg>
+        </div>
+        <h3 class="event-name">Mehendi</h3>
+        <p class="event-tagline">A canvas of henna</p>
+        <div class="event-divider"></div>
+        <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="event-status">Coming Soon</span>
+      </article>
+
+      <article class="event-card reveal delay-3">
+        <span class="event-num">II.</span>
+        <div class="event-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <h3 class="event-name">Sangeet</h3>
+        <p class="event-tagline">An evening of song</p>
+        <div class="event-divider"></div>
+        <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="event-status">Coming Soon</span>
+      </article>
+
+      <article class="event-card reveal delay-4">
+        <span class="event-num">III.</span>
+        <div class="event-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="9" r="6"/><path d="M9 14l-2 7 5-3 5 3-2-7"/>
+          </svg>
+        </div>
+        <h3 class="event-name">The Wedding</h3>
+        <p class="event-tagline">The sacred vows</p>
+        <div class="event-divider"></div>
+        <p class="event-meta">August 2026<br>Venue · To Be Confirmed</p>
+        <span class="event-status confirmed">Confirmed</span>
+      </article>
+
+      <article class="event-card reveal delay-5">
+        <span class="event-num">IV.</span>
+        <div class="event-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v6m0 0l3-3m-3 3l-3-3M5 14l-2 8h18l-2-8"/><circle cx="12" cy="14" r="2"/>
+          </svg>
+        </div>
+        <h3 class="event-name">Reception</h3>
+        <p class="event-tagline">A grand celebration</p>
+        <div class="event-divider"></div>
+        <p class="event-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
+        <span class="event-status">Coming Soon</span>
+      </article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- STORY -->
-  <section id="story">
-    <div class="story-open"></div>
-    <div class="story-panel">
-      <p class="s-eyebrow reveal d1">The Royal Union</p>
-      <h2 class="s-heading reveal d2">A Love <em>Written</em><br>in the Stars</h2>
-      <p class="s-body reveal d3">
-        Two hearts, one extraordinary celebration. Akhila and Akshay invite their dearest family and friends to bear witness to their union — where ancient palaces mirror upon still waters and every stone tells a story of love enduring through ages.
+<!-- ══════════════════════════════════════
+     CHAPTER 3 — THE MANDAP
+══════════════════════════════════════ -->
+<section class="chapter" id="chapter-3" style="display:flex;align-items:center;">
+  <div class="chapter-bg parallax-img"></div>
+
+  <div class="chapter-inner" style="width: 100%;">
+    <div class="mandap-quote reveal">
+      <span class="chapter-eyebrow" style="color: var(--gold-bright); margin-bottom: 1.4rem;">Chapter Three</span>
+      <h2 class="mandap-script">Witness the<br>sacred union</h2>
+      <p class="mandap-quote-text">
+        Beneath the marigold canopy, before the eternal fire, two lives intertwine into one. Every petal, every chant, every flicker of flame &mdash; a vow made beneath the open sky.
       </p>
-      <div class="inv-card reveal d4">
-        <div class="inv-row">
-          <span class="inv-k">The Date</span>
-          <span class="inv-v">August 2026</span>
-        </div>
-        <div class="inv-row">
-          <span class="inv-k">The Venue</span>
-          <span class="inv-v">To Be Announced</span>
-        </div>
-      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- EVENTS -->
-  <section id="events">
-    <div class="ev-header">
-      <div class="ev-rule"></div>
-      <h2 class="ev-title reveal">The Celebrations</h2>
-      <p class="ev-sub reveal d1">Four sacred ceremonies · One eternal bond</p>
-      <div class="ev-rule" style="margin-top:1.5rem"></div>
-    </div>
-
-    <div class="events-row">
-      <div class="ev-card reveal d1">
-        <span class="ev-num">I.</span>
-        <span class="ev-icon">🌿</span>
-        <h3 class="ev-name">Mehendi</h3>
-        <span class="ev-name-sub">Henna Ceremony</span>
-        <div class="ev-sep"></div>
-        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-        <span class="ev-badge">Coming Soon</span>
-      </div>
-      <div class="ev-card reveal d2">
-        <span class="ev-num">II.</span>
-        <span class="ev-icon">🎶</span>
-        <h3 class="ev-name">Sangeet</h3>
-        <span class="ev-name-sub">Music &amp; Dance</span>
-        <div class="ev-sep"></div>
-        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-        <span class="ev-badge">Coming Soon</span>
-      </div>
-      <div class="ev-card reveal d3">
-        <span class="ev-num">III.</span>
-        <span class="ev-icon">💍</span>
-        <h3 class="ev-name">Wedding</h3>
-        <span class="ev-name-sub">Main Ceremony</span>
-        <div class="ev-sep"></div>
-        <p class="ev-meta">August 2026<br>Venue · To Be Confirmed</p>
-        <span class="ev-badge confirmed">Confirmed</span>
-      </div>
-      <div class="ev-card reveal d4">
-        <span class="ev-num">IV.</span>
-        <span class="ev-icon">🎊</span>
-        <h3 class="ev-name">Reception</h3>
-        <span class="ev-name-sub">Grand Celebration</span>
-        <div class="ev-sep"></div>
-        <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
-        <span class="ev-badge">Coming Soon</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- PLANNER -->
-  <section id="planner">
-    <div class="planner-inner">
-      <div class="gazette-header reveal">
-        <p class="gazette-tag">✦ The Wedding Gazette ✦</p>
+<!-- ══════════════════════════════════════
+     CHAPTER 4 / CLIMAX — THE PLANNER
+══════════════════════════════════════ -->
+<section class="chapter" id="chapter-4">
+  <div class="chapter-inner">
+    <div class="planner-card reveal">
+      <header class="gazette-header">
+        <p class="gazette-pre">✦ The Wedding Gazette ✦</p>
         <h2 class="gazette-title">Planning the Perfect Day</h2>
-        <p class="gazette-deck">Every detail, beautifully organised — for the family who cares deeply.</p>
+        <p class="gazette-deck">Every detail, beautifully organised &mdash; for the family who cares deeply.</p>
+      </header>
+
+      <div class="feature-grid">
+        <div class="feature-cell reveal delay-1">
+          <span class="feature-num">I &mdash; Guests</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Guest List</h4>
+          <p class="feature-body">RSVPs, dietary needs &amp; party-size tracking.</p>
+        </div>
+
+        <div class="feature-cell reveal delay-2">
+          <span class="feature-num">II &mdash; Tasks</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Task Board</h4>
+          <p class="feature-body">Categorised checklists with deadlines &amp; assignees.</p>
+        </div>
+
+        <div class="feature-cell reveal delay-3">
+          <span class="feature-num">III &mdash; Finance</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Budget</h4>
+          <p class="feature-body">Track expenses in dollars &amp; rupees with payment logs.</p>
+        </div>
+
+        <div class="feature-cell reveal delay-4">
+          <span class="feature-num">IV &mdash; Vendors</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18M5 21V8l7-4 7 4v13M9 9h6M9 13h6M9 17h6"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Vendors</h4>
+          <p class="feature-body">Bookings, contacts &amp; contracts &mdash; all in one place.</p>
+        </div>
+
+        <div class="feature-cell reveal delay-5">
+          <span class="feature-num">V &mdash; Venues</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Venues</h4>
+          <p class="feature-body">Ceremony, sangeet, mehendi &amp; reception locations.</p>
+        </div>
+
+        <div class="feature-cell reveal delay-6">
+          <span class="feature-num">VI &mdash; Dining</span>
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 11h16a1 1 0 0 1 1 1v.5a6.5 6.5 0 0 1-13 0V12a1 1 0 0 1 1-1z"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>
+            </svg>
+          </div>
+          <h4 class="feature-title">Food &amp; Menu</h4>
+          <p class="feature-body">Menu planning with guest-by-guest dietary notes.</p>
+        </div>
       </div>
 
-      <div class="feat-grid">
-        <div class="feat-col reveal d1">
-          <span class="feat-num">I — Guests</span>
-          <div class="feat-icon">👥</div>
-          <h4 class="feat-title">Guest List</h4>
-          <p class="feat-body">RSVP tracking, dietary requirements &amp; seating coordination.</p>
-        </div>
-        <div class="feat-col reveal d2">
-          <span class="feat-num">II — Tasks</span>
-          <div class="feat-icon">✅</div>
-          <h4 class="feat-title">Task Board</h4>
-          <p class="feat-body">Categorised checklists with deadlines, priorities &amp; assignments.</p>
-        </div>
-        <div class="feat-col reveal d3">
-          <span class="feat-num">III — Finance</span>
-          <div class="feat-icon">💰</div>
-          <h4 class="feat-title">Budget</h4>
-          <p class="feat-body">Expense tracking by category — budgeted vs. actual.</p>
-        </div>
-        <div class="feat-col reveal d4">
-          <span class="feat-num">IV — Vendors</span>
-          <div class="feat-icon">🏢</div>
-          <h4 class="feat-title">Vendors</h4>
-          <p class="feat-body">Booking status, contacts &amp; contracts for every provider.</p>
-        </div>
-        <div class="feat-col reveal d5">
-          <span class="feat-num">V — Venues</span>
-          <div class="feat-icon">📍</div>
-          <h4 class="feat-title">Venues</h4>
-          <p class="feat-body">Ceremony, sangeet, mehendi &amp; reception management.</p>
-        </div>
-        <div class="feat-col reveal d6">
-          <span class="feat-num">VI — Dining</span>
-          <div class="feat-icon">🍽️</div>
-          <h4 class="feat-title">Food &amp; Menu</h4>
-          <p class="feat-body">Menu planning with per-guest dietary accommodations.</p>
-        </div>
-      </div>
-
-      <div class="planner-cta-wrap reveal d4">
-        <a href="dashboard.html" class="planner-cta">
+      <div class="planner-cta-wrap">
+        <a href="dashboard.html" class="cta-dark">
           Enter the Dashboard
-          <span class="arr">→</span>
+          <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-</div><!-- /page-content -->
-
-<!-- FOOTER -->
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
 <footer>
-  <h2 class="ft-names">Akhila <span>&amp;</span> Akshay</h2>
+  <h2 class="ft-names">Akhila <span class="amp">&amp;</span> Akshay</h2>
   <p class="ft-detail">August 2026 · With Love</p>
-  <span class="ft-orn">✦ &nbsp; ✦ &nbsp; ✦</span>
+  <span class="ft-orn">✦ ✦ ✦</span>
   <p class="ft-credit">Made with love for the most beautiful day</p>
 </footer>
 
 <script>
-/* ══════════════════════════════════
-   THE ROLLING BACKGROUND ENGINE
-   Fort panorama travels as you scroll:
-   — Starts: dome/left side of fort visible
-   — Ends:   right wing of fort visible
-   Direction: left → right (image pans right)
-══════════════════════════════════ */
-const rollingImg = document.getElementById('rolling-img');
+/* ════════════════════════════════════════════════════
+   PETAL GENERATOR
+═══════════════════════════════════════════════════════ */
+(function makePetals() {
+  const root = document.getElementById('petals');
+  if (!root) return;
+  const types = ['', 'marigold', 'marigold', 'rose'];
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('span');
+    p.className = 'petal ' + types[i % types.length];
+    p.style.left = (Math.random() * 100) + '%';
+    p.style.animationDuration = (7 + Math.random() * 9) + 's';
+    p.style.animationDelay = (Math.random() * 12) + 's';
+    p.style.transform = 'scale(' + (0.7 + Math.random() * 0.8) + ')';
+    root.appendChild(p);
+  }
+})();
 
-function updateRolling() {
-  const scrollTop   = window.scrollY;
-  const maxScroll   = document.documentElement.scrollHeight - window.innerHeight;
-  const progress    = Math.min(1, scrollTop / maxScroll);
+/* ════════════════════════════════════════════════════
+   COUNTDOWN
+═══════════════════════════════════════════════════════ */
+(function countdown() {
+  const target = new Date('2026-08-15T10:00:00+05:30').getTime();
+  const d = document.getElementById('cd-d');
+  const h = document.getElementById('cd-h');
+  const m = document.getElementById('cd-m');
+  const s = document.getElementById('cd-s');
+  function tick() {
+    const diff = Math.max(0, target - Date.now());
+    const D = Math.floor(diff / 86400000);
+    const H = Math.floor((diff % 86400000) / 3600000);
+    const M = Math.floor((diff % 3600000)  / 60000);
+    const S = Math.floor((diff % 60000)    / 1000);
+    if (d) d.textContent = String(D).padStart(3,'0');
+    if (h) h.textContent = String(H).padStart(2,'0');
+    if (m) m.textContent = String(M).padStart(2,'0');
+    if (s) s.textContent = String(S).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
 
-  // Image is 280vw wide. Viewport is 100vw.
-  // So we can travel 180vw horizontally.
-  // At progress=0: translateX(0)   — left/dome side shows
-  // At progress=1: translateX(-180vw) — right side of fort shows
-  const maxTravel   = -(window.innerWidth * 1.8);
-  const xPos        = progress * maxTravel;
+/* ════════════════════════════════════════════════════
+   PARALLAX + SCROLL PROGRESS
+═══════════════════════════════════════════════════════ */
+(function parallax() {
+  const fill = document.getElementById('progressFill');
+  const imgs = document.querySelectorAll('.parallax-img');
+  let scheduled = false;
+  function update() {
+    scheduled = false;
+    const sc = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (fill) fill.style.width = (Math.min(1, sc / Math.max(1, max)) * 100) + '%';
 
-  // Slight vertical drift for depth
-  const yPos        = progress * 40;
+    imgs.forEach(img => {
+      const rect = img.parentElement.getBoundingClientRect();
+      const center = rect.top + rect.height / 2 - window.innerHeight / 2;
+      const offset = -center * 0.15;
+      img.style.transform = 'translateY(' + offset.toFixed(1) + 'px) scale(1.08)';
+    });
+  }
+  window.addEventListener('scroll', () => {
+    if (!scheduled) { requestAnimationFrame(update); scheduled = true; }
+  }, { passive: true });
+  update();
+})();
 
-  rollingImg.style.transform = `translate(${xPos}px, ${yPos}px)`;
-}
-
-window.addEventListener('scroll', updateRolling, { passive: true });
-window.addEventListener('resize', updateRolling, { passive: true });
-updateRolling();
-
-/* ══ COUNTDOWN ══ */
-function tick() {
-  const target = new Date('2026-08-15T10:00:00+05:30');
-  const now    = new Date();
-  const diff   = Math.max(0, target - now);
-
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000)  / 60000);
-  const s = Math.floor((diff % 60000)    / 1000);
-
-  document.getElementById('cd-d').textContent = String(d).padStart(3,'0');
-  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
-  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
-  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
-}
-
-tick();
-setInterval(tick, 1000);
-
-/* ══ SCROLL REVEALS ══ */
-const io = new IntersectionObserver(entries =>
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
-  { threshold: 0.12 }
-);
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-/* ══ NAV DOTS ══ */
-const sections = ['hero','story','events','planner'];
-const dots     = document.querySelectorAll('.nav-dot');
-
-function goTo(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-}
-
-const sio = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting && e.intersectionRatio >= 0.4) {
-      const i = sections.indexOf(e.target.id);
-      if (i !== -1) {
-        dots.forEach(d => d.classList.remove('active'));
-        dots[i].classList.add('active');
+/* ════════════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════════════ */
+(function revealOnScroll() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
       }
-    }
-  });
-}, { threshold: 0.4 });
+    });
+  }, { threshold: 0.14 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
 
-sections.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) sio.observe(el);
-});
+/* ════════════════════════════════════════════════════
+   CHAPTER NAV
+═══════════════════════════════════════════════════════ */
+(function chapterNav() {
+  const dots = document.querySelectorAll('.chapter-dot');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = document.getElementById(dot.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const sections = [...dots].map(d => document.getElementById(d.dataset.target)).filter(Boolean);
+  const sio = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio >= 0.4) {
+        const id = e.target.id;
+        dots.forEach(d => d.classList.toggle('active', d.dataset.target === id));
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => sio.observe(s));
+})();
 </script>
 </body>
 </html>
