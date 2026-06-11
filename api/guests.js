@@ -32,6 +32,10 @@ module.exports = async function handler(req, res) {
       return handleBulkInvite(req, res);
     }
 
+    if (req.method === 'POST' && (req.url.includes('action=import') || req.url.includes('/import'))) {
+      return handleImportGuests(req, res);
+    }
+
     if (req.method === 'POST' && req.url.includes('/guests') && !req.url.includes('/export')) {
       return handleAddGuest(req, res);
     }
@@ -123,7 +127,7 @@ async function handleListGuests(req, res) {
 }
 
 async function handleAddGuest(req, res) {
-  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes } = req.body;
+  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, events } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'Guest name required' });
@@ -140,6 +144,7 @@ async function handleAddGuest(req, res) {
     partySize: partySize || 1,
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
+    events: Array.isArray(events) ? events : [],
     rsvpStatus: 'pending',
     invitedDate: new Date().toISOString(),
     rsvpDate: null,
@@ -172,7 +177,7 @@ async function handleUpdateGuest(req, res) {
   const guest = guests[guestIndex];
 
   // Update fields
-  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, rsvpStatus } = req.body;
+  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, rsvpStatus, events } = req.body;
 
   if (name !== undefined) guest.name = name;
   if (email !== undefined) guest.email = email;
@@ -181,6 +186,7 @@ async function handleUpdateGuest(req, res) {
   if (partySize !== undefined) guest.partySize = partySize;
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
+  if (events !== undefined) guest.events = Array.isArray(events) ? events : [];
 
   if (rsvpStatus !== undefined) {
     guest.rsvpStatus = rsvpStatus;
@@ -196,6 +202,141 @@ async function handleUpdateGuest(req, res) {
   await kv.set(guestsKey, guests);
 
   res.json(guest);
+}
+
+async function handleImportGuests(req, res) {
+  const incoming = Array.isArray(req.body?.guests) ? req.body.guests : [];
+
+  if (incoming.length === 0) {
+    return res.status(400).json({ error: 'No guests to import' });
+  }
+
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
+  const guests = (await kv.get(guestsKey)) || [];
+  const now = new Date().toISOString();
+  const importedGuests = [];
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  incoming.forEach(rawGuest => {
+    const guestData = normalizeImportedGuest(rawGuest);
+    if (!guestData.name) {
+      skipped++;
+      return;
+    }
+
+    const existingIndex = guests.findIndex(existing => guestMatches(existing, guestData));
+
+    if (existingIndex !== -1) {
+      const current = guests[existingIndex];
+      guests[existingIndex] = {
+        ...current,
+        ...compactGuestFields(guestData),
+        id: current.id,
+        weddingId: current.weddingId || WEDDING_ID,
+        rsvpStatus: guestData.rsvpStatus || current.rsvpStatus || 'pending',
+        invitedDate: current.invitedDate || now,
+        createdAt: current.createdAt || now,
+        updatedAt: now
+      };
+      importedGuests.push(guests[existingIndex]);
+      updated++;
+      return;
+    }
+
+    const guest = {
+      id: crypto.randomBytes(8).toString('hex'),
+      weddingId: WEDDING_ID,
+      name: guestData.name,
+      email: guestData.email || '',
+      phone: guestData.phone || '',
+      relationship: guestData.relationship || '',
+      partySize: guestData.partySize || 1,
+      dietaryRestrictions: guestData.dietaryRestrictions || 'none',
+      events: guestData.events || [],
+      notes: guestData.notes || '',
+      rsvpStatus: guestData.rsvpStatus || 'pending',
+      invitedDate: now,
+      rsvpDate: null,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    guests.push(guest);
+    importedGuests.push(guest);
+    added++;
+  });
+
+  await kv.set(guestsKey, guests);
+
+  res.status(200).json({
+    success: true,
+    added,
+    updated,
+    skipped,
+    importedCount: importedGuests.length,
+    guests: importedGuests
+  });
+}
+
+function normalizeImportedGuest(rawGuest = {}) {
+  const events = Array.isArray(rawGuest.events)
+    ? rawGuest.events.filter(Boolean)
+    : String(rawGuest.events || '').split(/[|;,]/).map(e => e.trim()).filter(Boolean);
+
+  return {
+    name: String(rawGuest.name || '').trim(),
+    email: String(rawGuest.email || '').trim(),
+    phone: String(rawGuest.phone || '').trim(),
+    relationship: String(rawGuest.relationship || '').trim(),
+    partySize: Math.max(1, parseInt(rawGuest.partySize, 10) || 1),
+    dietaryRestrictions: normalizeDietary(rawGuest.dietaryRestrictions),
+    events,
+    notes: String(rawGuest.notes || '').trim(),
+    rsvpStatus: normalizeRsvpStatus(rawGuest.rsvpStatus)
+  };
+}
+
+function compactGuestFields(guest) {
+  return Object.fromEntries(
+    Object.entries(guest).filter(([, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== undefined && value !== null && value !== '';
+    })
+  );
+}
+
+function guestMatches(existing, guest) {
+  const existingEmail = String(existing.email || '').trim().toLowerCase();
+  const guestEmail = String(guest.email || '').trim().toLowerCase();
+  if (existingEmail && guestEmail && existingEmail === guestEmail) return true;
+
+  const existingPhone = String(existing.phone || '').replace(/\D/g, '');
+  const guestPhone = String(guest.phone || '').replace(/\D/g, '');
+  if (existingPhone && guestPhone && existingPhone === guestPhone) return true;
+
+  return String(existing.name || '').trim().toLowerCase() === String(guest.name || '').trim().toLowerCase();
+}
+
+function normalizeDietary(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return 'none';
+  if (text.includes('non') || text.includes('chicken') || text.includes('meat')) return 'non-vegetarian';
+  if (text.includes('vegan')) return 'vegan';
+  if (text.includes('veg')) return 'vegetarian';
+  if (text.includes('gluten')) return 'gluten-free';
+  if (text.includes('apane') || text.includes('family')) return 'apane';
+  if (text === 'none' || text === 'no' || text === 'na' || text === 'n/a') return 'none';
+  return 'other';
+}
+
+function normalizeRsvpStatus(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (['accepted', 'accept', 'yes', 'attending', 'confirmed'].includes(text)) return 'accepted';
+  if (['declined', 'decline', 'no', 'not attending'].includes(text)) return 'declined';
+  if (['maybe', 'tentative'].includes(text)) return 'maybe';
+  return 'pending';
 }
 
 async function handleDeleteGuest(req, res) {
@@ -362,7 +503,7 @@ async function handleExportGuests(req, res) {
 
   // Generate CSV
   const csv = [
-    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
+    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
   ];
 
   guests.forEach(g => {
@@ -373,6 +514,7 @@ async function handleExportGuests(req, res) {
       `"${g.relationship || ''}"`,
       g.partySize || 1,
       `"${g.dietaryRestrictions || ''}"`,
+      `"${(g.events || []).join('|')}"`,
       g.rsvpStatus,
       g.rsvpDate ? new Date(g.rsvpDate).toLocaleDateString('en-US', { timeZone: 'America/Chicago' }) : '',
       `"${g.notes || ''}"`

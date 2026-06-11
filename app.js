@@ -212,7 +212,7 @@ class WeddingPlanningApp {
 
     mainContent.innerHTML = `
       <div class="dashboard-hero">
-        <div class="hero-ornament">❧</div>
+        <div class="hero-ornament">ॐ</div>
         <h1 class="hero-couple-name">${coupleName}</h1>
         <p class="hero-tagline">${weddingDateStr} &nbsp;·&nbsp; ${location}</p>
         <div class="hero-divider"><span></span><span class="hero-diamond">◆</span><span></span></div>

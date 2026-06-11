@@ -64,6 +64,16 @@ const guestListPage = {
     // Bulk invite
     view.querySelector('.guest-bulk-invite-btn')?.addEventListener('click', () => this.openBulkInviteModal());
 
+    // Import guest list
+    view.querySelector('.guest-import-btn')?.addEventListener('click', () => {
+      const input = view.querySelector('.guest-import-input');
+      if (!input) return;
+      input.value = '';
+      input.click();
+    });
+
+    view.querySelector('.guest-import-input')?.addEventListener('change', (e) => this.importGuestFile(e));
+
     // Reset all (testing)
     view.querySelector('.guest-reset-btn')?.addEventListener('click', () => this.resetAllGuests());
   },
@@ -368,6 +378,269 @@ const guestListPage = {
     } catch (err) {
       showNotification('Failed to export guests', 'error');
     }
+  },
+
+  async importGuestFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const guests = this.parseGuestImport(text, file.name);
+
+      if (guests.length === 0) {
+        showNotification('No usable guests found in that file', 'error');
+        return;
+      }
+
+      const confirmed = confirm(`Import ${guests.length} guests from ${file.name}? Existing matches by email, phone, or name will be updated.`);
+      if (!confirmed) return;
+
+      const response = await apiCall('/api/guests?action=import', 'POST', { guests });
+      showNotification(`Imported ${response.added || 0} new, updated ${response.updated || 0}, skipped ${response.skipped || 0}`, 'success');
+      await this.loadGuests();
+      this.render();
+    } catch (err) {
+      console.error('Guest import failed:', err);
+      showNotification('Failed to import guest list', 'error');
+    }
+  },
+
+  parseGuestImport(text, fileName = '') {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return [];
+
+    const isCsv = /\.csv$/i.test(fileName) || this.looksLikeCsv(trimmed);
+    const rows = isCsv ? this.parseCsvRows(trimmed) : this.parseTextRows(trimmed);
+
+    if (rows.length === 0) return [];
+
+    if (isCsv) {
+      return this.mapStructuredRows(rows);
+    }
+
+    return rows.map(row => this.inferGuestFromParts(row)).filter(g => g.name);
+  },
+
+  looksLikeCsv(text) {
+    const firstLine = text.split(/\r?\n/).find(line => line.trim()) || '';
+    return /[,;\t|]/.test(firstLine);
+  },
+
+  parseCsvRows(text) {
+    const delimiter = this.detectDelimiter(text);
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const next = text[i + 1];
+
+      if (char === '"' && inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (!inQuotes && char === delimiter) {
+        row.push(cell.trim());
+        cell = '';
+      } else if (!inQuotes && (char === '\n' || char === '\r')) {
+        if (char === '\r' && next === '\n') i++;
+        row.push(cell.trim());
+        if (row.some(Boolean)) rows.push(row);
+        row = [];
+        cell = '';
+      } else {
+        cell += char;
+      }
+    }
+
+    row.push(cell.trim());
+    if (row.some(Boolean)) rows.push(row);
+    return rows;
+  },
+
+  detectDelimiter(text) {
+    const firstLine = text.split(/\r?\n/).find(line => line.trim()) || '';
+    return [',', '\t', ';', '|']
+      .map(delimiter => ({ delimiter, count: firstLine.split(delimiter).length - 1 }))
+      .sort((a, b) => b.count - a.count)[0]?.delimiter || ',';
+  },
+
+  parseTextRows(text) {
+    return text
+      .split(/\r?\n/)
+      .map(line => line.replace(/^[-*•\d.)\s]+/, '').trim())
+      .filter(Boolean)
+      .map(line => line.split(/\s*(?:,|;|\||\t| - | – | — )\s*/).filter(Boolean));
+  },
+
+  mapStructuredRows(rows) {
+    const header = rows[0].map(value => this.normalizeHeader(value));
+    const hasHeader = header.some(value => ['name', 'email', 'phone', 'relationship', 'partySize', 'dietaryRestrictions', 'events', 'notes', 'rsvpStatus'].includes(value));
+    const dataRows = hasHeader ? rows.slice(1) : rows;
+
+    return dataRows
+      .map(row => hasHeader ? this.guestFromHeaderRow(row, header) : this.inferGuestFromParts(row))
+      .filter(g => g.name);
+  },
+
+  normalizeHeader(value) {
+    const key = String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const map = {
+      guest: 'name',
+      guestname: 'name',
+      fullname: 'name',
+      name: 'name',
+      email: 'email',
+      emailaddress: 'email',
+      mail: 'email',
+      phone: 'phone',
+      phonenumber: 'phone',
+      mobile: 'phone',
+      contact: 'phone',
+      relationship: 'relationship',
+      relation: 'relationship',
+      side: 'relationship',
+      group: 'relationship',
+      familyside: 'relationship',
+      partysize: 'partySize',
+      guests: 'partySize',
+      count: 'partySize',
+      plusones: 'partySize',
+      dietary: 'dietaryRestrictions',
+      diet: 'dietaryRestrictions',
+      meal: 'dietaryRestrictions',
+      food: 'dietaryRestrictions',
+      dietaryrestrictions: 'dietaryRestrictions',
+      events: 'events',
+      event: 'events',
+      ceremonies: 'events',
+      rsvp: 'rsvpStatus',
+      rsvpstatus: 'rsvpStatus',
+      status: 'rsvpStatus',
+      notes: 'notes',
+      note: 'notes'
+    };
+    return map[key] || key;
+  },
+
+  guestFromHeaderRow(row, header) {
+    const data = {};
+    header.forEach((field, index) => {
+      if (!field) return;
+      data[field] = row[index] || '';
+    });
+
+    return this.normalizeImportedGuest(data);
+  },
+
+  inferGuestFromParts(parts) {
+    const cleanParts = parts.map(part => String(part || '').trim()).filter(Boolean);
+    const text = cleanParts.join(' ');
+    const singleLine = cleanParts.length === 1;
+    const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || '';
+    const phone = text.match(/(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}/)?.[0] || '';
+    const partyMatch = singleLine
+      ? text.match(/\b(?:party|size|count|guests?)\s*[:=]?\s*(\d+)\b/i)
+      : null;
+    const partySize = partyMatch?.[1]
+      || cleanParts.find(part => /^(party\s*)?(size|count)?\s*[:=]?\s*\d+$/i.test(part))?.match(/\d+/)?.[0]
+      || cleanParts.find(part => /^\d+$/.test(part));
+    let dietary = '';
+    if (singleLine) {
+      if (/\b(non[-\s]?veg(?:etarian)?|meat|chicken)\b/i.test(text)) dietary = 'non-vegetarian';
+      else if (/\bvegan\b/i.test(text)) dietary = 'vegan';
+      else if (/\b(vegetarian|veg)\b/i.test(text)) dietary = 'vegetarian';
+      else if (/\bgluten[-\s]?free\b/i.test(text)) dietary = 'gluten-free';
+      else if (/\b(apane|family)\b/i.test(text)) dietary = 'apane';
+      else if (/\b(no dietary|none)\b/i.test(text)) dietary = 'none';
+    } else {
+      dietary = cleanParts.find(part => /(veg|vegan|non|meat|chicken|gluten|apane|family|none|diet)/i.test(part)) || '';
+    }
+    const rsvpStatus = cleanParts.find(part => /(accepted|confirmed|pending|declined|maybe|attending|not attending)/i.test(part)) || '';
+    const eventWords = text.match(/\b(pre-wedding|wedding|reception|sangeet|mehendi|haldi|ceremony|cocktail)\b/gi) || [];
+    const events = singleLine
+      ? [...new Set(eventWords.map(eventName => eventName.trim()))]
+      : cleanParts
+        .filter(part => /(wedding|reception|sangeet|mehendi|haldi|ceremony|cocktail|pre-wedding)/i.test(part))
+        .flatMap(part => part.split(/[+/&]/).map(item => item.trim()))
+        .filter(Boolean);
+
+    let namePart = cleanParts.find(part =>
+      part !== email &&
+      part !== phone &&
+      part !== partySize &&
+      part !== dietary &&
+      part !== rsvpStatus &&
+      !events.includes(part) &&
+      !/@/.test(part) &&
+      !/\d{3}/.test(part)
+    ) || cleanParts[0] || '';
+
+    if (singleLine) {
+      const relationshipWords = text.match(/\b(bride|groom|friend|family|work|college|school|relative|cousin|uncle|aunt)\b/gi) || [];
+      const removableWords = [...eventWords, ...relationshipWords].map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const inferredName = text
+        .replace(email, '')
+        .replace(phone, '')
+        .replace(/\b(?:party|size|count|guests?)\s*[:=]?\s*\d+\b/gi, '')
+        .replace(/\b(veg|vegetarian|vegan|non-vegetarian|non vegetarian|nonveg|non veg|gluten-free|gluten free|accepted|confirmed|pending|declined|maybe|attending|no dietary|none)\b/gi, '')
+        .replace(removableWords.length ? new RegExp(`\\b(${removableWords.join('|')})\\b`, 'gi') : /$a/, '')
+        .replace(/[,:;|()/-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (inferredName) namePart = inferredName;
+    }
+
+    const relationship = singleLine
+      ? (text.match(/\b(bride|groom|friend|family|work|college|school|relative|cousin|uncle|aunt)\b/i)?.[0] || '')
+      : cleanParts.find(part => /(bride|groom|friend|family|work|college|school|relative|cousin|uncle|aunt)/i.test(part) && part !== dietary) || '';
+    const notes = singleLine
+      ? ''
+      : cleanParts.filter(part => ![namePart, email, phone, partySize, dietary, rsvpStatus, relationship].includes(part) && !events.includes(part)).join('; ');
+
+    return this.normalizeImportedGuest({ name: namePart, email, phone, relationship, partySize, dietaryRestrictions: dietary, events, rsvpStatus, notes });
+  },
+
+  normalizeImportedGuest(data) {
+    const events = Array.isArray(data.events)
+      ? data.events
+      : String(data.events || '').split(/[|;,]/);
+
+    return {
+      name: String(data.name || '').trim(),
+      email: String(data.email || '').trim(),
+      phone: String(data.phone || '').trim(),
+      relationship: String(data.relationship || '').trim(),
+      partySize: Math.max(1, parseInt(data.partySize, 10) || 1),
+      dietaryRestrictions: this.normalizeDietary(data.dietaryRestrictions),
+      events: events.map(e => e.trim()).filter(Boolean),
+      rsvpStatus: this.normalizeRsvpStatus(data.rsvpStatus),
+      notes: String(data.notes || '').trim()
+    };
+  },
+
+  normalizeDietary(value) {
+    const text = String(value || '').trim().toLowerCase();
+    if (!text) return 'none';
+    if (text.includes('non') || text.includes('chicken') || text.includes('meat')) return 'non-vegetarian';
+    if (text.includes('vegan')) return 'vegan';
+    if (text.includes('veg')) return 'vegetarian';
+    if (text.includes('gluten')) return 'gluten-free';
+    if (text.includes('apane') || text.includes('family')) return 'apane';
+    if (['none', 'no', 'na', 'n/a'].includes(text)) return 'none';
+    return 'other';
+  },
+
+  normalizeRsvpStatus(value) {
+    const text = String(value || '').trim().toLowerCase();
+    if (['accepted', 'accept', 'yes', 'attending', 'confirmed'].includes(text)) return 'accepted';
+    if (['declined', 'decline', 'no', 'not attending'].includes(text)) return 'declined';
+    if (['maybe', 'tentative'].includes(text)) return 'maybe';
+    return 'pending';
   }
 };
 
