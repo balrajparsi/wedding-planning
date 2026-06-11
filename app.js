@@ -237,7 +237,6 @@ class WeddingPlanningApp {
 
       <div class="dashboard-grid">
         <div class="stat-card" onclick="app.navigateTo('guests')">
-          <div class="stat-icon">👥</div>
           <div class="stat-number">${confirmedCount}<span class="stat-total">/${totalGuests}</span></div>
           <div class="stat-label">Guests Confirmed</div>
           <div class="progress-bar">
@@ -247,7 +246,6 @@ class WeddingPlanningApp {
         </div>
 
         <div class="stat-card" onclick="app.navigateTo('tasks')">
-          <div class="stat-icon">✅</div>
           <div class="stat-number">${tasksDone}<span class="stat-total">/${totalTasks}</span></div>
           <div class="stat-label">Tasks Completed</div>
           <div class="progress-bar">
@@ -257,7 +255,6 @@ class WeddingPlanningApp {
         </div>
 
         <div class="stat-card" onclick="app.navigateTo('budget')">
-          <div class="stat-icon">💰</div>
           <div class="stat-number">$${(budgetSpent).toLocaleString('en-US',{maximumFractionDigits:0})}</div>
           <div class="stat-label">Budget Spent</div>
           <div class="progress-bar">
@@ -267,7 +264,6 @@ class WeddingPlanningApp {
         </div>
 
         <div class="stat-card" onclick="app.navigateTo('vendors')">
-          <div class="stat-icon">🏢</div>
           <div class="stat-number">${vendorsConfirmed}<span class="stat-total">/${totalVendors}</span></div>
           <div class="stat-label">Vendors Booked</div>
           <div class="progress-bar">
@@ -281,27 +277,21 @@ class WeddingPlanningApp {
         <h3 class="section-title">Quick Actions</h3>
         <div class="quick-links-grid">
           <a href="#guests" data-page="guests" class="quick-link-card">
-            <span class="ql-icon">👥</span>
             <span class="ql-label">Add Guest</span>
           </a>
           <a href="#tasks" data-page="tasks" class="quick-link-card">
-            <span class="ql-icon">✅</span>
             <span class="ql-label">Add Task</span>
           </a>
           <a href="#budget" data-page="budget" class="quick-link-card">
-            <span class="ql-icon">💰</span>
             <span class="ql-label">Track Expense</span>
           </a>
           <a href="#vendors" data-page="vendors" class="quick-link-card">
-            <span class="ql-icon">🏢</span>
             <span class="ql-label">Add Vendor</span>
           </a>
           <a href="#venues" data-page="venues" class="quick-link-card">
-            <span class="ql-icon">📍</span>
             <span class="ql-label">Add Venue</span>
           </a>
           <a href="#timeline" data-page="timeline" class="quick-link-card">
-            <span class="ql-icon">📅</span>
             <span class="ql-label">Add Milestone</span>
           </a>
         </div>

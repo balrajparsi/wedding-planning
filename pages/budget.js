@@ -146,7 +146,7 @@ const budgetPage = {
               <h4 style="color:var(--blue);margin:0 0 0.25rem 0;">${expense.description}</h4>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                 <span style="background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;text-transform:capitalize;">${expense.category}</span>
-                ${expense.vendor ? `<span style="background:#e8f4fd;color:#2a5f7f;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">🏢 ${expense.vendor}</span>` : ''}
+                ${expense.vendor ? `<span style="background:#e8f4fd;color:#2a5f7f;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">${expense.vendor}</span>` : ''}
               </div>
             </div>
             <span style="background:${statusColor};color:white;padding:0.25rem 0.6rem;border-radius:0.25rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;white-space:nowrap;">${expense.status}</span>

@@ -101,24 +101,22 @@ const timelinePage = {
       el.style.cssText = 'margin-bottom:2rem;position:relative;padding-left:1.5rem;';
 
       const isUpcoming = parseCentralDate(milestone.date) > new Date();
-      const typeIcon = { event: '📅', deadline: '⏰', reminder: '🔔', milestone: '🎯' }[milestone.type] || '📌';
-
       el.innerHTML = `
         <div style="position:absolute;left:-0.875rem;top:0.25rem;width:1.5rem;height:1.5rem;background:${isUpcoming ? 'var(--gold)' : '#27ae60'};border:3px solid white;border-radius:50%;box-shadow:0 0 0 3px ${isUpcoming ? 'var(--gold)' : '#27ae60'}33;"></div>
         <div class="milestone-card" style="background:white;padding:1.25rem;border-radius:0.75rem;border-left:4px solid ${isUpcoming ? 'var(--gold)' : '#27ae60'};box-shadow:var(--shadow-sm);transition:all 0.2s ease;">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.75rem;">
             <div>
-              <h4 style="color:var(--blue);margin:0 0 0.25rem 0;">${typeIcon} ${milestone.title}</h4>
+              <h4 style="color:var(--blue);margin:0 0 0.25rem 0;">${milestone.title}</h4>
               <p style="color:var(--text-muted);font-size:0.85rem;margin:0;text-transform:capitalize;">${milestone.type}</p>
             </div>
             <span style="background:${isUpcoming ? '#f39c12' : '#27ae60'};color:white;padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;font-weight:600;">${isUpcoming ? 'Upcoming' : 'Complete'}</span>
           </div>
-          ${milestone.date ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">📅 ${formatCentralDate(milestone.date, 'en-US', {weekday:'short',year:'numeric',month:'short',day:'numeric'})}</p>` : ''}
-          ${milestone.location ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">📍 ${milestone.location}</p>` : ''}
+          ${milestone.date ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">${formatCentralDate(milestone.date, 'en-US', {weekday:'short',year:'numeric',month:'short',day:'numeric'})}</p>` : ''}
+          ${milestone.location ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">${milestone.location}</p>` : ''}
           ${milestone.description ? `<p style="color:var(--text);font-size:0.9rem;margin:0.75rem 0;">${milestone.description}</p>` : ''}
           ${milestone.attendees?.length ? `
             <div style="margin:0.5rem 0;">
-              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">👥 Attendees: </span>
+              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Attendees: </span>
               ${milestone.attendees.map(a => `<span style="display:inline-block;background:#e8f0fe;color:#2a5f7f;padding:0.15rem 0.4rem;border-radius:0.25rem;font-size:0.78rem;margin:0.1rem;">${a}</span>`).join('')}
             </div>
           ` : ''}

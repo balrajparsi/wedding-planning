@@ -115,19 +115,20 @@ const foodPage = {
       const card = document.createElement('div');
       card.style.cssText = `background: white; padding: 1rem; border-radius: 0.5rem; border-left: 3px solid var(--gold); box-shadow: var(--shadow-sm);`;
 
-      const vegIcon = item.vegNonVeg === 'veg' ? '🥬' : item.vegNonVeg === 'non-veg' ? '🍖' : '🍽️';
+      const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
 
       card.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start;">
           <div style="flex: 1;">
             <h5 style="color: var(--blue); margin: 0; display: flex; gap: 0.5rem; align-items: center;">
-              ${vegIcon} ${item.dish}
+              ${item.dish}
               <span style="background: var(--gold); color: white; padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${item.courseType}</span>
+              <span style="background: rgba(24,34,44,0.08); color: var(--text-muted); padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${vegTypeLabel}</span>
             </h5>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.25rem 0;">
               ${item.eventType} • ${item.cuisine} • $${(item.cost||0).toLocaleString('en-US',{maximumFractionDigits:2})} • ${item.portionSize}
             </p>
-            ${item.guestAccommodations?.length ? `<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0;">👥 ${item.guestAccommodations.length} guest accommodation(s)</p>` : ''}
+            ${item.guestAccommodations?.length ? `<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0;">${item.guestAccommodations.length} guest accommodation(s)</p>` : ''}
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn-icon edit-dish" data-id="${item.id}" title="Edit">✎</button>

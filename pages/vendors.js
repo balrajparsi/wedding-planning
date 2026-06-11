@@ -158,9 +158,9 @@ const vendorPage = {
         <div><h4 style="color: var(--blue); margin: 0 0 0.25rem 0;">${vendor.name}</h4><p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${vendor.category}</p></div>
         <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${vendor.status}</span>
       </div>
-      ${vendor.contactName ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">👤 ${vendor.contactName}</p>` : ''}
-      ${vendor.email ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📧 ${vendor.email}</p>` : ''}
-      ${vendor.phone ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📱 ${vendor.phone}</p>` : ''}
+      ${vendor.contactName ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.contactName}</p>` : ''}
+      ${vendor.email ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.email}</p>` : ''}
+      ${vendor.phone ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.phone}</p>` : ''}
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
         <div style="font-size: 0.85rem; color: var(--text-muted);">${vendor.documents?.length || 0} doc(s)</div>
         <div style="display: flex; gap: 0.5rem;">

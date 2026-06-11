@@ -125,17 +125,14 @@ const venuesPage = {
     card.style.cssText = `background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid var(--gold); box-shadow: var(--shadow-sm); transition: all 0.2s ease;`;
 
     const statusColor = { inquiry: '#95a5a6', negotiating: '#f39c12', confirmed: '#3498db', paid: '#27ae60' }[venue.status] || '#95a5a6';
-    const eventTypeIcon = { 'Ceremony': '👰', 'Rehearsal Dinner': '🍽️', 'Pre-Wedding': '💐', 'Sangeet': '🎵', 'Mehendi': '🎨', 'Reception': '🎉', 'Cocktail Hour': '🍸' };
-    const icon = eventTypeIcon[venue.eventType] || '📍';
-
     card.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-        <div><h4 style="color: var(--blue); margin: 0 0 0.25rem 0;">${icon} ${venue.name}</h4><p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${venue.eventType}</p></div>
+        <div><h4 style="color: var(--blue); margin: 0 0 0.25rem 0;">${venue.name}</h4><p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${venue.eventType}</p></div>
         <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${venue.status}</span>
       </div>
-      ${venue.location ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📍 ${venue.location}</p>` : ''}
-      ${venue.capacity ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">👥 Capacity: ${venue.capacity}</p>` : ''}
-      ${venue.eventDate ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📅 ${formatCentralDate(venue.eventDate)}</p>` : ''}
+      ${venue.location ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${venue.location}</p>` : ''}
+      ${venue.capacity ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">Capacity: ${venue.capacity}</p>` : ''}
+      ${venue.eventDate ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${formatCentralDate(venue.eventDate)}</p>` : ''}
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
         <div style="font-size: 0.85rem; color: var(--text-muted);">$${(venue.costActual||0).toLocaleString('en-US',{maximumFractionDigits:0})} paid <span style="color:#aaa;">· ≈ ₹${(((venue.costActual||0)*83)/100000).toFixed(1)}L</span></div>
         <div style="display: flex; gap: 0.5rem;">

@@ -202,10 +202,10 @@ const taskListPage = {
       <p style="color:var(--text-muted);font-size:0.85rem;margin:0.5rem 0;">
         ${task.category ? `<span style="display:inline-block;background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;">${task.category}</span>` : ''}
       </p>
-      ${task.dueDate ? `<p style="color:${isOverdue ? '#c0392b' : 'var(--text-muted)'};font-size:0.85rem;margin:0.5rem 0;font-weight:${isOverdue ? '600' : '400'};">📅 ${formatCentralDate(task.dueDate)}${isOverdue ? ' (OVERDUE)' : ''}</p>` : ''}
+      ${task.dueDate ? `<p style="color:${isOverdue ? '#c0392b' : 'var(--text-muted)'};font-size:0.85rem;margin:0.5rem 0;font-weight:${isOverdue ? '600' : '400'};">${formatCentralDate(task.dueDate)}${isOverdue ? ' (OVERDUE)' : ''}</p>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
         <button class="expand-subtasks-btn" style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--blue);padding:0;">
-          📋 Subtasks ${completedSubs}/${subtasks.length} ${subtasks.length > 0 ? '▼' : ''}
+          Subtasks ${completedSubs}/${subtasks.length} ${subtasks.length > 0 ? '▼' : ''}
         </button>
         <div style="display:flex;gap:0.5rem;">
           <button class="btn-icon edit-task" data-id="${task.id}" title="Edit">✎</button>
@@ -238,7 +238,7 @@ const taskListPage = {
     expandBtn.addEventListener('click', () => {
       const isOpen = subtasksPanel.style.display !== 'none';
       subtasksPanel.style.display = isOpen ? 'none' : 'block';
-      expandBtn.textContent = `📋 Subtasks ${completedSubs}/${subtasks.length} ${subtasks.length > 0 ? (isOpen ? '▼' : '▲') : ''}`;
+      expandBtn.textContent = `Subtasks ${completedSubs}/${subtasks.length} ${subtasks.length > 0 ? (isOpen ? '▼' : '▲') : ''}`;
       if (!isOpen) this.renderSubtasks(task, card);
     });
 
@@ -274,7 +274,7 @@ const taskListPage = {
       item.style.cssText = 'background:#f8f9fa;border-radius:0.4rem;padding:0.75rem;margin-bottom:0.5rem;';
 
       const responseColor = { yes: '#27ae60', no: '#c0392b' }[sub.response] || '#95a5a6';
-      const responseLabel = { yes: '✅ Yes', no: '❌ No' }[sub.response] || '—';
+      const responseLabel = { yes: 'Yes', no: 'No' }[sub.response] || '—';
 
       item.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;">
@@ -285,8 +285,8 @@ const taskListPage = {
           <span style="background:${responseColor};color:white;padding:0.15rem 0.4rem;border-radius:0.2rem;font-size:0.75rem;white-space:nowrap;">${responseLabel}</span>
         </div>
         <div style="display:flex;gap:0.4rem;margin-bottom:0.5rem;flex-wrap:wrap;">
-          <button class="sub-yes-btn" style="background:${sub.response === 'yes' ? '#27ae60' : '#ecf0f1'};color:${sub.response === 'yes' ? 'white' : '#555'};border:none;padding:0.3rem 0.75rem;border-radius:0.25rem;cursor:pointer;font-size:0.8rem;font-weight:600;">✅ Yes</button>
-          <button class="sub-no-btn" style="background:${sub.response === 'no' ? '#c0392b' : '#ecf0f1'};color:${sub.response === 'no' ? 'white' : '#555'};border:none;padding:0.3rem 0.75rem;border-radius:0.25rem;cursor:pointer;font-size:0.8rem;font-weight:600;">❌ No</button>
+          <button class="sub-yes-btn" style="background:${sub.response === 'yes' ? '#27ae60' : '#ecf0f1'};color:${sub.response === 'yes' ? 'white' : '#555'};border:none;padding:0.3rem 0.75rem;border-radius:0.25rem;cursor:pointer;font-size:0.8rem;font-weight:600;">Yes</button>
+          <button class="sub-no-btn" style="background:${sub.response === 'no' ? '#c0392b' : '#ecf0f1'};color:${sub.response === 'no' ? 'white' : '#555'};border:none;padding:0.3rem 0.75rem;border-radius:0.25rem;cursor:pointer;font-size:0.8rem;font-weight:600;">No</button>
         </div>
         <div style="display:flex;gap:0.4rem;">
           <input type="text" class="sub-notes-input" value="${sub.notes || ''}" placeholder="Add notes..." style="flex:1;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:0.25rem;font-size:0.8rem;">

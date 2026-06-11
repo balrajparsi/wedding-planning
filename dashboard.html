@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akhila & Akshay - Wedding Planning Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="dashboard-additions.css">
 </head>
@@ -17,8 +17,8 @@
                 <h1 class="couple-name">Akhila & Akshay</h1>
             </div>
             <div class="user-menu">
-                <span id="userGreeting">💍 Wedding Planning Dashboard</span>
-                <a href="#settings" data-page="settings">⚙️ Settings</a>
+                <span id="userGreeting">Wedding Planning</span>
+                <a href="#settings" data-page="settings">Settings</a>
             </div>
         </div>
     </header>
@@ -31,19 +31,19 @@
             <div class="nav-section">
                 <label class="nav-label">Planning</label>
                 <ul class="nav-links">
-                    <li><a href="#dashboard" data-page="dashboard" class="active">📋 Dashboard</a></li>
-                    <li><a href="#guests" data-page="guests">👥 Guest List</a></li>
-                    <li><a href="#tasks" data-page="tasks">✓ Tasks</a></li>
-                    <li><a href="#budget" data-page="budget">💰 Budget</a></li>
-                    <li><a href="#vendors" data-page="vendors">🏢 Vendors</a></li>
+                    <li><a href="#dashboard" data-page="dashboard" class="active">Dashboard</a></li>
+                    <li><a href="#guests" data-page="guests">Guest List</a></li>
+                    <li><a href="#tasks" data-page="tasks">Tasks</a></li>
+                    <li><a href="#budget" data-page="budget">Budget</a></li>
+                    <li><a href="#vendors" data-page="vendors">Vendors</a></li>
                 </ul>
             </div>
             <div class="nav-section">
                 <label class="nav-label">Events</label>
                 <ul class="nav-links">
-                    <li><a href="#venues" data-page="venues">📍 Venues</a></li>
-                    <li><a href="#food" data-page="food">🍽️ Food & Menu</a></li>
-                    <li><a href="#timeline" data-page="timeline">📅 Events</a></li>
+                    <li><a href="#venues" data-page="venues">Venues</a></li>
+                    <li><a href="#food" data-page="food">Food & Menu</a></li>
+                    <li><a href="#timeline" data-page="timeline">Events</a></li>
                 </ul>
             </div>
             </div><!-- end sidebar-nav -->
@@ -64,11 +64,11 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Guest List</h2>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end;">
-                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">📧 Bulk Invite</button>
-                        <button class="btn btn-secondary btn-sm guest-import-btn">📄 Import List</button>
+                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">Bulk Invite</button>
+                        <button class="btn btn-secondary btn-sm guest-import-btn">Import List</button>
                         <input type="file" class="guest-import-input" accept=".csv,.txt,text/csv,text/plain" style="display:none;">
-                        <button class="btn btn-secondary btn-sm guest-export-btn">⬇️ Export CSV</button>
-                        <button class="btn btn-secondary btn-sm guest-reset-btn" style="border-color:#c0392b;color:#c0392b;">🗑️ Reset All</button>
+                        <button class="btn btn-secondary btn-sm guest-export-btn">Export CSV</button>
+                        <button class="btn btn-danger btn-sm guest-reset-btn">Reset All</button>
                         <button class="btn btn-primary btn-sm guest-add-btn">+ Add Guest</button>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                 <!-- Filters & Search -->
                 <div class="card" style="margin-bottom: 2rem;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
-                        <input type="text" placeholder="🔍 Search name/email..." class="guest-search" style="margin-bottom: 0;">
+                        <input type="text" placeholder="Search name/email..." class="guest-search" style="margin-bottom: 0;">
                         <select class="guest-rsvp-filter" style="margin-bottom: 0;">
                             <option value="">All RSVP Status</option>
                             <option value="pending">Pending</option>
@@ -98,7 +98,7 @@
                             <option value="apane">Apane (Family)</option>
                             <option value="none">None</option>
                         </select>
-                        <button class="btn btn-secondary guest-clear-btn" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary guest-clear-btn" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -113,7 +113,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Tasks & Checklist</h2>
                     <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm task-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-secondary btn-sm task-view-toggle">Toggle View</button>
                         <button class="btn btn-primary btn-sm task-add-btn">+ Add Task</button>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
                             <option value="in-progress">In Progress</option>
                             <option value="completed">Completed</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -158,7 +158,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Budget Tracker</h2>
                     <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm budget-export-btn">⬇️ Export CSV</button>
+                        <button class="btn btn-secondary btn-sm budget-export-btn">Export CSV</button>
                         <button class="btn btn-primary btn-sm budget-add-btn">+ Add Expense</button>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
                             <option value="partial">Partial</option>
                             <option value="paid">Paid</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -213,7 +213,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Vendor Management</h2>
                     <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm vendor-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-secondary btn-sm vendor-view-toggle">Toggle View</button>
                         <button class="btn btn-primary btn-sm vendor-add-btn">+ Add Vendor</button>
                     </div>
                 </div>
@@ -248,7 +248,7 @@
                             <option value="confirmed">Confirmed</option>
                             <option value="paid">Paid</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -263,7 +263,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Venue & Events</h2>
                     <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm venue-view-toggle">📊 Toggle View</button>
+                        <button class="btn btn-secondary btn-sm venue-view-toggle">Toggle View</button>
                         <button class="btn btn-primary btn-sm venue-add-btn">+ Add Venue</button>
                     </div>
                 </div>
@@ -292,7 +292,7 @@
                             <option value="confirmed">Confirmed</option>
                             <option value="paid">Paid</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -335,7 +335,7 @@
                             <option value="beverages">Beverages</option>
                             <option value="snacks">Snacks</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -368,7 +368,7 @@
                             <option value="milestone">Milestone</option>
                         </select>
                         <div></div>
-                        <button class="btn btn-secondary" style="cursor: pointer;">🔄 Clear Filters</button>
+                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 

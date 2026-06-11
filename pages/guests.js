@@ -123,9 +123,9 @@ const guestListPage = {
       <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#2a5f7f">${partySize}</div><div class="stat-label">Total Party Size</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#27ae60">🌿 ${veg}</div><div class="stat-label">Vegetarian</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#e74c3c">🍗 ${nonVeg}</div><div class="stat-label">Non-Vegetarian</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">👨‍👩‍👧 ${apane}</div><div class="stat-label">Apane (Family)</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#27ae60">${veg}</div><div class="stat-label">Vegetarian</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#e74c3c">${nonVeg}</div><div class="stat-label">Non-Vegetarian</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${apane}</div><div class="stat-label">Apane (Family)</div></div>
     `;
   },
 
@@ -139,14 +139,13 @@ const guestListPage = {
     if (!guests || guests.length === 0) {
       container.innerHTML = `
         <div style="text-align:center;padding:3rem;color:var(--text-muted);">
-          <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
           <p style="font-size:1rem;">No guests found. Add your first guest to get started.</p>
         </div>`;
       return;
     }
 
     const tbody = guests.map(g => {
-      const dietaryIcon = { vegetarian: '🌿', 'non-vegetarian': '🍗', vegan: '🌱', 'gluten-free': '🌾', apane: '👨‍👩‍👧', other: '❓', none: '' }[g.dietaryRestrictions] || '';
+      const dietaryIcon = '';
       const eventTags = (g.events || []).map(ev => `<span style="display:inline-block;background:#e8f0fe;color:#2a5f7f;padding:0.15rem 0.4rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;">${ev}</span>`).join('');
       return `
       <tr>
