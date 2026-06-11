@@ -145,6 +145,18 @@ class WeddingPlanningApp {
     return response.json();
   }
 
+  parseWeddingDate(value) {
+    const dateValue = value || '2026-08-30';
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      return new Date(Number(year), Number(month) - 1, Number(day));
+    }
+
+    return new Date(dateValue);
+  }
+
   // Render main dashboard
   renderDashboard() {
     const mainContent = document.querySelector('[data-view="dashboard"]');
@@ -159,7 +171,7 @@ class WeddingPlanningApp {
     const vendorsConfirmed = this.vendors.filter(v => v.status === 'confirmed').length;
     const totalVendors = this.vendors.length;
 
-    const weddingDate = new Date((this.wedding && this.wedding.weddingDate) || '2026-08-30');
+    const weddingDate = this.parseWeddingDate(this.wedding && this.wedding.weddingDate);
     const now = new Date();
     const diff = weddingDate - now;
     const daysLeft = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
