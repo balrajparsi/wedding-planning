@@ -177,7 +177,7 @@ const budgetPage = {
               <div style="font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:0.4rem;">Payment History</div>
               ${(expense.payments||[]).map(p => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.6rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;font-size:0.82rem;">
-                  <span style="color:#555;">${new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+                  <span style="color:#555;">${formatCentralDate(p.date, 'en-US', {month:'short',day:'numeric',year:'numeric'})}</span>
                   <span style="font-weight:600;color:#27ae60;">+$${(p.amount||0).toFixed(2)}</span>
                   ${p.notes ? `<span style="color:#888;font-style:italic;">${p.notes}</span>` : ''}
                 </div>

@@ -135,7 +135,7 @@ const venuesPage = {
       </div>
       ${venue.location ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📍 ${venue.location}</p>` : ''}
       ${venue.capacity ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">👥 Capacity: ${venue.capacity}</p>` : ''}
-      ${venue.eventDate ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📅 ${new Date(venue.eventDate).toLocaleDateString()}</p>` : ''}
+      ${venue.eventDate ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">📅 ${formatCentralDate(venue.eventDate)}</p>` : ''}
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
         <div style="font-size: 0.85rem; color: var(--text-muted);">$${(venue.costActual||0).toLocaleString('en-US',{maximumFractionDigits:0})} paid <span style="color:#aaa;">· ≈ ₹${(((venue.costActual||0)*83)/100000).toFixed(1)}L</span></div>
         <div style="display: flex; gap: 0.5rem;">

@@ -122,7 +122,7 @@ const taskModule = {
       pending: this.tasks.filter(t => t.status === 'pending').length,
       inProgress: this.tasks.filter(t => t.status === 'in-progress').length,
       completed: this.tasks.filter(t => t.status === 'completed').length,
-      overdue: this.tasks.filter(t => t.status !== 'completed' && new Date(t.dueDate) < new Date()).length
+      overdue: this.tasks.filter(t => t.status !== 'completed' && parseCentralDate(t.dueDate) < new Date()).length
     };
   },
 

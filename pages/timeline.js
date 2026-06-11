@@ -57,7 +57,7 @@ const timelinePage = {
       const s = this.currentFilters.search.toLowerCase();
       filtered = filtered.filter(m => m.title.toLowerCase().includes(s));
     }
-    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    filtered.sort((a, b) => parseCentralDate(a.date) - parseCentralDate(b.date));
     timelineModule.filteredMilestones = filtered;
     this.render();
   },
@@ -100,7 +100,7 @@ const timelinePage = {
       const el = document.createElement('div');
       el.style.cssText = 'margin-bottom:2rem;position:relative;padding-left:1.5rem;';
 
-      const isUpcoming = new Date(milestone.date) > new Date();
+      const isUpcoming = parseCentralDate(milestone.date) > new Date();
       const typeIcon = { event: '📅', deadline: '⏰', reminder: '🔔', milestone: '🎯' }[milestone.type] || '📌';
 
       el.innerHTML = `
@@ -113,7 +113,7 @@ const timelinePage = {
             </div>
             <span style="background:${isUpcoming ? '#f39c12' : '#27ae60'};color:white;padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;font-weight:600;">${isUpcoming ? 'Upcoming' : 'Complete'}</span>
           </div>
-          ${milestone.date ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">📅 ${new Date(milestone.date).toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'})}</p>` : ''}
+          ${milestone.date ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">📅 ${formatCentralDate(milestone.date, 'en-US', {weekday:'short',year:'numeric',month:'short',day:'numeric'})}</p>` : ''}
           ${milestone.location ? `<p style="color:var(--text-muted);font-size:0.9rem;margin:0.5rem 0;">📍 ${milestone.location}</p>` : ''}
           ${milestone.description ? `<p style="color:var(--text);font-size:0.9rem;margin:0.75rem 0;">${milestone.description}</p>` : ''}
           ${milestone.attendees?.length ? `

@@ -3,6 +3,34 @@
  * Handles routing, state management, and event delegation
  */
 
+const WEDDING_TIME_ZONE = 'America/Chicago';
+const DEFAULT_WEDDING_DATE = '2026-08-30';
+const DEFAULT_WEDDING_TIME = 'T10:00:00-05:00';
+const DEFAULT_DATE_ONLY_TIME = 'T12:00:00Z';
+
+function parseCentralDate(value, fallback = null, dateOnlyTime = DEFAULT_DATE_ONLY_TIME) {
+  const dateValue = value || fallback;
+  if (!dateValue) return new Date(NaN);
+
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+
+  if (dateOnlyMatch) {
+    return new Date(`${dateValue}${dateOnlyTime}`);
+  }
+
+  return new Date(dateValue);
+}
+
+function formatCentralDate(value, locale = 'en-US', options = {}) {
+  const date = value instanceof Date ? value : parseCentralDate(value);
+  return date.toLocaleDateString(locale, { ...options, timeZone: WEDDING_TIME_ZONE });
+}
+
+if (typeof window !== 'undefined') {
+  window.parseCentralDate = parseCentralDate;
+  window.formatCentralDate = formatCentralDate;
+}
+
 class WeddingPlanningApp {
   constructor() {
     this.currentPage = 'dashboard';
@@ -146,15 +174,15 @@ class WeddingPlanningApp {
   }
 
   parseWeddingDate(value) {
-    const dateValue = value || '2026-08-30';
-    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+    return parseCentralDate(value, DEFAULT_WEDDING_DATE, DEFAULT_WEDDING_TIME);
+  }
 
-    if (dateOnlyMatch) {
-      const [, year, month, day] = dateOnlyMatch;
-      return new Date(Number(year), Number(month) - 1, Number(day));
-    }
-
-    return new Date(dateValue);
+  formatWeddingDate(date) {
+    return formatCentralDate(date, 'en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
   // Render main dashboard
@@ -178,7 +206,7 @@ class WeddingPlanningApp {
     const hoursLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
     const minutesLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
 
-    const weddingDateStr = weddingDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const weddingDateStr = this.formatWeddingDate(weddingDate);
     const location = (this.wedding && this.wedding.location) || 'To Be Announced';
     const coupleName = (this.wedding && this.wedding.coupleName) || 'Akhila & Akshay';
 

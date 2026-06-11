@@ -167,7 +167,7 @@ const venueModule = {
   getUpcomingVenues() {
     return this.venues
       .filter(v => v.eventDate)
-      .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+      .sort((a, b) => parseCentralDate(a.eventDate) - parseCentralDate(b.eventDate))
       .slice(0, 5);
   }
 };

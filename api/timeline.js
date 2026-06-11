@@ -5,6 +5,12 @@
 const kv = require('../lib/kv');
 const WEDDING_ID = 'akhila-akshay-2026';
 
+function parseCentralDateOnly(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T12:00:00Z`)
+    : new Date(value);
+}
+
 module.exports = async (req, res) => {
   const method = req.method;
   const url    = new URL(req.url, 'http://localhost');
@@ -17,7 +23,7 @@ module.exports = async (req, res) => {
       let milestones = await kv.get(key) || [];
       const type = sp.get('type');
       if (type) milestones = milestones.filter(m => m.type === type);
-      milestones.sort((a, b) => new Date(a.date) - new Date(b.date));
+      milestones.sort((a, b) => parseCentralDateOnly(a.date) - parseCentralDateOnly(b.date));
       return res.status(200).json(milestones);
     }
 

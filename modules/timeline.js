@@ -113,7 +113,7 @@ const timelineModule = {
       }
 
       // Upcoming vs Past
-      const mDate = new Date(m.date);
+      const mDate = parseCentralDate(m.date);
       if (mDate > now) {
         summary.upcoming++;
       } else if (m.type === 'deadline') {
@@ -134,15 +134,15 @@ const timelineModule = {
 
     return this.milestones
       .filter(m => {
-        const mDate = new Date(m.date);
+        const mDate = parseCentralDate(m.date);
         return mDate >= now && mDate <= futureDate;
       })
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => parseCentralDate(a.date) - parseCentralDate(b.date));
   },
 
   getEventsByMonth(year, month) {
     return this.milestones.filter(m => {
-      const mDate = new Date(m.date);
+      const mDate = parseCentralDate(m.date);
       return mDate.getFullYear() === year && mDate.getMonth() === month;
     });
   }

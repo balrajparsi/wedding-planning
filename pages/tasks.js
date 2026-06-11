@@ -189,7 +189,7 @@ const taskListPage = {
     card.style.cssText = 'background:white;padding:1rem;border-radius:0.5rem;border-left:3px solid var(--gold);box-shadow:var(--shadow-sm);cursor:grab;transition:all 0.2s ease;';
 
     const priorityColor = { high: '#c0392b', medium: '#f39c12', low: '#27ae60' }[task.priority] || '#95a5a6';
-    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+    const dueDate = task.dueDate ? parseCentralDate(task.dueDate) : null;
     const isOverdue = dueDate && dueDate < new Date() && task.status !== 'completed';
     const subtasks = task.subtasks || [];
     const completedSubs = subtasks.filter(s => s.completed).length;
@@ -202,7 +202,7 @@ const taskListPage = {
       <p style="color:var(--text-muted);font-size:0.85rem;margin:0.5rem 0;">
         ${task.category ? `<span style="display:inline-block;background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;">${task.category}</span>` : ''}
       </p>
-      ${task.dueDate ? `<p style="color:${isOverdue ? '#c0392b' : 'var(--text-muted)'};font-size:0.85rem;margin:0.5rem 0;font-weight:${isOverdue ? '600' : '400'};">📅 ${new Date(task.dueDate).toLocaleDateString()}${isOverdue ? ' (OVERDUE)' : ''}</p>` : ''}
+      ${task.dueDate ? `<p style="color:${isOverdue ? '#c0392b' : 'var(--text-muted)'};font-size:0.85rem;margin:0.5rem 0;font-weight:${isOverdue ? '600' : '400'};">📅 ${formatCentralDate(task.dueDate)}${isOverdue ? ' (OVERDUE)' : ''}</p>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
         <button class="expand-subtasks-btn" style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--blue);padding:0;">
           📋 Subtasks ${completedSubs}/${subtasks.length} ${subtasks.length > 0 ? '▼' : ''}

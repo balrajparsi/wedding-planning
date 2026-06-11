@@ -374,7 +374,7 @@ async function handleExportGuests(req, res) {
       g.partySize || 1,
       `"${g.dietaryRestrictions || ''}"`,
       g.rsvpStatus,
-      g.rsvpDate ? new Date(g.rsvpDate).toLocaleDateString() : '',
+      g.rsvpDate ? new Date(g.rsvpDate).toLocaleDateString('en-US', { timeZone: 'America/Chicago' }) : '',
       `"${g.notes || ''}"`
     ].join(','));
   });
