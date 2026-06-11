@@ -11,7 +11,7 @@ const WEDDING_ID = 'akhila-akshay-2026';
 const DEFAULT_CONFIG = {
   id: WEDDING_ID,
   coupleName: 'Akhila & Akshay',
-  weddingDate: '2026-08-15',
+  weddingDate: '2026-08-30',
   location: 'To Be Announced',
   currency: 'USD',
   createdAt: new Date().toISOString()

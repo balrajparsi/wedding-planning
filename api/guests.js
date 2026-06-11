@@ -253,7 +253,7 @@ async function handleBulkInvite(req, res) {
 
   if (RESEND_API_KEY && withEmail.length > 0) {
     for (const g of withEmail) {
-      const finalSubject = subject || `You're invited — Akhila & Akshay's Wedding · August 2026`;
+      const finalSubject = subject || `You're invited — Akhila & Akshay's Wedding · 30 August 2026`;
       const html = buildInviteHtml(g, message, SITE_URL);
       try {
         const r = await fetch('https://api.resend.com/emails', {
@@ -325,7 +325,7 @@ function buildInviteHtml(guest, customMessage, siteUrl) {
           <h1 style="font-family:Georgia,serif;font-size:42px;color:#1a3a52;margin:0 0 8px;font-weight:400;letter-spacing:0.02em;">
             Akhila <em style="color:#c0392b;">&amp;</em> Akshay
           </h1>
-          <p style="font-size:13px;letter-spacing:3px;color:#b8860b;text-transform:uppercase;margin:0 0 24px;">August 2026</p>
+          <p style="font-size:13px;letter-spacing:3px;color:#b8860b;text-transform:uppercase;margin:0 0 24px;">30 August 2026</p>
           <div style="height:1px;background:linear-gradient(90deg,transparent,#d4a017,transparent);width:60%;margin:0 auto 24px;"></div>
           <p style="font-size:16px;line-height:1.7;color:#333;text-align:left;margin:18px 0;">${greeting}</p>
           <p style="font-size:16px;line-height:1.7;color:#333;text-align:left;margin:0 0 18px;">
@@ -383,4 +383,3 @@ async function handleExportGuests(req, res) {
   res.setHeader('Content-Disposition', 'attachment; filename="guests.csv"');
   res.send(csv.join('\n'));
 }
-

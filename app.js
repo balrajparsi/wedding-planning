@@ -159,7 +159,7 @@ class WeddingPlanningApp {
     const vendorsConfirmed = this.vendors.filter(v => v.status === 'confirmed').length;
     const totalVendors = this.vendors.length;
 
-    const weddingDate = new Date((this.wedding && this.wedding.weddingDate) || '2026-08-15');
+    const weddingDate = new Date((this.wedding && this.wedding.weddingDate) || '2026-08-30');
     const now = new Date();
     const diff = weddingDate - now;
     const daysLeft = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
