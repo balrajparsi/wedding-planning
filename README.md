@@ -1,7 +1,5 @@
 # Akhila & Akshay Wedding Planning Platform
 
-A modern, luxury wedding planning dashboard with rolling Udaipur Fort aesthetic. Built with vanilla HTML/CSS/JavaScript and deployed on Vercel.
-
 ## 🎨 Features
 
 ### Core Features (7 Modules)
@@ -22,7 +20,6 @@ A modern, luxury wedding planning dashboard with rolling Udaipur Fort aesthetic.
 - Email-based invite system for planners
 
 ### Design
-- **Udaipur Fort Aesthetic**: Classical elegance + modern minimalism
 - **Color Palette**: Gold (#b8860b), Royal Blue (#1a3a52), Terracotta (#a0644e), Cream (#f5f1e8)
 - **Animations**: Rolling parallax background, smooth hover effects, scroll indicators
 - **Responsive**: Mobile-first design for all screen sizes
