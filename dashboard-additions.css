@@ -993,6 +993,238 @@ tr:hover {
   background: #b13c34;
 }
 
+/* ========================================
+   SETTINGS COMMAND CENTER
+   ======================================== */
+
+.settings-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.settings-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 2rem;
+  align-items: end;
+  background: #10283a;
+  color: #fffdf8;
+  border: 1px solid rgba(215, 189, 120, 0.32);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.settings-hero h2 {
+  color: #fffdf8;
+  font-size: 2.45rem;
+  line-height: 1;
+  margin: 0.3rem 0 0.7rem;
+}
+
+.settings-hero p {
+  max-width: 680px;
+  color: rgba(255, 253, 248, 0.68);
+  margin: 0;
+}
+
+.settings-kicker {
+  margin: 0;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.settings-readiness {
+  background: rgba(255, 253, 248, 0.08);
+  border: 1px solid rgba(255, 253, 248, 0.14);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.readiness-value {
+  display: block;
+  color: #fffdf8;
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.readiness-label {
+  display: block;
+  margin-top: 0.25rem;
+  color: rgba(255, 253, 248, 0.62);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.readiness-track {
+  height: 8px;
+  margin-top: 1rem;
+  background: rgba(255, 253, 248, 0.14);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.readiness-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 220ms ease;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 1.5rem;
+}
+
+.settings-grid-secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-panel {
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid var(--border-soft);
+  border-top: 1px solid var(--border-gold);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.settings-panel h3 {
+  color: var(--text-dark);
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0.25rem 0 1rem;
+}
+
+.settings-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.settings-pill {
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.35rem 0.65rem;
+  white-space: nowrap;
+}
+
+.settings-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-form-row {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 1rem;
+}
+
+.settings-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.role-list {
+  display: grid;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.role-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.role-row:last-child {
+  border-bottom: 0;
+}
+
+.role-row strong,
+.role-row span,
+.role-row em {
+  display: block;
+}
+
+.role-row strong {
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.role-row span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.role-row em {
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.settings-full-btn {
+  width: 100%;
+}
+
+.settings-toggle-list,
+.settings-action-list,
+.settings-idea-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.settings-toggle-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--text-dark);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.settings-toggle-list input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+}
+
+.settings-action-list .btn {
+  width: 100%;
+}
+
+.settings-idea-list {
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
 @media (max-width: 1024px) {
   .container {
     grid-template-columns: 1fr;
@@ -1040,5 +1272,12 @@ tr:hover {
 
   .quick-links-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .settings-hero,
+  .settings-grid,
+  .settings-grid-secondary,
+  .settings-form-row {
+    grid-template-columns: 1fr;
   }
 }

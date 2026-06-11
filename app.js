@@ -114,6 +114,11 @@ class WeddingPlanningApp {
       const page = window.location.hash.slice(1) || 'dashboard';
       this.navigateTo(page);
     });
+
+    const initialPage = window.location.hash.slice(1);
+    if (initialPage) {
+      this.navigateTo(initialPage);
+    }
   }
 
   // Navigate to a page
@@ -147,6 +152,8 @@ class WeddingPlanningApp {
         window.foodPage?.init?.();
       } else if (page === 'timeline') {
         window.timelinePage?.init?.();
+      } else if (page === 'settings') {
+        this.renderSettings();
       }
     }
   }
@@ -159,6 +166,11 @@ class WeddingPlanningApp {
         'Content-Type': 'application/json'
       }
     };
+
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      options.headers.Authorization = `Bearer ${token}`;
+    }
 
     if (data) {
       options.body = JSON.stringify(data);
@@ -299,6 +311,100 @@ class WeddingPlanningApp {
     `;
   }
 
+  renderSettings() {
+    const view = document.querySelector('[data-view="settings"]');
+    if (!view) return;
+
+    const wedding = this.wedding || {};
+    const checks = [
+      Boolean(wedding.coupleName),
+      Boolean(wedding.weddingDate),
+      Boolean(wedding.location && wedding.location !== 'To Be Announced'),
+      this.guests.length > 0,
+      this.tasks.length > 0,
+      this.budget.length > 0,
+      this.vendors.length > 0,
+      this.venues.length > 0,
+      this.foods.length > 0,
+      this.timeline.length > 0
+    ];
+    const readiness = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+
+    const readinessValue = document.getElementById('settingsReadinessValue');
+    const readinessBar = document.getElementById('settingsReadinessBar');
+    if (readinessValue) readinessValue.textContent = `${readiness}%`;
+    if (readinessBar) readinessBar.style.width = `${readiness}%`;
+
+    const coupleName = document.getElementById('coupleName');
+    const weddingDate = document.getElementById('weddingDate');
+    const location = document.getElementById('location');
+    const currency = document.getElementById('currency');
+    const lastUpdated = document.getElementById('settingsLastUpdated');
+
+    if (coupleName) coupleName.value = wedding.coupleName || 'Akhila & Akshay';
+    if (weddingDate) weddingDate.value = wedding.weddingDate || DEFAULT_WEDDING_DATE;
+    if (location) location.value = wedding.location || 'To Be Announced';
+    if (currency) currency.value = wedding.currency || 'USD';
+    if (lastUpdated) {
+      lastUpdated.textContent = wedding.updatedAt
+        ? `Synced ${formatCentralDate(wedding.updatedAt, 'en-US', { month: 'short', day: 'numeric' })}`
+        : 'Default profile';
+    }
+
+    this.renderRoleList();
+    this.bindSettingsForm();
+  }
+
+  renderRoleList() {
+    const list = document.getElementById('plannersList');
+    if (!list) return;
+
+    const roles = [
+      { name: 'Akhila', role: 'Admin', scope: 'Full control' },
+      { name: 'Akshay', role: 'Admin', scope: 'Full control' },
+      { name: 'Balraj', role: 'Planner', scope: 'Planning modules' },
+      { name: 'Parents', role: 'Viewer', scope: 'Read-only family view' },
+      { name: 'Guests', role: 'Guest', scope: 'RSVP only' }
+    ];
+
+    list.innerHTML = roles.map(person => `
+      <div class="role-row">
+        <div>
+          <strong>${person.name}</strong>
+          <span>${person.scope}</span>
+        </div>
+        <em>${person.role}</em>
+      </div>
+    `).join('');
+  }
+
+  bindSettingsForm() {
+    const form = document.getElementById('weddingForm');
+    if (!form || form.dataset.bound === 'true') return;
+
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const payload = {
+        coupleName: document.getElementById('coupleName')?.value?.trim() || 'Akhila & Akshay',
+        weddingDate: document.getElementById('weddingDate')?.value || DEFAULT_WEDDING_DATE,
+        location: document.getElementById('location')?.value?.trim() || 'To Be Announced',
+        currency: document.getElementById('currency')?.value || 'USD'
+      };
+
+      try {
+        this.wedding = await this.apiCall('/api/wedding', 'PUT', payload);
+        this.renderDashboard();
+        this.renderSettings();
+        this.showSuccess('Wedding profile saved');
+      } catch (error) {
+        console.error('Failed to save wedding profile:', error);
+        this.showError('Failed to save wedding profile');
+      }
+    });
+  }
+
 
   // Start polling sync (5s intervals)
   startPollingSync() {
@@ -436,7 +542,23 @@ class WeddingPlanningApp {
   }
 
   openInvitePlannerModal() {
-    // TODO: Implement planner invite modal
+    const email = window.prompt('Planner email address');
+    if (!email) return;
+
+    const role = window.prompt('Role: planner or viewer', 'planner') || 'planner';
+    const token = localStorage.getItem('authToken');
+
+    if (!token) {
+      this.showError('Sign in as admin to send planner invites');
+      return;
+    }
+
+    this.apiCall('/api/auth/invite-planner', 'POST', { email, role })
+      .then(() => this.showSuccess('Planner invite created'))
+      .catch((error) => {
+        console.error('Invite planner failed:', error);
+        this.showError('Failed to create planner invite');
+      });
   }
 }
 

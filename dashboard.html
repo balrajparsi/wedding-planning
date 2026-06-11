@@ -380,37 +380,100 @@
 
             <!-- Settings View -->
             <div data-view="settings">
-                <h2 style="font-size: 2rem; color: var(--blue); margin-bottom: 2rem;">Settings</h2>
+                <div class="settings-shell">
+                    <section class="settings-hero">
+                        <div>
+                            <p class="settings-kicker">Private controls</p>
+                            <h2>Wedding Command Center</h2>
+                            <p>Keep the celebration details, access, sharing preferences, and planning readiness in one place.</p>
+                        </div>
+                        <div class="settings-readiness">
+                            <span class="readiness-value" id="settingsReadinessValue">0%</span>
+                            <span class="readiness-label">Planning readiness</span>
+                            <div class="readiness-track"><span id="settingsReadinessBar"></span></div>
+                        </div>
+                    </section>
 
-                <div class="card">
-                    <h4 style="margin-bottom: 1.5rem;">Wedding Details</h4>
-                    <form id="weddingForm">
-                        <label>Couple Name</label>
-                        <input type="text" id="coupleName" placeholder="Couple Name">
+                    <div class="settings-grid">
+                        <section class="settings-panel settings-panel-large">
+                            <div class="settings-panel-head">
+                                <div>
+                                    <p class="settings-kicker">Core details</p>
+                                    <h3>Wedding Profile</h3>
+                                </div>
+                                <span class="settings-pill" id="settingsLastUpdated">Not synced</span>
+                            </div>
 
-                        <label>Wedding Date</label>
-                        <input type="date" id="weddingDate">
+                            <form id="weddingForm" class="settings-form">
+                                <label for="coupleName">Couple Name</label>
+                                <input type="text" id="coupleName" placeholder="Akhila & Akshay">
 
-                        <label>Location</label>
-                        <input type="text" id="location" placeholder="Wedding Location">
+                                <div class="settings-form-row">
+                                    <div>
+                                        <label for="weddingDate">Wedding Date</label>
+                                        <input type="date" id="weddingDate">
+                                    </div>
+                                    <div>
+                                        <label for="currency">Currency</label>
+                                        <select id="currency">
+                                            <option value="USD">$ USD</option>
+                                            <option value="INR">INR</option>
+                                            <option value="EUR">EUR</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                        <label>Currency</label>
-                        <select id="currency">
-                            <option value="USD">$ USD (primary)</option>
-                            <option value="INR">₹ INR</option>
-                            <option value="EUR">€ EUR</option>
-                        </select>
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="Wedding Location">
 
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </form>
-                </div>
+                                <button type="submit" class="btn btn-primary">Save Wedding Profile</button>
+                            </form>
+                        </section>
 
-                <div class="card" style="margin-top: 2rem;">
-                    <h4 style="margin-bottom: 1.5rem;">Manage Planners</h4>
-                    <div id="plannersList">
-                        <!-- Planners list will be populated here -->
+                        <section class="settings-panel">
+                            <div class="settings-panel-head">
+                                <div>
+                                    <p class="settings-kicker">Access</p>
+                                    <h3>Family & Planner Roles</h3>
+                                </div>
+                            </div>
+                            <div id="plannersList" class="role-list"></div>
+                            <button class="btn btn-secondary settings-full-btn" onclick="app?.openInvitePlannerModal?.()">Invite Planner</button>
+                        </section>
                     </div>
-                    <button class="btn btn-secondary" onclick="app?.openInvitePlannerModal?.()">+ Invite Planner</button>
+
+                    <div class="settings-grid settings-grid-secondary">
+                        <section class="settings-panel">
+                            <p class="settings-kicker">Preferences</p>
+                            <h3>Communication Defaults</h3>
+                            <div class="settings-toggle-list">
+                                <label><input type="checkbox" checked> RSVP follow-ups</label>
+                                <label><input type="checkbox" checked> Payment reminders</label>
+                                <label><input type="checkbox"> Weekly family summary</label>
+                            </div>
+                        </section>
+
+                        <section class="settings-panel">
+                            <p class="settings-kicker">Sharing</p>
+                            <h3>Exports & Links</h3>
+                            <div class="settings-action-list">
+                                <button class="btn btn-secondary" type="button">Export Master Plan</button>
+                                <button class="btn btn-secondary" type="button">Copy Family View Link</button>
+                                <button class="btn btn-secondary" type="button">Generate RSVP Link</button>
+                            </div>
+                        </section>
+
+                        <section class="settings-panel">
+                            <p class="settings-kicker">What belongs here</p>
+                            <h3>Useful Additions</h3>
+                            <ul class="settings-idea-list">
+                                <li>Role-based access for parents, planners, and guests.</li>
+                                <li>Notification rules for overdue tasks and pending RSVPs.</li>
+                                <li>Export controls for guest lists, budget, and vendor sheets.</li>
+                                <li>Wedding branding: colors, logo, invitation copy, and RSVP text.</li>
+                            </ul>
+                        </section>
+                    </div>
                 </div>
             </div>
         </main>
