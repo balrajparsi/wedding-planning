@@ -395,16 +395,20 @@ button {
 }
 
 .hero-names {
-  font-family: var(--serif);
-  font-size: clamp(3.8rem, 9.6vw, 8.3rem);
-  font-weight: 600;
-  background: linear-gradient(135deg, #fff8ed 0%, #f2cf78 26%, #d4912a 56%, #9f1d20 100%);
+  font-family: var(--display);
+  font-size: clamp(3.8rem, 9.2vw, 8rem);
+  font-weight: 700;
+  background: linear-gradient(180deg, #fff8ed 0%, #f7dfa3 42%, #d69a36 78%, #b25a24 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  line-height: 0.88;
-  letter-spacing: 0.01em;
-  filter: drop-shadow(0 8px 30px rgba(36,16,6,0.82)) drop-shadow(0 0 70px rgba(240,180,41,0.24));
+  line-height: 0.9;
+  letter-spacing: 0.015em;
+  text-shadow:
+    0 4px 18px rgba(36, 16, 6, 0.8),
+    0 0 32px rgba(240, 180, 41, 0.18),
+    0 0 46px rgba(159, 29, 32, 0.12);
+  filter: drop-shadow(0 8px 20px rgba(36,16,6,0.5));
   margin: 0.2rem 0;
   opacity: 0;
   animation: riseIn 1.2s 0.5s ease forwards;
@@ -412,11 +416,14 @@ button {
 
 .hero-names .amp {
   font-style: italic;
-  font-size: 0.78em;
-  background: linear-gradient(135deg, #f2cf78, #9f1d20);
+  font-size: 0.72em;
+  background: linear-gradient(180deg, #ffe7a8 0%, #d99a35 48%, #9f1d20 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 3px 14px rgba(36, 16, 6, 0.72),
+    0 0 24px rgba(159, 29, 32, 0.22);
 }
 
 /* Ganesh / auspicious symbol above names */
@@ -433,11 +440,14 @@ button {
 
 .hero-telugu {
   display: block;
-  margin: -0.35rem auto 0.5rem;
+  margin: -0.15rem auto 0.65rem;
   font-family: var(--telugu);
-  font-size: clamp(1.05rem, 2.6vw, 1.45rem);
-  color: rgba(255, 248, 237, 0.82);
-  text-shadow: 0 8px 28px rgba(36, 16, 6, 0.7);
+  font-size: clamp(1.08rem, 2.5vw, 1.42rem);
+  font-weight: 600;
+  color: rgba(255, 239, 198, 0.9);
+  text-shadow:
+    0 3px 14px rgba(36, 16, 6, 0.78),
+    0 0 20px rgba(159, 29, 32, 0.16);
   opacity: 0;
   animation: riseIn 1s 0.72s ease forwards;
 }
