@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Akhila & Akshay — 30 August 2026</title>
-<meta name="description" content="Akhila and Akshay's private wedding planning suite for the 30 August 2026 celebration.">
+<meta name="description" content="Akhila and Akshay's private Telugu wedding planning suite for the 30 August 2026 celebration.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Noto+Serif+Telugu:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,25 +13,25 @@
 
 :root {
   --hero-progress: 0;
-  --gold:      #b8860b;
-  --gold-lt:   #d4a017;
-  --gold-pale: #e8c84a;
-  --gold-veil: rgba(232, 200, 74, 0.18);
+  --gold:      #c08a24;
+  --gold-lt:   #e0ad3d;
+  --gold-pale: #f2cf78;
+  --gold-veil: rgba(240, 180, 41, 0.2);
   --sand:      #c9a96e;
-  --parchment: #f5e6c8;
-  --parchment-dk: #e8d5a8;
-  --ink:       #1a0f00;
+  --parchment: #fff3dc;
+  --parchment-dk: #ead1a3;
+  --ink:       #241006;
   --espresso:  #120904;
-  --crimson:   #7a1a1a;
-  --rust:      #8b3a1a;
-  --wine:      #5d1d22;
-  --jade:      #496451;
+  --crimson:   #9f1d20;
+  --rust:      #a34a22;
+  --wine:      #7b1720;
+  --jade:      #2f6a3e;
   --mango:     #2f6a3e;
   --turmeric:  #f0b429;
   --kumkum:    #9f1d20;
   --navy:      #1a3a52;
-  --ivory:     #fff7e6;
-  --mist:      rgba(255, 247, 230, 0.72);
+  --ivory:     #fff8ed;
+  --mist:      rgba(255, 248, 237, 0.76);
   --serif:     'IM Fell English', 'Cormorant Garamond', Georgia, serif;
   --display:   'Cormorant Garamond', Georgia, serif;
   --sans:      'Poppins', sans-serif;
@@ -61,7 +61,7 @@ button {
 
 /* ═══════════════════════════════════════
    ROLLING BACKGROUND ENGINE
-   The fort panorama travels left-to-right
+   The Nalugu decor image travels gently
    as you scroll top-to-bottom.
 ═══════════════════════════════════════ */
 #rolling-stage {
@@ -72,46 +72,45 @@ button {
   pointer-events: none;
 }
 
-/* The panoramic fort image — 3× wider than viewport */
+/* The Nalugu decor image travels gently without hiding the stage details. */
 #rolling-img {
   position: absolute;
   top: 0;
   left: 0;
-  /* wide enough to travel across: starts left, ends right */
-  width: 280vw;
+  width: 150vw;
   height: 112%;
   background:
-    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=3200&q=90&fit=crop')
-    left center / cover no-repeat;
+    url('assets/images/nalugu-telugu-wedding-decor.jpg')
+    center center / cover no-repeat;
   will-change: transform;
   transform: translateX(0);
   transition: transform 0.05s linear;
 }
 
-/* Warm color wash to amplify the wedding vibe */
+/* Warm color wash to amplify the Telugu wedding palette. */
 #rolling-tint {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 62% at 24% 20%, rgba(184, 134, 11, 0.18), transparent 68%),
-    radial-gradient(ellipse 58% 55% at 74% 62%, rgba(93, 29, 34, 0.22), transparent 72%),
-    radial-gradient(ellipse 62% 70% at 84% 18%, rgba(73, 100, 81, 0.18), transparent 68%),
-    linear-gradient(180deg, rgba(18, 9, 4, 0.12) 0%, rgba(18, 9, 4, 0.6) 100%);
+    radial-gradient(ellipse 70% 58% at 50% 20%, rgba(255, 248, 237, 0.2), transparent 66%),
+    radial-gradient(ellipse 54% 52% at 20% 68%, rgba(47, 106, 62, 0.2), transparent 70%),
+    radial-gradient(ellipse 58% 56% at 78% 58%, rgba(159, 29, 32, 0.2), transparent 72%),
+    linear-gradient(180deg, rgba(255, 248, 237, 0.05) 0%, rgba(36, 16, 6, 0.5) 100%);
 }
 
-/* Dark cinematic overlay — thinner at middle to show more image */
+/* Balanced scrim keeps the bright decor visible while preserving text contrast. */
 #rolling-overlay {
   position: fixed;
   inset: 0;
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(10, 6, 0, 0.78), rgba(10, 6, 0, 0.18) 42%, rgba(10, 6, 0, 0.74)),
-    radial-gradient(ellipse 78% 64% at 50% 48%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.58) 100%);
+    linear-gradient(90deg, rgba(36, 16, 6, 0.66), rgba(36, 16, 6, 0.2) 44%, rgba(36, 16, 6, 0.58)),
+    radial-gradient(ellipse 72% 58% at 50% 46%, rgba(255, 248, 237, 0.06) 0%, rgba(36, 16, 6, 0.46) 100%);
   /* Vignette edges */
-  box-shadow: inset 0 0 190px rgba(0,0,0,0.72);
+  box-shadow: inset 0 0 150px rgba(36, 16, 6, 0.62);
 }
 
 /* Mango-leaf toranam with turmeric and kumkum beads. */
@@ -193,8 +192,9 @@ button {
 }
 
 .site-name {
-  font-family: var(--serif);
-  font-size: 1.32rem;
+  font-family: var(--display);
+  font-size: 1.42rem;
+  font-weight: 600;
   line-height: 1;
   color: rgba(255, 247, 230, 0.86);
 }
@@ -310,7 +310,7 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(ellipse 52% 58% at 50% 48%, rgba(18, 9, 4, 0.42), transparent 72%);
+  background: radial-gradient(ellipse 52% 58% at 50% 48%, rgba(36, 16, 6, 0.34), transparent 72%);
 }
 
 .hero-frame::before {
@@ -337,12 +337,12 @@ button {
   border: 1px solid rgba(232, 200, 74, calc(0.2 + 0.22 * var(--hero-progress)));
   border-radius: calc(22px - 14px * var(--hero-progress));
   background:
-    linear-gradient(180deg, rgba(18, 9, 4, 0.24), rgba(18, 9, 4, 0.62)),
-    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1800&q=90&fit=crop') center / cover no-repeat;
+    linear-gradient(180deg, rgba(255, 248, 237, 0.04), rgba(36, 16, 6, 0.52)),
+    url('assets/images/nalugu-telugu-wedding-decor.jpg') center / cover no-repeat;
   box-shadow:
     0 30px 90px rgba(0, 0, 0, calc(0.22 + 0.22 * var(--hero-progress))),
-    inset 0 0 90px rgba(18, 9, 4, 0.48);
-  opacity: calc(0.18 + 0.34 * var(--hero-progress));
+    inset 0 0 90px rgba(36, 16, 6, 0.42);
+  opacity: calc(0.28 + 0.4 * var(--hero-progress));
   pointer-events: none;
   will-change: width, height, opacity, border-radius;
 }
@@ -353,7 +353,7 @@ button {
   inset: 0;
   background:
     radial-gradient(ellipse 62% 54% at 50% 44%, rgba(255, 247, 230, 0.08), transparent 64%),
-    linear-gradient(90deg, rgba(18, 9, 4, 0.72), transparent 44%, rgba(18, 9, 4, 0.72));
+    linear-gradient(90deg, rgba(36, 16, 6, 0.68), transparent 44%, rgba(36, 16, 6, 0.66));
   border-radius: inherit;
 }
 
@@ -397,14 +397,14 @@ button {
 .hero-names {
   font-family: var(--serif);
   font-size: clamp(3.8rem, 9.6vw, 8.3rem);
-  font-weight: 400;
-  background: linear-gradient(135deg, #fff8e2 0%, #f7dda1 28%, #e3b45b 56%, #ac6f2b 100%);
+  font-weight: 600;
+  background: linear-gradient(135deg, #fff8ed 0%, #f2cf78 26%, #d4912a 56%, #9f1d20 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 0.88;
   letter-spacing: 0.01em;
-  filter: drop-shadow(0 8px 36px rgba(0,0,0,0.72)) drop-shadow(0 0 92px rgba(212,160,23,0.22));
+  filter: drop-shadow(0 8px 30px rgba(36,16,6,0.82)) drop-shadow(0 0 70px rgba(240,180,41,0.24));
   margin: 0.2rem 0;
   opacity: 0;
   animation: riseIn 1.2s 0.5s ease forwards;
@@ -413,7 +413,7 @@ button {
 .hero-names .amp {
   font-style: italic;
   font-size: 0.78em;
-  background: linear-gradient(135deg, #f4cf78, #8f3028);
+  background: linear-gradient(135deg, #f2cf78, #9f1d20);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -423,8 +423,8 @@ button {
 .hero-symbol {
   display: block;
   font-family: var(--telugu);
-  font-size: 1.72rem;
-  color: var(--gold-pale);
+  font-size: 2rem;
+  color: var(--turmeric);
   margin-bottom: 0.7rem;
   opacity: 0;
   animation: riseIn 1s 0.1s ease forwards;
@@ -436,7 +436,8 @@ button {
   margin: -0.35rem auto 0.5rem;
   font-family: var(--telugu);
   font-size: clamp(1.05rem, 2.6vw, 1.45rem);
-  color: rgba(255, 247, 230, 0.74);
+  color: rgba(255, 248, 237, 0.82);
+  text-shadow: 0 8px 28px rgba(36, 16, 6, 0.7);
   opacity: 0;
   animation: riseIn 1s 0.72s ease forwards;
 }
@@ -444,15 +445,15 @@ button {
 .hero-date {
   display: inline-block;
   padding: 0.5rem 1.65rem;
-  border: 1px solid rgba(232, 200, 74, 0.3);
+  border: 1px solid rgba(240, 180, 41, 0.42);
   border-radius: 999px;
-  background: rgba(18, 9, 4, 0.26);
+  background: rgba(36, 16, 6, 0.32);
   backdrop-filter: blur(10px);
   font-family: var(--sans);
   font-size: 0.62rem;
   letter-spacing: 0.24rem;
   text-transform: uppercase;
-  color: rgba(255, 247, 230, 0.82);
+  color: rgba(255, 248, 237, 0.9);
   margin: 0.7rem 0 1.25rem;
   opacity: 0;
   animation: riseIn 1s 0.8s ease forwards;
@@ -490,7 +491,8 @@ button {
   font-family: var(--display);
   font-size: clamp(1rem, 2vw, 1.22rem);
   line-height: 1.65;
-  color: rgba(255, 247, 230, 0.64);
+  color: rgba(255, 248, 237, 0.82);
+  text-shadow: 0 3px 18px rgba(36, 16, 6, 0.72);
   text-wrap: pretty;
   opacity: 0;
   animation: riseIn 1s 0.92s ease forwards;
@@ -1268,9 +1270,9 @@ footer::before {
     <div class="events-row">
       <div class="ev-card reveal d1">
         <span class="ev-num">I.</span>
-        <span class="ev-icon">P</span>
-        <h3 class="ev-name">Pellikuthuru</h3>
-        <span class="ev-name-sub">Haldi &amp; Blessings</span>
+        <span class="ev-icon">N</span>
+        <h3 class="ev-name">Nalugu</h3>
+        <span class="ev-name-sub">Turmeric, Blessings &amp; Family</span>
         <div class="ev-sep"></div>
         <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
         <span class="ev-badge">Coming Soon</span>
@@ -1318,10 +1320,7 @@ footer::before {
 <script>
 /* ══════════════════════════════════
    THE ROLLING BACKGROUND ENGINE
-   Fort panorama travels as you scroll:
-   — Starts: dome/left side of fort visible
-   — Ends:   right wing of fort visible
-   Direction: left → right (image pans right)
+   Nalugu decor travels gently as you scroll.
 ══════════════════════════════════ */
 const rollingImg = document.getElementById('rolling-img');
 const heroSection = document.getElementById('hero');
@@ -1333,11 +1332,8 @@ function updateRolling() {
   const heroScrollable = Math.max(1, heroSection.offsetHeight - window.innerHeight);
   const heroProgress = Math.min(1, Math.max(0, scrollTop / heroScrollable));
 
-  // Image is 280vw wide. Viewport is 100vw.
-  // So we can travel 180vw horizontally.
-  // At progress=0: translateX(0)   — left/dome side shows
-  // At progress=1: translateX(-180vw) — right side of fort shows
-  const maxTravel   = -(window.innerWidth * 1.8);
+  // The attached Nalugu decor image is wide enough for a gentle parallax drift.
+  const maxTravel   = -(window.innerWidth * 0.36);
   const xPos        = progress * maxTravel;
 
   // Slight vertical drift for depth
