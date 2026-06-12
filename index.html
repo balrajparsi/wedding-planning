@@ -7,11 +7,12 @@
 <meta name="description" content="Akhila and Akshay's private wedding planning suite for the 30 August 2026 celebration.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Noto+Serif+Telugu:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
+  --hero-progress: 0;
   --gold:      #b8860b;
   --gold-lt:   #d4a017;
   --gold-pale: #e8c84a;
@@ -25,12 +26,16 @@
   --rust:      #8b3a1a;
   --wine:      #5d1d22;
   --jade:      #496451;
+  --mango:     #2f6a3e;
+  --turmeric:  #f0b429;
+  --kumkum:    #9f1d20;
   --navy:      #1a3a52;
   --ivory:     #fff7e6;
   --mist:      rgba(255, 247, 230, 0.72);
   --serif:     'IM Fell English', 'Cormorant Garamond', Georgia, serif;
   --display:   'Cormorant Garamond', Georgia, serif;
   --sans:      'Poppins', sans-serif;
+  --telugu:    'Noto Serif Telugu', 'Cormorant Garamond', serif;
 }
 
 html { scroll-behavior: smooth; }
@@ -109,7 +114,7 @@ button {
   box-shadow: inset 0 0 190px rgba(0,0,0,0.72);
 }
 
-/* A fine ceremonial thread at the top keeps the page festive without heaviness. */
+/* Mango-leaf toranam with turmeric and kumkum beads. */
 .marigold-garland {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -117,12 +122,13 @@ button {
   z-index: 50;
   pointer-events: none;
   background:
-    radial-gradient(circle 5px at 24px 16px, rgba(232, 200, 74, 0.92) 0 4px, transparent 5px),
-    radial-gradient(circle 4px at 58px 15px, rgba(160, 82, 45, 0.76) 0 3px, transparent 4px),
-    radial-gradient(circle 5px at 94px 16px, rgba(232, 200, 74, 0.9) 0 4px, transparent 5px),
+    radial-gradient(ellipse 8px 14px at 28px 20px, rgba(47, 106, 62, 0.92) 0 56%, transparent 60%),
+    radial-gradient(ellipse 8px 14px at 72px 20px, rgba(47, 106, 62, 0.84) 0 56%, transparent 60%),
+    radial-gradient(circle 5px at 50px 15px, rgba(240, 180, 41, 0.96) 0 4px, transparent 5px),
+    radial-gradient(circle 4px at 104px 15px, rgba(159, 29, 32, 0.84) 0 3px, transparent 4px),
     linear-gradient(180deg, rgba(18, 9, 4, 0.76), rgba(18, 9, 4, 0));
   background-repeat: repeat-x;
-  background-size: 118px 34px, 118px 34px, 118px 34px, 100% 34px;
+  background-size: 128px 34px, 128px 34px, 128px 34px, 128px 34px, 100% 34px;
   filter: drop-shadow(0 5px 12px rgba(0,0,0,0.28));
 }
 .marigold-garland::after {
@@ -130,7 +136,7 @@ button {
   position: absolute;
   top: 15px; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(232, 200, 74, 0.18), rgba(232, 200, 74, 0.6), rgba(232, 200, 74, 0.18), transparent);
+  background: linear-gradient(90deg, transparent, rgba(240, 180, 41, 0.18), rgba(240, 180, 41, 0.68), rgba(240, 180, 41, 0.18), transparent);
   opacity: 0.78;
 }
 
@@ -180,6 +186,10 @@ button {
   letter-spacing: 0.22rem;
   text-transform: uppercase;
   color: rgba(232, 200, 74, 0.72);
+}
+
+.telugu-text {
+  font-family: var(--telugu);
 }
 
 .site-name {
@@ -255,13 +265,13 @@ button {
    SECTION 1 — HERO
 ═══════════════════════════════════════ */
 #hero {
-  min-height: 100svh;
+  min-height: 168svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
-  padding: 6.2rem 2rem 3rem;
+  padding: 0 2rem;
   position: relative;
 }
 
@@ -288,13 +298,19 @@ button {
 
 /* Hero composition; the fort remains the frame. */
 .hero-frame {
+  min-height: 100svh;
   max-width: 1040px;
   width: min(100%, 1040px);
   max-width: calc(100vw - 4rem);
   border: 0;
-  padding: 2rem 2rem 1.4rem;
-  position: relative;
-  background: radial-gradient(ellipse 52% 58% at 50% 48%, rgba(18, 9, 4, 0.48), transparent 72%);
+  padding: 6.4rem 2rem 3rem;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(ellipse 52% 58% at 50% 48%, rgba(18, 9, 4, 0.42), transparent 72%);
 }
 
 .hero-frame::before {
@@ -308,6 +324,37 @@ button {
   border-bottom: 1px solid rgba(232, 200, 74, 0.16);
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.hero-expander {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(calc(300px + 64vw * var(--hero-progress)), 1120px);
+  height: min(calc(390px + 48svh * var(--hero-progress)), 820px);
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(232, 200, 74, calc(0.2 + 0.22 * var(--hero-progress)));
+  border-radius: calc(22px - 14px * var(--hero-progress));
+  background:
+    linear-gradient(180deg, rgba(18, 9, 4, 0.24), rgba(18, 9, 4, 0.62)),
+    url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1800&q=90&fit=crop') center / cover no-repeat;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, calc(0.22 + 0.22 * var(--hero-progress))),
+    inset 0 0 90px rgba(18, 9, 4, 0.48);
+  opacity: calc(0.18 + 0.34 * var(--hero-progress));
+  pointer-events: none;
+  will-change: width, height, opacity, border-radius;
+}
+
+.hero-expander::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 62% 54% at 50% 44%, rgba(255, 247, 230, 0.08), transparent 64%),
+    linear-gradient(90deg, rgba(18, 9, 4, 0.72), transparent 44%, rgba(18, 9, 4, 0.72));
+  border-radius: inherit;
 }
 
 .hero-frame::after {
@@ -375,12 +422,23 @@ button {
 /* Ganesh / auspicious symbol above names */
 .hero-symbol {
   display: block;
+  font-family: var(--telugu);
   font-size: 1.72rem;
   color: var(--gold-pale);
   margin-bottom: 0.7rem;
   opacity: 0;
   animation: riseIn 1s 0.1s ease forwards;
   text-shadow: 0 0 24px rgba(212,160,23,0.42);
+}
+
+.hero-telugu {
+  display: block;
+  margin: -0.35rem auto 0.5rem;
+  font-family: var(--telugu);
+  font-size: clamp(1.05rem, 2.6vw, 1.45rem);
+  color: rgba(255, 247, 230, 0.74);
+  opacity: 0;
+  animation: riseIn 1s 0.72s ease forwards;
 }
 
 .hero-date {
@@ -398,6 +456,31 @@ button {
   margin: 0.7rem 0 1.25rem;
   opacity: 0;
   animation: riseIn 1s 0.8s ease forwards;
+}
+
+.ritual-strip {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: -0.1rem auto 1.1rem;
+  opacity: 0;
+  animation: riseIn 1s 0.86s ease forwards;
+}
+
+.ritual-strip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(240, 180, 41, 0.22);
+  border-radius: 999px;
+  background: rgba(47, 106, 62, 0.16);
+  font-family: var(--sans);
+  font-size: 0.5rem;
+  letter-spacing: 0.13rem;
+  text-transform: uppercase;
+  color: rgba(255, 247, 230, 0.66);
 }
 
 .hero-caption {
@@ -876,175 +959,6 @@ button {
 }
 
 /* ═══════════════════════════════════════
-   SECTION 4 — PLANNER (parchment)
-═══════════════════════════════════════ */
-#planner {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6rem 2rem;
-  position: relative;
-}
-
-/* Full-width frosted parchment */
-.planner-inner {
-  width: 100%;
-  max-width: 1080px;
-  background:
-    linear-gradient(135deg, rgba(255, 247, 230, 0.96), rgba(232, 213, 168, 0.9)),
-    rgba(245,230,200,0.93);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 4.2rem 4rem 3.6rem;
-  border: 1px solid rgba(139,90,26,0.25);
-  color: var(--ink);
-  position: relative;
-  box-shadow: 0 34px 90px rgba(0,0,0,0.28);
-}
-
-.planner-inner::before,
-.planner-inner::after {
-  content: '';
-  position: absolute;
-  left: 2rem;
-  right: 2rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(139, 90, 26, 0.32), transparent);
-}
-
-.planner-inner::before { top: 1.25rem; }
-.planner-inner::after { bottom: 1.25rem; }
-
-/* Vintage gazette header */
-.gazette-header {
-  text-align: center;
-  padding-bottom: 1.5rem;
-  margin-bottom: 2.5rem;
-  border-bottom: 3px double rgba(139,58,26,0.25);
-}
-
-.gazette-tag {
-  font-family: var(--sans);
-  font-size: 0.5rem;
-  letter-spacing: 0.3rem;
-  text-transform: uppercase;
-  color: var(--rust);
-  opacity: 0.6;
-  margin-bottom: 0.8rem;
-}
-
-.gazette-title {
-  font-family: var(--serif);
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  font-weight: 400;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.gazette-deck {
-  font-family: var(--display);
-  font-style: italic;
-  font-size: 1.08rem;
-  color: rgba(26,15,0,0.52);
-  margin-top: 0.7rem;
-}
-
-/* Newspaper-style module grid */
-.feat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  border: 1px solid rgba(139,90,26,0.15);
-  margin-bottom: 2.5rem;
-  background: rgba(255, 247, 230, 0.24);
-}
-
-.feat-col {
-  padding: 1.8rem;
-  border-right: 1px solid rgba(139,90,26,0.12);
-  border-bottom: 1px solid rgba(139,90,26,0.12);
-  transition: background 0.3s;
-  min-height: 178px;
-}
-
-.feat-col:nth-child(4) { border-right: none; }
-.feat-col:nth-child(n+5) { border-bottom: none; }
-.feat-col:nth-child(7) { grid-column: span 2; border-right: none; }
-.feat-col:hover { background: rgba(139,58,26,0.04); }
-
-.feat-num {
-  font-family: var(--sans);
-  font-size: 0.48rem;
-  letter-spacing: 0.12rem;
-  color: var(--sand);
-  text-transform: uppercase;
-  margin-bottom: 0.7rem;
-  display: block;
-}
-
-.feat-icon {
-  width: 36px; height: 36px;
-  border: 1px solid rgba(139,90,26,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-style: italic;
-  color: var(--wine);
-  background: rgba(139, 58, 26, 0.04);
-  margin-bottom: 0.7rem;
-}
-
-.feat-title {
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  color: var(--ink);
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-}
-
-.feat-body {
-  font-family: var(--sans);
-  font-size: 0.68rem;
-  color: rgba(26,15,0,0.5);
-  line-height: 1.7;
-  font-weight: 300;
-}
-
-.planner-cta-wrap { text-align: center; }
-
-.planner-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 1rem;
-  min-height: 48px;
-  padding: 1rem 3.5rem;
-  background: var(--ink);
-  color: var(--gold-pale);
-  font-family: var(--sans);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.26rem;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.4s ease;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-}
-
-.planner-cta:hover,
-.planner-cta:focus-visible {
-  background: transparent;
-  color: var(--ink);
-  letter-spacing: 0.28rem;
-  outline: none;
-}
-
-.planner-cta .arr { transition: transform 0.3s; }
-.planner-cta:hover .arr { transform: translateX(5px); }
-
-/* ═══════════════════════════════════════
    FOOTER
 ═══════════════════════════════════════ */
 footer {
@@ -1143,13 +1057,7 @@ footer::before {
   .story-open { min-height: 45vh; flex: none; width: 100%; }
   .story-panel { width: 100%; padding: 4rem 2.5rem; box-shadow: none; }
   .events-row { grid-template-columns: repeat(2, 1fr); }
-  .feat-grid { grid-template-columns: repeat(2, 1fr); }
-  .feat-col { border-right: 1px solid rgba(139,90,26,0.12); border-bottom: 1px solid rgba(139,90,26,0.12); }
-  .feat-col:nth-child(7) { grid-column: auto; }
-  .feat-col:nth-child(2n) { border-right: none; }
-  .feat-col:nth-last-child(1) { border-bottom: none; }
   .nav-dots { display: none; }
-  .planner-inner { padding: 3rem 2rem; }
 }
 
 @media (max-width: 600px) {
@@ -1176,19 +1084,14 @@ footer::before {
   .cd-block:nth-child(2) { border-right: none; }
   .cd-block:nth-child(1),
   .cd-block:nth-child(2) { border-bottom: 1px solid rgba(232, 200, 74, 0.14); }
-  .hero-cta,
-  .planner-cta {
-    width: min(100%, 315px);
+  .hero-cta {
+    width: min(100%, 285px);
     max-width: calc(100vw - 2rem);
     justify-content: center;
     padding-inline: 1.2rem;
     letter-spacing: 0.12rem;
   }
   .events-row { grid-template-columns: 1fr; }
-  .feat-grid { grid-template-columns: 1fr; }
-  .feat-col { border-right: none !important; border-bottom: 1px solid rgba(139,90,26,0.12) !important; }
-  .feat-col:last-child { border-bottom: none !important; }
-  .planner-inner { padding: 3rem 1.25rem; }
   footer { padding: 3.5rem 1.25rem; }
   .ft-names { font-size: 2.35rem; }
 }
@@ -1221,7 +1124,7 @@ footer::before {
 
 <header class="site-header" aria-label="Landing page header">
   <a class="site-lockup" href="#hero" aria-label="Akhila and Akshay home">
-    <span class="site-kicker">Wedding Suite</span>
+    <span class="site-kicker">Telugu Wedding Suite</span>
     <span class="site-name">Akhila &amp; Akshay</span>
   </a>
   <a class="site-action" href="dashboard.html">Open Dashboard</a>
@@ -1246,7 +1149,6 @@ footer::before {
   <button class="nav-dot active" type="button" data-target="hero" aria-label="Go to invitation"></button>
   <button class="nav-dot" type="button" data-target="story" aria-label="Go to story"></button>
   <button class="nav-dot" type="button" data-target="events" aria-label="Go to celebrations"></button>
-  <button class="nav-dot" type="button" data-target="planner" aria-label="Go to planning suite"></button>
 </nav>
 
 <!-- ═══════════════════════════════════
@@ -1257,13 +1159,14 @@ footer::before {
   <!-- HERO -->
   <section id="hero">
     <div class="hero-frame">
+      <div class="hero-expander" aria-hidden="true"></div>
       <span class="frame-corner fc-tl">✦</span>
       <span class="frame-corner fc-tr">✦</span>
       <span class="frame-corner fc-bl">✦</span>
       <span class="frame-corner fc-br">✦</span>
 
-      <span class="hero-symbol">ॐ</span>
-      <p class="hero-eyebrow">श्री गणेशाय नमः · A private celebration planning suite for the union of</p>
+      <span class="hero-symbol">శుభం</span>
+      <p class="hero-eyebrow">శ్రీ గణేశాయ నమః · A private Telugu pelli planning suite for the union of</p>
 
       <div class="gold-rule">
         <span class="rule-bar"></span>
@@ -1275,6 +1178,8 @@ footer::before {
         Akhila <span class="amp">&amp;</span> Akshay
       </h1>
 
+      <span class="hero-telugu">అఖిల &amp; అక్షయ్ పెళ్లి వేడుక</span>
+
       <div class="gold-rule" style="animation-delay:.7s">
         <span class="rule-bar"></span>
         <span class="rule-gem">◆ ◆ ◆</span>
@@ -1283,8 +1188,14 @@ footer::before {
 
       <div class="hero-date">30 August 2026</div>
 
+      <div class="ritual-strip" aria-label="Telugu wedding rituals">
+        <span>Jeelakarra Bellam</span>
+        <span>Talambralu</span>
+        <span>Mangala Snaanam</span>
+      </div>
+
       <p class="hero-caption">
-        A cinematic wedding entrance for the family, and one calm planning room behind it for guests, ceremonies, vendors, budget, menus, and the final run of show.
+        A temple-warm wedding entrance for the family, with one calm planning room behind it for guests, ceremonies, vendors, budget, menus, and the final muhurtham flow.
       </p>
 
       <a href="dashboard.html" class="hero-cta">
@@ -1313,12 +1224,12 @@ footer::before {
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="scroll-hint">
-      <span class="sh-text">Scroll to explore</span>
-      <div class="sh-chevrons">
-        <span></span><span></span><span></span>
+      <div class="scroll-hint">
+        <span class="sh-text">Scroll to open the pelli veduka</span>
+        <div class="sh-chevrons">
+          <span></span><span></span><span></span>
+        </div>
       </div>
     </div>
   </section>
@@ -1327,10 +1238,10 @@ footer::before {
   <section id="story">
     <div class="story-open"></div>
     <div class="story-panel">
-      <p class="s-eyebrow reveal d1">The Royal Union</p>
-      <h2 class="s-heading reveal d2">An Entrance <em>Worthy</em><br>of the Occasion</h2>
+      <p class="s-eyebrow reveal d1">Mana Pelli Veduka</p>
+      <h2 class="s-heading reveal d2">A Telugu Celebration <em>Wrapped</em><br>in Tradition</h2>
       <p class="s-body reveal d3">
-        The first impression should feel like opening a private invitation: warm, composed, and deeply personal. Behind the welcome sits the quieter machinery of the wedding, where every family note, vendor decision, and ceremony detail can stay beautifully organized.
+        The welcome opens with the warmth of mango-leaf toranam, brass lamps, jasmine, turmeric, kumkum, and pattu silk. Past the invitation, the family dashboard keeps every note, vendor decision, and ceremony detail beautifully organized.
       </p>
       <div class="inv-card reveal d4">
         <div class="inv-row">
@@ -1350,16 +1261,16 @@ footer::before {
     <div class="ev-header">
       <div class="ev-rule"></div>
       <h2 class="ev-title reveal">The Celebrations</h2>
-      <p class="ev-sub reveal d1">Four ceremonies · One coordinated celebration</p>
+      <p class="ev-sub reveal d1">Telugu rituals · Family moments · One coordinated celebration</p>
       <div class="ev-rule" style="margin-top:1.5rem"></div>
     </div>
 
     <div class="events-row">
       <div class="ev-card reveal d1">
         <span class="ev-num">I.</span>
-        <span class="ev-icon">M</span>
-        <h3 class="ev-name">Mehendi</h3>
-        <span class="ev-name-sub">Henna Ceremony</span>
+        <span class="ev-icon">P</span>
+        <h3 class="ev-name">Pellikuthuru</h3>
+        <span class="ev-name-sub">Haldi &amp; Blessings</span>
         <div class="ev-sep"></div>
         <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
         <span class="ev-badge">Coming Soon</span>
@@ -1368,7 +1279,7 @@ footer::before {
         <span class="ev-num">II.</span>
         <span class="ev-icon">S</span>
         <h3 class="ev-name">Sangeet</h3>
-        <span class="ev-name-sub">Music &amp; Dance</span>
+        <span class="ev-name-sub">Music, Family &amp; Dance</span>
         <div class="ev-sep"></div>
         <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
         <span class="ev-badge">Coming Soon</span>
@@ -1376,8 +1287,8 @@ footer::before {
       <div class="ev-card reveal d3">
         <span class="ev-num">III.</span>
         <span class="ev-icon">W</span>
-        <h3 class="ev-name">Wedding</h3>
-        <span class="ev-name-sub">Main Ceremony</span>
+        <h3 class="ev-name">Muhurtham</h3>
+        <span class="ev-name-sub">Jeelakarra Bellam &amp; Talambralu</span>
         <div class="ev-sep"></div>
         <p class="ev-meta">30 August 2026<br>Venue · To Be Confirmed</p>
         <span class="ev-badge confirmed">Confirmed</span>
@@ -1386,73 +1297,10 @@ footer::before {
         <span class="ev-num">IV.</span>
         <span class="ev-icon">R</span>
         <h3 class="ev-name">Reception</h3>
-        <span class="ev-name-sub">Grand Celebration</span>
+        <span class="ev-name-sub">Grand Family Celebration</span>
         <div class="ev-sep"></div>
         <p class="ev-meta">Date · To Be Announced<br>Venue · To Be Confirmed</p>
         <span class="ev-badge">Coming Soon</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- PLANNER -->
-  <section id="planner">
-    <div class="planner-inner">
-      <div class="gazette-header reveal">
-        <p class="gazette-tag">The Private Planning Suite</p>
-        <h2 class="gazette-title">Every decision has its place.</h2>
-        <p class="gazette-deck">A calm workspace for the people making the celebration happen.</p>
-      </div>
-
-      <div class="feat-grid">
-        <div class="feat-col reveal d1">
-          <span class="feat-num">I — Guests</span>
-          <div class="feat-icon">G</div>
-          <h4 class="feat-title">Guest List</h4>
-          <p class="feat-body">RSVPs, family grouping, dietary notes, and invitation readiness.</p>
-        </div>
-        <div class="feat-col reveal d2">
-          <span class="feat-num">II — Tasks</span>
-          <div class="feat-icon">T</div>
-          <h4 class="feat-title">Task Board</h4>
-          <p class="feat-body">Owners, due dates, priorities, and the next clear action.</p>
-        </div>
-        <div class="feat-col reveal d3">
-          <span class="feat-num">III — Finance</span>
-          <div class="feat-icon">B</div>
-          <h4 class="feat-title">Budget</h4>
-          <p class="feat-body">Category totals, paid amounts, pending balances, and surprises avoided.</p>
-        </div>
-        <div class="feat-col reveal d4">
-          <span class="feat-num">IV — Vendors</span>
-          <div class="feat-icon">V</div>
-          <h4 class="feat-title">Vendors</h4>
-          <p class="feat-body">Contacts, booking states, follow-ups, and contract confidence.</p>
-        </div>
-        <div class="feat-col reveal d5">
-          <span class="feat-num">V — Venues</span>
-          <div class="feat-icon">P</div>
-          <h4 class="feat-title">Venues</h4>
-          <p class="feat-body">Spaces, capacities, timings, and movement between celebrations.</p>
-        </div>
-        <div class="feat-col reveal d6">
-          <span class="feat-num">VI — Dining</span>
-          <div class="feat-icon">D</div>
-          <h4 class="feat-title">Food &amp; Menu</h4>
-          <p class="feat-body">Menus, preferences, guest restrictions, and hospitality coverage.</p>
-        </div>
-        <div class="feat-col reveal d6">
-          <span class="feat-num">VII — Timeline</span>
-          <div class="feat-icon">L</div>
-          <h4 class="feat-title">Run of Show</h4>
-          <p class="feat-body">Milestones, ceremony flow, reminders, and the final wedding week rhythm.</p>
-        </div>
-      </div>
-
-      <div class="planner-cta-wrap reveal d4">
-        <a href="dashboard.html" class="planner-cta">
-          Enter the Dashboard
-          <span class="arr">→</span>
-        </a>
       </div>
     </div>
   </section>
@@ -1462,7 +1310,7 @@ footer::before {
 <!-- FOOTER -->
 <footer>
   <h2 class="ft-names">Akhila <span>&amp;</span> Akshay</h2>
-  <p class="ft-detail">30 August 2026 · With Love</p>
+  <p class="ft-detail">30 August 2026 · మా పెళ్లి వేడుక</p>
   <span class="ft-orn">✦ &nbsp; ✦ &nbsp; ✦</span>
   <p class="ft-credit">Made with love for the most beautiful day</p>
 </footer>
@@ -1476,11 +1324,14 @@ footer::before {
    Direction: left → right (image pans right)
 ══════════════════════════════════ */
 const rollingImg = document.getElementById('rolling-img');
+const heroSection = document.getElementById('hero');
 
 function updateRolling() {
   const scrollTop   = window.scrollY;
   const maxScroll   = document.documentElement.scrollHeight - window.innerHeight;
   const progress    = Math.min(1, scrollTop / maxScroll);
+  const heroScrollable = Math.max(1, heroSection.offsetHeight - window.innerHeight);
+  const heroProgress = Math.min(1, Math.max(0, scrollTop / heroScrollable));
 
   // Image is 280vw wide. Viewport is 100vw.
   // So we can travel 180vw horizontally.
@@ -1493,6 +1344,7 @@ function updateRolling() {
   const yPos        = progress * 40;
 
   rollingImg.style.transform = `translate(${xPos}px, ${yPos}px)`;
+  document.documentElement.style.setProperty('--hero-progress', heroProgress.toFixed(3));
 }
 
 window.addEventListener('scroll', updateRolling, { passive: true });
@@ -1527,7 +1379,7 @@ const io = new IntersectionObserver(entries =>
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 /* ══ NAV DOTS ══ */
-const sections = ['hero','story','events','planner'];
+const sections = ['hero','story','events'];
 const dots     = document.querySelectorAll('.nav-dot');
 
 function goTo(id) {
