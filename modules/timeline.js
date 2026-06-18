@@ -15,12 +15,10 @@ const timelineModule = {
   ],
 
   eventTypes: [
-    'Ceremony',
-    'Rehearsal',
     'Sangeet',
-    'Mehendi',
-    'Reception',
-    'Pre-Wedding'
+    'Pellikuthuru',
+    'Marriage',
+    'Satyanarayana Swamy Vratam'
   ],
 
   async fetch(filters = {}) {

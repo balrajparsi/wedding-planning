@@ -8,12 +8,10 @@ const foodModule = {
   filteredItems: [],
 
   eventTypes: [
-    'Main Wedding',
-    'Pre-Wedding',
-    'Rehearsal Dinner',
     'Sangeet',
-    'Mehendi',
-    'Reception'
+    'Pellikuthuru',
+    'Marriage',
+    'Satyanarayana Swamy Vratam'
   ],
 
   courseTypes: [

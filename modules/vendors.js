@@ -23,12 +23,10 @@ const vendorModule = {
   ],
 
   eventTypes: [
-    'Ceremony',
-    'Rehearsal Dinner',
-    'Pre-Wedding',
     'Sangeet',
-    'Mehendi',
-    'Reception',
+    'Pellikuthuru',
+    'Marriage',
+    'Satyanarayana Swamy Vratam',
     'Multiple Events'
   ],
 

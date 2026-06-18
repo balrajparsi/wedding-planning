@@ -8,13 +8,10 @@ const venueModule = {
   filteredVenues: [],
 
   eventTypes: [
-    'Ceremony',
-    'Rehearsal Dinner',
-    'Pre-Wedding',
     'Sangeet',
-    'Mehendi',
-    'Reception',
-    'Cocktail Hour'
+    'Pellikuthuru',
+    'Marriage',
+    'Satyanarayana Swamy Vratam'
   ],
 
   amenities: [

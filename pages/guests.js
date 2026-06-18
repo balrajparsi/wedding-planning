@@ -560,13 +560,15 @@ const guestListPage = {
       dietary = cleanParts.find(part => /(veg|vegan|non|meat|chicken|gluten|apane|family|none|diet)/i.test(part)) || '';
     }
     const rsvpStatus = cleanParts.find(part => /(accepted|confirmed|pending|declined|maybe|attending|not attending)/i.test(part)) || '';
-    const eventWords = text.match(/\b(pre-wedding|wedding|reception|sangeet|mehendi|haldi|ceremony|cocktail)\b/gi) || [];
+    const eventPattern = /\b(satyanarayana(?:\s+swamy)?(?:\s+vratam)?|vratam|pelli\s*kuthuru|pellikuthuru|nalugu|marriage|wedding|sangeet|pre-wedding|reception|mehendi|haldi|ceremony|cocktail)\b/gi;
+    const eventWords = text.match(eventPattern) || [];
+    const extractEvents = value => [...new Set((String(value || '').match(eventPattern) || [])
+      .map(eventName => this.normalizeEventName(eventName))
+      .filter(Boolean))];
     const events = singleLine
-      ? [...new Set(eventWords.map(eventName => eventName.trim()))]
+      ? extractEvents(text)
       : cleanParts
-        .filter(part => /(wedding|reception|sangeet|mehendi|haldi|ceremony|cocktail|pre-wedding)/i.test(part))
-        .flatMap(part => part.split(/[+/&]/).map(item => item.trim()))
-        .filter(Boolean);
+        .flatMap(part => extractEvents(part));
 
     let namePart = cleanParts.find(part =>
       part !== email &&
@@ -616,10 +618,20 @@ const guestListPage = {
       relationship: String(data.relationship || '').trim(),
       partySize: Math.max(1, parseInt(data.partySize, 10) || 1),
       dietaryRestrictions: this.normalizeDietary(data.dietaryRestrictions),
-      events: events.map(e => e.trim()).filter(Boolean),
+      events: events.map(e => this.normalizeEventName(e)).filter(Boolean),
       rsvpStatus: this.normalizeRsvpStatus(data.rsvpStatus),
       notes: String(data.notes || '').trim()
     };
+  },
+
+  normalizeEventName(value) {
+    const text = String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!text) return '';
+    if (text.includes('sangeet')) return 'Sangeet';
+    if (text.includes('pellikuthuru') || text.includes('pelli kuthuru') || text.includes('nalugu') || text.includes('haldi') || text.includes('mehendi')) return 'Pellikuthuru';
+    if (text.includes('satyanarayana') || text.includes('vratam')) return 'Satyanarayana Swamy Vratam';
+    if (text.includes('marriage') || text.includes('wedding') || text.includes('ceremony')) return 'Marriage';
+    return '';
   },
 
   normalizeDietary(value) {
