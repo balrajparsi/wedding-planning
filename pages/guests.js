@@ -346,7 +346,7 @@ const guestListPage = {
   async submitBulkInvite(modal) {
     const form = modal.querySelector('form');
     const filterStatus = form.querySelector('[name="filterStatus"]')?.value || 'all';
-    const subject = form.querySelector('[name="subject"]')?.value || `You're invited — Akhila & Akshay's Wedding`;
+    const subject = form.querySelector('[name="subject"]')?.value || `RSVP requested - Akhila & Akshay's Wedding`;
     const message = form.querySelector('[name="message"]')?.value || '';
 
     try {
@@ -627,8 +627,9 @@ const guestListPage = {
   normalizeEventName(value) {
     const text = String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
     if (!text) return '';
+    if (text.includes('haldi')) return 'Haldi';
     if (text.includes('sangeet')) return 'Sangeet';
-    if (text.includes('pellikuthuru') || text.includes('pelli kuthuru') || text.includes('nalugu') || text.includes('haldi') || text.includes('mehendi')) return 'Pellikuthuru';
+    if (text.includes('pellikuthuru') || text.includes('pelli kuthuru') || text.includes('nalugu') || text.includes('mehendi')) return 'Pellikuthuru';
     if (text.includes('satyanarayana') || text.includes('vratam')) return 'Satyanarayana Swamy Vratam';
     if (text.includes('marriage') || text.includes('wedding') || text.includes('ceremony')) return 'Marriage';
     return '';

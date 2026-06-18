@@ -228,14 +228,19 @@ Required for production:
 VERCEL_KV_REST_API_URL    # Vercel KV endpoint
 VERCEL_KV_REST_API_TOKEN  # Vercel KV token
 JWT_SECRET                # Minimum 32 characters
+RSVP_SECRET               # Signs guest-specific RSVP links
 
 # Optional
 RESEND_API_KEY            # For email notifications
+INVITE_FROM_EMAIL         # Verified Resend sender address
+SITE_URL                  # Public site URL used in RSVP links
+WEDDING_TIMEZONE          # Calendar timezone, defaults to America/Chicago
 ```
 
 ## 🚨 Notes
 
 - **Development**: Uses in-memory KV fallback if env vars not set
+- **RSVP**: Guest email links open `rsvp.html` with a signed token and offer an Apple Calendar `.ics` download
 - **Security**: Never commit `.env.local` or `.env.*.local`
 - **Polling**: 5-second sync interval is suitable for wedding planning
 - **Scaling**: Vercel KV has limits; fine for single wedding (thousands of guests)

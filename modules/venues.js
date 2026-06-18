@@ -8,6 +8,7 @@ const venueModule = {
   filteredVenues: [],
 
   eventTypes: [
+    'Haldi',
     'Sangeet',
     'Pellikuthuru',
     'Marriage',

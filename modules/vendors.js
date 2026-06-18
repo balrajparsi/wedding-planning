@@ -23,6 +23,7 @@ const vendorModule = {
   ],
 
   eventTypes: [
+    'Haldi',
     'Sangeet',
     'Pellikuthuru',
     'Marriage',

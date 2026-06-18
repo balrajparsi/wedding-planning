@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP | Akhila & Akshay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ivory: #fff5dc;
+      --ivory-deep: #f2dfb5;
+      --gold: #c89422;
+      --gold-deep: #8c5f11;
+      --kumkum: #9f1d22;
+      --leaf: #315a31;
+      --ink: #281309;
+      --muted: #705843;
+      --shadow: rgba(48, 20, 8, 0.28);
+      --ring: rgba(200, 148, 34, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(32, 12, 4, 0.72), rgba(32, 12, 4, 0.22) 42%, rgba(32, 12, 4, 0.66)),
+        url("assets/images/nalugu-telugu-wedding-decor.jpg") center / cover fixed no-repeat;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255, 238, 188, 0.20), transparent 26%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.34));
+    }
+
+    main {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 0.86fr) minmax(340px, 1.14fr);
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: center;
+      padding: clamp(1.25rem, 4vw, 4rem);
+    }
+
+    .rsvp-intro {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: min(780px, calc(100vh - 8rem));
+      color: var(--ivory);
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #f8d680;
+    }
+
+    .brand-line::before,
+    .brand-line::after {
+      content: "";
+      width: 3.5rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #f8d680);
+    }
+
+    .brand-line::after {
+      background: linear-gradient(90deg, #f8d680, transparent);
+    }
+
+    h1 {
+      margin: 0.8rem 0 1rem;
+      max-width: 680px;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(4rem, 9vw, 8.5rem);
+      line-height: 0.84;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .amp {
+      color: #f8c647;
+      font-style: italic;
+    }
+
+    .intro-copy {
+      max-width: 40rem;
+      margin: 0;
+      color: rgba(255, 245, 220, 0.88);
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.35rem, 2.1vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .date-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .date-pill {
+      border: 1px solid rgba(248, 214, 128, 0.45);
+      background: rgba(44, 16, 5, 0.32);
+      color: #ffe6a7;
+      padding: 0.72rem 0.9rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel {
+      width: min(100%, 760px);
+      margin-left: auto;
+      background:
+        linear-gradient(145deg, rgba(255, 248, 226, 0.98), rgba(244, 222, 176, 0.96)),
+        radial-gradient(circle at top right, rgba(200, 148, 34, 0.16), transparent 34%);
+      border: 1px solid rgba(219, 172, 77, 0.62);
+      box-shadow: 0 28px 80px var(--shadow);
+      padding: clamp(1.2rem, 3vw, 2.4rem);
+      position: relative;
+    }
+
+    .panel::before,
+    .panel::after {
+      content: "";
+      position: absolute;
+      width: 3rem;
+      height: 3rem;
+      border-color: var(--gold);
+      border-style: solid;
+      pointer-events: none;
+    }
+
+    .panel::before {
+      top: 1rem;
+      left: 1rem;
+      border-width: 1px 0 0 1px;
+    }
+
+    .panel::after {
+      right: 1rem;
+      bottom: 1rem;
+      border-width: 0 1px 1px 0;
+    }
+
+    .panel-header {
+      padding: 1rem 1rem 1.4rem;
+      border-bottom: 1px solid rgba(140, 95, 17, 0.24);
+    }
+
+    .eyebrow {
+      margin: 0 0 0.55rem;
+      color: var(--kumkum);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .guest-name {
+      margin: 0;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.45rem, 5vw, 4.1rem);
+      line-height: 0.94;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .guest-sub {
+      margin: 0.8rem 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.98rem;
+    }
+
+    form {
+      padding: 1.25rem 1rem 0.4rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    label,
+    legend {
+      display: block;
+      margin-bottom: 0.48rem;
+      color: var(--gold-deep);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(140, 95, 17, 0.26);
+      background: rgba(255, 252, 241, 0.76);
+      color: var(--ink);
+      font: inherit;
+      padding: 0.9rem 0.95rem;
+      outline: none;
+      transition: border 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: rgba(255, 252, 241, 0.96);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 5.5rem;
+    }
+
+    .events-field {
+      margin: 1.35rem 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .events-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .event-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.95rem;
+      border: 1px solid rgba(140, 95, 17, 0.20);
+      background: rgba(255, 252, 241, 0.55);
+    }
+
+    .event-title {
+      margin: 0;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.65rem;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .event-meta {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .event-response {
+      display: grid;
+      grid-template-columns: repeat(3, 2.8rem);
+      gap: 0.35rem;
+    }
+
+    .event-response label {
+      margin: 0;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .event-response input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .event-response span {
+      display: grid;
+      place-items: center;
+      height: 2.7rem;
+      border: 1px solid rgba(140, 95, 17, 0.24);
+      background: rgba(255, 255, 255, 0.42);
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease, border 160ms ease;
+    }
+
+    .event-response input:checked + span {
+      transform: translateY(-1px);
+      border-color: var(--gold);
+      background: linear-gradient(145deg, #9f1d22, #c89422);
+      color: #fff8e8;
+      box-shadow: 0 10px 26px rgba(159, 29, 34, 0.22);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+    }
+
+    .button,
+    .calendar-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.15rem;
+      padding: 0.9rem 1.2rem;
+      border: 0;
+      color: #fff8e8;
+      background: linear-gradient(135deg, #8c151a, #c89422);
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 18px 36px rgba(112, 36, 16, 0.26);
+    }
+
+    .calendar-link {
+      color: var(--gold-deep);
+      background: rgba(255, 255, 255, 0.36);
+      border: 1px solid rgba(140, 95, 17, 0.24);
+      box-shadow: none;
+    }
+
+    .status {
+      margin: 1rem 0 0;
+      padding: 0.95rem 1rem;
+      border: 1px solid rgba(140, 95, 17, 0.2);
+      background: rgba(255, 252, 241, 0.52);
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .status.success {
+      border-color: rgba(49, 90, 49, 0.36);
+      color: var(--leaf);
+    }
+
+    .status.error {
+      border-color: rgba(159, 29, 34, 0.34);
+      color: var(--kumkum);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        background-attachment: scroll;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .rsvp-intro {
+        min-height: auto;
+        gap: 2rem;
+      }
+
+      .panel {
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 0.75rem;
+      }
+
+      h1 {
+        font-size: clamp(3.4rem, 18vw, 5.2rem);
+      }
+
+      .form-grid,
+      .event-row {
+        grid-template-columns: 1fr;
+      }
+
+      .event-response {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .button,
+      .calendar-link {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="rsvp-intro" aria-label="Wedding invitation">
+      <div>
+        <div class="brand-line">Mana Pelli Veduka</div>
+        <h1>Akhila <span class="amp">&amp;</span><br>Akshay</h1>
+        <p class="intro-copy">A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
+      </div>
+      <div class="date-strip" aria-label="Celebration dates">
+        <span class="date-pill">28 Aug · Haldi 11 AM</span>
+        <span class="date-pill">28 Aug · Sangeet 6 PM</span>
+        <span class="date-pill">30 Aug · Marriage 11 AM</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <div class="panel-header">
+        <p class="eyebrow">Private RSVP</p>
+        <h2 class="guest-name" id="guestName">Welcome</h2>
+        <p class="guest-sub" id="guestSub">Opening your invitation...</p>
+      </div>
+
+      <form id="rsvpForm" class="hidden">
+        <div class="form-grid">
+          <div>
+            <label for="rsvpStatus">Your Response</label>
+            <select id="rsvpStatus" name="rsvpStatus">
+              <option value="accepted">Joyfully Attending</option>
+              <option value="maybe">Still Confirming</option>
+              <option value="declined">Unable To Attend</option>
+            </select>
+          </div>
+          <div>
+            <label for="partySize">Party Size</label>
+            <input id="partySize" name="partySize" type="number" min="1" value="1">
+          </div>
+          <div>
+            <label for="dietaryRestrictions">Dietary Preference</label>
+            <select id="dietaryRestrictions" name="dietaryRestrictions">
+              <option value="none">None</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="non-vegetarian">Non-Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="gluten-free">Gluten-Free</option>
+              <option value="apane">Apane / Family</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="rsvpNotes">Notes</label>
+            <textarea id="rsvpNotes" name="rsvpNotes" placeholder="Dietary details, arrival note, or anything the family should know."></textarea>
+          </div>
+        </div>
+
+        <fieldset class="events-field">
+          <legend>Your Events</legend>
+          <div class="events-list" id="eventsList"></div>
+        </fieldset>
+
+        <div class="action-row">
+          <button class="button" type="submit">Send RSVP</button>
+          <a class="calendar-link" id="calendarLink" href="#" download>Add To Apple Calendar</a>
+        </div>
+        <div class="status hidden" id="statusBox"></div>
+      </form>
+
+      <div class="status" id="loadingBox">Please wait while we prepare your RSVP.</div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const form = document.getElementById('rsvpForm');
+    const loadingBox = document.getElementById('loadingBox');
+    const statusBox = document.getElementById('statusBox');
+    const eventsList = document.getElementById('eventsList');
+    const guestName = document.getElementById('guestName');
+    const guestSub = document.getElementById('guestSub');
+    const calendarLink = document.getElementById('calendarLink');
+
+    let currentGuest = null;
+
+    function setStatus(message, type = '') {
+      statusBox.textContent = message;
+      statusBox.className = `status ${type}`.trim();
+      statusBox.classList.remove('hidden');
+    }
+
+    function eventRadioName(event) {
+      return `event-${event.id}`;
+    }
+
+    function renderEvents(events) {
+      eventsList.innerHTML = events.map((event, index) => {
+        const selected = event.response || 'pending';
+        const name = eventRadioName(event);
+        return `
+          <div class="event-row">
+            <div>
+              <p class="event-title">${index + 1}. ${event.name}</p>
+              <p class="event-meta">${event.displayDate} · ${event.time}<br>${event.subtitle}</p>
+            </div>
+            <div class="event-response" aria-label="${event.name} response">
+              <label title="Attending">
+                <input type="radio" name="${name}" value="attending" data-event="${event.name}" ${selected === 'attending' ? 'checked' : ''}>
+                <span>Yes</span>
+              </label>
+              <label title="Maybe">
+                <input type="radio" name="${name}" value="maybe" data-event="${event.name}" ${selected === 'maybe' || selected === 'pending' ? 'checked' : ''}>
+                <span>Maybe</span>
+              </label>
+              <label title="Not attending">
+                <input type="radio" name="${name}" value="not_attending" data-event="${event.name}" ${selected === 'not_attending' ? 'checked' : ''}>
+                <span>No</span>
+              </label>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadRsvp() {
+      if (!token) {
+        loadingBox.textContent = 'This RSVP link is missing its private token.';
+        loadingBox.classList.add('error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/rsvp?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to open RSVP');
+
+        currentGuest = data.guest;
+        guestName.textContent = currentGuest.name || 'Dear Guest';
+        guestSub.textContent = 'Please confirm your attendance for the celebrations listed below.';
+        document.getElementById('rsvpStatus').value = currentGuest.rsvpStatus === 'pending' ? 'accepted' : currentGuest.rsvpStatus;
+        document.getElementById('partySize').value = currentGuest.partySize || 1;
+        document.getElementById('dietaryRestrictions').value = currentGuest.dietaryRestrictions || 'none';
+        document.getElementById('rsvpNotes').value = currentGuest.rsvpNotes || '';
+        calendarLink.href = `/api/rsvp?action=calendar&token=${encodeURIComponent(token)}`;
+        renderEvents(currentGuest.events || []);
+
+        loadingBox.classList.add('hidden');
+        form.classList.remove('hidden');
+      } catch (error) {
+        loadingBox.textContent = error.message || 'This RSVP link could not be opened.';
+        loadingBox.classList.add('error');
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!currentGuest) return;
+
+      const eventResponses = {};
+      currentGuest.events.forEach(item => {
+        const selected = form.querySelector(`input[name="${eventRadioName(item)}"]:checked`);
+        eventResponses[item.name] = selected?.value || 'pending';
+      });
+
+      const payload = {
+        token,
+        rsvpStatus: document.getElementById('rsvpStatus').value,
+        partySize: document.getElementById('partySize').value,
+        dietaryRestrictions: document.getElementById('dietaryRestrictions').value,
+        rsvpNotes: document.getElementById('rsvpNotes').value,
+        eventResponses
+      };
+
+      try {
+        const response = await fetch('/api/rsvp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to save RSVP');
+        currentGuest = data.guest;
+        renderEvents(currentGuest.events || []);
+        setStatus('Your RSVP has been received. Thank you for celebrating with Akhila and Akshay.', 'success');
+      } catch (error) {
+        setStatus(error.message || 'Unable to save RSVP right now.', 'error');
+      }
+    });
+
+    loadRsvp();
+  </script>
+</body>
+</html>

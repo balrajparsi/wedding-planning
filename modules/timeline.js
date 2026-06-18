@@ -15,6 +15,7 @@ const timelineModule = {
   ],
 
   eventTypes: [
+    'Haldi',
     'Sangeet',
     'Pellikuthuru',
     'Marriage',

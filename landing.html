@@ -500,12 +500,12 @@ body {
   color: rgba(201,168,76,0.6); margin-top: 0.7rem;
 }
 
-/* 4-card grid */
+/* 5-card grid */
 .cer-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1px;
-  max-width: 1120px; width: 100%;
+  max-width: 1220px; width: 100%;
   background: rgba(201,168,76,0.12);
   border: 1px solid rgba(201,168,76,0.18);
 }
@@ -912,13 +912,23 @@ footer::before {
     <div class="cer-header">
       <div class="cer-rule"></div>
       <h2 class="cer-title r">The Celebrations</h2>
-      <p class="cer-sub r r1">Four dated events &nbsp;·&nbsp; One Telugu celebration</p>
+      <p class="cer-sub r r1">Five dated events &nbsp;·&nbsp; One Telugu celebration</p>
       <div class="cer-rule" style="margin-top:1.6rem"></div>
     </div>
 
     <div class="cer-grid">
       <div class="cer-card r r1">
         <span class="cer-num">I.</span>
+        <span class="cer-icon">H</span>
+        <h3 class="cer-name">Haldi</h3>
+        <span class="cer-sub-name">Turmeric &amp; Blessings</span>
+        <div class="cer-sep"></div>
+        <p class="cer-meta">28 August 2026 &nbsp;·&nbsp; 11:00 AM<br>Venue &nbsp;·&nbsp; To Be Confirmed</p>
+        <span class="cer-badge confirmed">Scheduled</span>
+      </div>
+
+      <div class="cer-card r r2">
+        <span class="cer-num">II.</span>
         <span class="cer-icon">S</span>
         <h3 class="cer-name">Sangeet</h3>
         <span class="cer-sub-name">Music, Family &amp; Dance</span>
@@ -927,8 +937,8 @@ footer::before {
         <span class="cer-badge confirmed">Scheduled</span>
       </div>
 
-      <div class="cer-card r r2">
-        <span class="cer-num">II.</span>
+      <div class="cer-card r r3">
+        <span class="cer-num">III.</span>
         <span class="cer-icon">P</span>
         <h3 class="cer-name">Pellikuthuru</h3>
         <span class="cer-sub-name">Nalugu &amp; Blessings</span>
@@ -937,8 +947,8 @@ footer::before {
         <span class="cer-badge">Time TBD</span>
       </div>
 
-      <div class="cer-card r r3">
-        <span class="cer-num">III.</span>
+      <div class="cer-card r r4">
+        <span class="cer-num">IV.</span>
         <span class="cer-icon">M</span>
         <h3 class="cer-name">Marriage</h3>
         <span class="cer-sub-name">Jeelakarra Bellam &amp; Talambralu</span>
@@ -947,8 +957,8 @@ footer::before {
         <span class="cer-badge confirmed">Confirmed</span>
       </div>
 
-      <div class="cer-card r r4">
-        <span class="cer-num">IV.</span>
+      <div class="cer-card r r5">
+        <span class="cer-num">V.</span>
         <span class="cer-icon">V</span>
         <h3 class="cer-name">Satyanarayana Swamy Vratam</h3>
         <span class="cer-sub-name">Post-wedding Pooja</span>
@@ -997,7 +1007,7 @@ footer::before {
           <span class="t-num">V — Venues</span>
           <div class="t-icon">📍</div>
           <h4 class="t-name">Venues</h4>
-          <p class="t-desc">Sangeet, pellikuthuru, marriage &amp; vratam venue management.</p>
+          <p class="t-desc">Haldi, sangeet, pellikuthuru, marriage &amp; vratam venue management.</p>
         </div>
         <div class="suite-tile r r6">
           <span class="t-num">VI — Dining</span>

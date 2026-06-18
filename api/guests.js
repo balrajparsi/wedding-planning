@@ -10,6 +10,12 @@
 
 const crypto = require('crypto');
 const kv = require('../lib/kv');
+const {
+  buildRsvpUrl,
+  buildCalendarUrl,
+  getInvitedEvents,
+  normalizeEvents
+} = require('../lib/rsvp');
 
 // Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
@@ -144,7 +150,7 @@ async function handleAddGuest(req, res) {
     partySize: partySize || 1,
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
-    events: Array.isArray(events) ? events : [],
+    events: normalizeEvents(events),
     rsvpStatus: 'pending',
     invitedDate: new Date().toISOString(),
     rsvpDate: null,
@@ -186,7 +192,7 @@ async function handleUpdateGuest(req, res) {
   if (partySize !== undefined) guest.partySize = partySize;
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
-  if (events !== undefined) guest.events = Array.isArray(events) ? events : [];
+  if (events !== undefined) guest.events = normalizeEvents(events);
 
   if (rsvpStatus !== undefined) {
     guest.rsvpStatus = rsvpStatus;
@@ -281,9 +287,7 @@ async function handleImportGuests(req, res) {
 }
 
 function normalizeImportedGuest(rawGuest = {}) {
-  const events = Array.isArray(rawGuest.events)
-    ? rawGuest.events.filter(Boolean)
-    : String(rawGuest.events || '').split(/[|;,]/).map(e => e.trim()).filter(Boolean);
+  const events = normalizeEvents(rawGuest.events);
 
   return {
     name: String(rawGuest.name || '').trim(),
@@ -394,8 +398,10 @@ async function handleBulkInvite(req, res) {
 
   if (RESEND_API_KEY && withEmail.length > 0) {
     for (const g of withEmail) {
-      const finalSubject = subject || `You're invited — Akhila & Akshay's Wedding · 30 August 2026 · 11 AM`;
-      const html = buildInviteHtml(g, message, SITE_URL);
+      const finalSubject = subject || `RSVP requested - Akhila & Akshay's Wedding`;
+      const rsvpUrl = buildRsvpUrl(SITE_URL, g);
+      const calendarUrl = buildCalendarUrl(SITE_URL, g);
+      const html = buildInviteHtml(g, message, { rsvpUrl, calendarUrl });
       try {
         const r = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -449,39 +455,59 @@ async function handleBulkInvite(req, res) {
   });
 }
 
-function buildInviteHtml(guest, customMessage, siteUrl) {
-  const greeting = guest.name ? `Dear ${guest.name},` : 'Dear friend,';
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildInviteHtml(guest, customMessage, links) {
+  const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
   const extra = customMessage
-    ? `<p style="font-size:15px;line-height:1.7;color:#444;margin:18px 0;">${customMessage.replace(/\n/g,'<br>')}</p>`
+    ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
     : '';
+  const eventRows = getInvitedEvents(guest).map(event => `
+            <tr>
+              <td style="padding:12px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Georgia,serif;font-size:19px;color:#281309;">${escapeHtml(event.name)}</td>
+              <td style="padding:12px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;">${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}</td>
+            </tr>`).join('');
+
   return `<!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#f5e6c8;font-family:Georgia,'Cormorant Garamond',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5e6c8;padding:40px 20px;">
+<html><body style="margin:0;padding:0;background:#f3dfb7;font-family:Georgia,'Cormorant Garamond',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3dfb7;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fffaf0;border:1px solid #d4a017;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,0.1);">
-        <tr><td style="padding:8px;background:linear-gradient(90deg,#b8860b,#d4a017,#b8860b);"></td></tr>
-        <tr><td align="center" style="padding:40px 36px 24px;">
-          <div style="font-size:32px;color:#b8860b;margin-bottom:6px;">☸</div>
-          <p style="font-size:11px;letter-spacing:4px;color:#a0644e;text-transform:uppercase;margin:0 0 14px;">You are cordially invited</p>
-          <h1 style="font-family:Georgia,serif;font-size:42px;color:#1a3a52;margin:0 0 8px;font-weight:400;letter-spacing:0.02em;">
-            Akhila <em style="color:#c0392b;">&amp;</em> Akshay
+      <table width="620" cellpadding="0" cellspacing="0" style="background:#fff8e8;border:1px solid #c89422;box-shadow:0 18px 46px rgba(70,35,10,0.18);">
+        <tr><td style="padding:8px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
+        <tr><td align="center" style="padding:42px 40px 28px;">
+          <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:4px;color:#9f1d22;text-transform:uppercase;margin:0 0 14px;">Mana Pelli Veduka</p>
+          <h1 style="font-family:Georgia,serif;font-size:48px;line-height:0.95;color:#281309;margin:0 0 10px;font-weight:400;letter-spacing:0;">
+            Akhila <em style="color:#9f1d22;">&amp;</em> Akshay
           </h1>
-          <p style="font-size:13px;letter-spacing:3px;color:#b8860b;text-transform:uppercase;margin:0 0 24px;">30 August 2026 · 11 AM</p>
-          <div style="height:1px;background:linear-gradient(90deg,transparent,#d4a017,transparent);width:60%;margin:0 auto 24px;"></div>
-          <p style="font-size:16px;line-height:1.7;color:#333;text-align:left;margin:18px 0;">${greeting}</p>
-          <p style="font-size:16px;line-height:1.7;color:#333;text-align:left;margin:0 0 18px;">
-            With hearts full of joy, we invite you to share in our celebration as we begin this beautiful journey together.
+          <p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.8px;color:#8c5f11;text-transform:uppercase;margin:0 0 24px;">28-31 August 2026</p>
+          <div style="height:1px;background:linear-gradient(90deg,transparent,#c89422,transparent);width:70%;margin:0 auto 26px;"></div>
+          <p style="font-size:17px;line-height:1.7;color:#281309;text-align:left;margin:18px 0;">${greeting}</p>
+          <p style="font-size:17px;line-height:1.7;color:#4f3a28;text-align:left;margin:0 0 18px;">
+            With hearts full of joy, we invite you to join the Telugu wedding celebrations of Akhila and Akshay.
           </p>
           ${extra}
-          <p style="font-size:15px;line-height:1.7;color:#555;text-align:left;margin:18px 0;">
-            Please RSVP at your earliest convenience so we can plan every detail.
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 28px;border-top:1px solid rgba(184,134,11,0.18);">
+${eventRows}
+          </table>
+          <p style="font-size:15px;line-height:1.7;color:#705843;text-align:left;margin:18px 0;">
+            Please confirm your RSVP using your private link. You can also add the invited events to Apple Calendar.
           </p>
-          <a href="${siteUrl}" style="display:inline-block;margin:20px 0 8px;padding:14px 36px;background:#1a3a52;color:#f4d27a;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;border-radius:2px;">
-            View Wedding Details
+          <a href="${escapeHtml(links.rsvpUrl)}" style="display:inline-block;margin:18px 6px 8px;padding:15px 30px;background:linear-gradient(135deg,#8c151a,#c89422);color:#fff8e8;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;">
+            RSVP Now
           </a>
-          <p style="font-size:11px;color:#999;margin:28px 0 0;">With love · The Parsi Family</p>
+          <a href="${escapeHtml(links.calendarUrl)}" style="display:inline-block;margin:18px 6px 8px;padding:14px 24px;border:1px solid #c89422;color:#8c5f11;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;">
+            Add To Apple Calendar
+          </a>
+          <p style="font-family:Arial,sans-serif;font-size:11px;color:#9d8061;margin:28px 0 0;">With love, The Parsi Family</p>
         </td></tr>
-        <tr><td style="padding:6px;background:linear-gradient(90deg,#b8860b,#d4a017,#b8860b);"></td></tr>
+        <tr><td style="padding:6px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
       </table>
     </td></tr>
   </table>

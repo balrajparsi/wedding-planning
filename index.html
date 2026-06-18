@@ -896,9 +896,9 @@ button {
 /* Cards float over the rolling bg */
 .events-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1px;
-  max-width: 1100px;
+  max-width: 1220px;
   width: 100%;
   background: rgba(232, 200, 74, 0.16);
   border: 1px solid rgba(232, 200, 74, 0.2);
@@ -1338,13 +1338,22 @@ footer::before {
     <div class="ev-header">
       <div class="ev-rule"></div>
       <h2 class="ev-title reveal">The Celebrations</h2>
-      <p class="ev-sub reveal d1">Four dated events · One coordinated Telugu celebration</p>
+      <p class="ev-sub reveal d1">Five dated events · One coordinated Telugu celebration</p>
       <div class="ev-rule" style="margin-top:1.5rem"></div>
     </div>
 
     <div class="events-row">
       <div class="ev-card reveal d1">
         <span class="ev-num">I.</span>
+        <span class="ev-icon">H</span>
+        <h3 class="ev-name">Haldi</h3>
+        <span class="ev-name-sub">Turmeric &amp; Blessings</span>
+        <div class="ev-sep"></div>
+        <p class="ev-meta">28 August 2026 · 11:00 AM<br>Venue · To Be Confirmed</p>
+        <span class="ev-badge confirmed">Scheduled</span>
+      </div>
+      <div class="ev-card reveal d2">
+        <span class="ev-num">II.</span>
         <span class="ev-icon">S</span>
         <h3 class="ev-name">Sangeet</h3>
         <span class="ev-name-sub">Music, Family &amp; Dance</span>
@@ -1352,8 +1361,8 @@ footer::before {
         <p class="ev-meta">28 August 2026 · 6:00 PM<br>Venue · To Be Confirmed</p>
         <span class="ev-badge confirmed">Scheduled</span>
       </div>
-      <div class="ev-card reveal d2">
-        <span class="ev-num">II.</span>
+      <div class="ev-card reveal d3">
+        <span class="ev-num">III.</span>
         <span class="ev-icon">P</span>
         <h3 class="ev-name">Pellikuthuru</h3>
         <span class="ev-name-sub">Nalugu &amp; Blessings</span>
@@ -1361,8 +1370,8 @@ footer::before {
         <p class="ev-meta">29 August 2026 · Time To Be Decided<br>Venue · To Be Confirmed</p>
         <span class="ev-badge">Time TBD</span>
       </div>
-      <div class="ev-card reveal d3">
-        <span class="ev-num">III.</span>
+      <div class="ev-card reveal d4">
+        <span class="ev-num">IV.</span>
         <span class="ev-icon">M</span>
         <h3 class="ev-name">Marriage</h3>
         <span class="ev-name-sub">Jeelakarra Bellam &amp; Talambralu</span>
@@ -1370,8 +1379,8 @@ footer::before {
         <p class="ev-meta">30 August 2026 · 11:00 AM<br>Venue · To Be Confirmed</p>
         <span class="ev-badge confirmed">Confirmed</span>
       </div>
-      <div class="ev-card reveal d4">
-        <span class="ev-num">IV.</span>
+      <div class="ev-card reveal d5">
+        <span class="ev-num">V.</span>
         <span class="ev-icon">V</span>
         <h3 class="ev-name">Satyanarayana Swamy Vratam</h3>
         <span class="ev-name-sub">Post-wedding Pooja</span>
