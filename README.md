@@ -235,15 +235,16 @@ RESEND_API_KEY            # For email notifications
 INVITE_FROM_EMAIL         # Verified Resend sender address
 SITE_URL                  # Public site URL used in RSVP links
 WEDDING_TIMEZONE          # Calendar timezone, defaults to America/Chicago
-AKHILA_SIDE_ADDRESS       # Bride-side Pellikuthuru address
-AKSHAY_SIDE_ADDRESS       # Groom-side Pellikoduku address
+COMMON_EVENT_ADDRESS      # Shared address for Haldi, Sangeet, Marriage, and Vratam
+PELLIKUTHURU_ADDRESS      # Bride-side Pellikuthuru address
+PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
 ```
 
 ## 🚨 Notes
 
 - **Development**: Uses in-memory KV fallback if env vars not set
 - **RSVP**: Guest email links open `rsvp.html` with a signed token and offer an Apple Calendar `.ics` download
-- **Guest Side**: Use Akhila/Akshay side to show side-specific Pellikuthuru/Pellikoduku details and addresses
+- **Guest Side**: Akhila/Akshay side only changes Pellikuthuru/Pellikoduku details and addresses; all other events use the common address
 - **Security**: Never commit `.env.local` or `.env.*.local`
 - **Polling**: 5-second sync interval is suitable for wedding planning
 - **Scaling**: Vercel KV has limits; fine for single wedding (thousands of guests)
