@@ -520,7 +520,7 @@
           <div class="event-row">
             <div>
               <p class="event-title">${index + 1}. ${event.name}</p>
-              <p class="event-meta">${event.displayDate} · ${event.time}<br>${event.subtitle}</p>
+              <p class="event-meta">${event.displayDate} · ${event.time}<br>${event.subtitle}${event.side ? `<br>${event.side}` : ''}<br>Venue · ${event.venue || 'To Be Confirmed'}</p>
             </div>
             <div class="event-response" aria-label="${event.name} response">
               <label title="Attending">
@@ -554,7 +554,9 @@
 
         currentGuest = data.guest;
         guestName.textContent = currentGuest.name || 'Dear Guest';
-        guestSub.textContent = 'Please confirm your attendance for the celebrations listed below.';
+        guestSub.textContent = currentGuest.sideLabel
+          ? `Please confirm your attendance for the celebrations listed below. You are listed under ${currentGuest.sideLabel}.`
+          : 'Please confirm your attendance for the celebrations listed below.';
         document.getElementById('rsvpStatus').value = currentGuest.rsvpStatus === 'pending' ? 'accepted' : currentGuest.rsvpStatus;
         document.getElementById('partySize').value = currentGuest.partySize || 1;
         document.getElementById('dietaryRestrictions').value = currentGuest.dietaryRestrictions || 'none';

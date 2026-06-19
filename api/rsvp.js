@@ -2,6 +2,7 @@ const kv = require('../lib/kv');
 const {
   WEDDING_ID,
   RSVP_EVENTS,
+  getGuestSideDetails,
   verifyRsvpToken,
   buildCalendarFile,
   getInvitedEvents,
@@ -55,10 +56,13 @@ async function findGuestFromToken(token) {
 function publicGuest(guest) {
   const invitedEvents = getInvitedEvents(guest);
   const responses = guest.eventResponses || {};
+  const sideDetails = getGuestSideDetails(guest);
   return {
     id: guest.id,
     name: guest.name || '',
     email: guest.email || '',
+    side: guest.side || '',
+    sideLabel: sideDetails?.label || '',
     partySize: parseInt(guest.partySize, 10) || 1,
     dietaryRestrictions: guest.dietaryRestrictions || 'none',
     rsvpStatus: guest.rsvpStatus || 'pending',

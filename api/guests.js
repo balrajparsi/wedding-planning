@@ -14,6 +14,8 @@ const {
   buildRsvpUrl,
   buildCalendarUrl,
   getInvitedEvents,
+  getGuestSideDetails,
+  normalizeGuestSide,
   normalizeEvents
 } = require('../lib/rsvp');
 
@@ -88,7 +90,11 @@ async function handleListGuests(req, res) {
     filtered = filtered.filter(g =>
       g.name.toLowerCase().includes(search) ||
       g.email?.toLowerCase().includes(search) ||
-      g.phone?.includes(search)
+      g.phone?.includes(search) ||
+      g.relationship?.toLowerCase().includes(search) ||
+      displayGuestSide(g.side).toLowerCase().includes(search) ||
+      g.side?.toLowerCase().includes(search) ||
+      (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
     );
   }
 
@@ -133,7 +139,7 @@ async function handleListGuests(req, res) {
 }
 
 async function handleAddGuest(req, res) {
-  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, events } = req.body;
+  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, events } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'Guest name required' });
@@ -147,6 +153,7 @@ async function handleAddGuest(req, res) {
     email: email || '',
     phone: phone || '',
     relationship: relationship || '',
+    side: normalizeGuestSide(side),
     partySize: partySize || 1,
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
@@ -183,12 +190,13 @@ async function handleUpdateGuest(req, res) {
   const guest = guests[guestIndex];
 
   // Update fields
-  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, rsvpStatus, events } = req.body;
+  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, rsvpStatus, events } = req.body;
 
   if (name !== undefined) guest.name = name;
   if (email !== undefined) guest.email = email;
   if (phone !== undefined) guest.phone = phone;
   if (relationship !== undefined) guest.relationship = relationship;
+  if (side !== undefined) guest.side = normalizeGuestSide(side);
   if (partySize !== undefined) guest.partySize = partySize;
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
@@ -258,6 +266,7 @@ async function handleImportGuests(req, res) {
       email: guestData.email || '',
       phone: guestData.phone || '',
       relationship: guestData.relationship || '',
+      side: guestData.side || '',
       partySize: guestData.partySize || 1,
       dietaryRestrictions: guestData.dietaryRestrictions || 'none',
       events: guestData.events || [],
@@ -294,6 +303,7 @@ function normalizeImportedGuest(rawGuest = {}) {
     email: String(rawGuest.email || '').trim(),
     phone: String(rawGuest.phone || '').trim(),
     relationship: String(rawGuest.relationship || '').trim(),
+    side: normalizeGuestSide(rawGuest.side),
     partySize: Math.max(1, parseInt(rawGuest.partySize, 10) || 1),
     dietaryRestrictions: normalizeDietary(rawGuest.dietaryRestrictions),
     events,
@@ -343,6 +353,33 @@ function normalizeRsvpStatus(value) {
   return 'pending';
 }
 
+function displayGuestSide(value) {
+  const side = normalizeGuestSide(value);
+  if (side === 'akhila') return "Akhila's side";
+  if (side === 'akshay') return "Akshay's side";
+  return '';
+}
+
+function getSiteUrl(req) {
+  if (process.env.SITE_URL) {
+    return process.env.SITE_URL.replace(/\/+$/g, '');
+  }
+
+  const forwardedHost = req.headers?.['x-forwarded-host'];
+  const host = Array.isArray(forwardedHost)
+    ? forwardedHost[0]
+    : forwardedHost || req.headers?.host;
+  if (host) {
+    const forwardedProto = req.headers?.['x-forwarded-proto'];
+    const proto = Array.isArray(forwardedProto)
+      ? forwardedProto[0]
+      : forwardedProto || (String(host).includes('localhost') ? 'http' : 'https');
+    return `${proto}://${host}`.replace(/\/+$/g, '');
+  }
+
+  return 'https://wedding-planning-two.vercel.app';
+}
+
 async function handleDeleteGuest(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const guestId = url.searchParams.get('id') || req.url.match(/\/guests\/([a-zA-Z0-9_]+)/)?.[1];
@@ -390,7 +427,7 @@ async function handleBulkInvite(req, res) {
   // ── Attempt to actually send via Resend (if API key present) ──
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const FROM_EMAIL     = process.env.INVITE_FROM_EMAIL || 'Akhila & Akshay <onboarding@resend.dev>';
-  const SITE_URL       = process.env.SITE_URL || 'https://wedding-planning-two.vercel.app';
+  const SITE_URL       = getSiteUrl(req);
 
   let sent = 0;
   let failed = 0;
@@ -466,6 +503,10 @@ function escapeHtml(value) {
 
 function buildInviteHtml(guest, customMessage, links) {
   const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
+  const sideDetails = getGuestSideDetails(guest);
+  const sideLine = sideDetails
+    ? `<p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8c5f11;margin:0 0 18px;">${escapeHtml(sideDetails.label)} · ${escapeHtml(sideDetails.family)} family</p>`
+    : '';
   const extra = customMessage
     ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
     : '';
@@ -489,6 +530,7 @@ function buildInviteHtml(guest, customMessage, links) {
           <p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.8px;color:#8c5f11;text-transform:uppercase;margin:0 0 24px;">28-31 August 2026</p>
           <div style="height:1px;background:linear-gradient(90deg,transparent,#c89422,transparent);width:70%;margin:0 auto 26px;"></div>
           <p style="font-size:17px;line-height:1.7;color:#281309;text-align:left;margin:18px 0;">${greeting}</p>
+          ${sideLine}
           <p style="font-size:17px;line-height:1.7;color:#4f3a28;text-align:left;margin:0 0 18px;">
             With hearts full of joy, we invite you to join the Telugu wedding celebrations of Akhila and Akshay.
           </p>
@@ -505,7 +547,7 @@ ${eventRows}
           <a href="${escapeHtml(links.calendarUrl)}" style="display:inline-block;margin:18px 6px 8px;padding:14px 24px;border:1px solid #c89422;color:#8c5f11;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;">
             Add To Apple Calendar
           </a>
-          <p style="font-family:Arial,sans-serif;font-size:11px;color:#9d8061;margin:28px 0 0;">With love, The Parsi Family</p>
+          <p style="font-family:Arial,sans-serif;font-size:11px;color:#9d8061;margin:28px 0 0;">With love, Chennaboina &amp; Lenkalapally Families</p>
         </td></tr>
         <tr><td style="padding:6px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
       </table>
@@ -529,7 +571,7 @@ async function handleExportGuests(req, res) {
 
   // Generate CSV
   const csv = [
-    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
+    ['Name', 'Email', 'Phone', 'Relationship', 'Side', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
   ];
 
   guests.forEach(g => {
@@ -538,6 +580,7 @@ async function handleExportGuests(req, res) {
       `"${g.email || ''}"`,
       `"${g.phone || ''}"`,
       `"${g.relationship || ''}"`,
+      `"${displayGuestSide(g.side)}"`,
       g.partySize || 1,
       `"${g.dietaryRestrictions || ''}"`,
       `"${(g.events || []).join('|')}"`,

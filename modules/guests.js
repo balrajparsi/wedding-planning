@@ -123,7 +123,10 @@ const guestModule = {
       filtered = filtered.filter(g =>
         g.name.toLowerCase().includes(search) ||
         g.email?.toLowerCase().includes(search) ||
-        g.phone?.includes(search)
+        g.phone?.includes(search) ||
+        g.relationship?.toLowerCase().includes(search) ||
+        g.side?.toLowerCase().includes(search) ||
+        (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
       );
     }
 
