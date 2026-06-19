@@ -240,7 +240,7 @@ PELLIKUTHURU_ADDRESS      # Bride-side Pellikuthuru address
 PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
 ```
 
-`INVITE_FROM_EMAIL` must be an email sender, not only a display name. In the Vercel environment variable value, use `Akhila and Akshay <onboarding@resend.dev>` for testing without a domain. Resend only allows that test sender for limited test sends; real guest invites require a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
+`INVITE_FROM_EMAIL` should be an email sender, not only a display name. For testing without a domain, use `Akhila and Akshay <onboarding@resend.dev>`. If Vercel only has a display name such as `Akhila & Akshay`, the app will fall back to Resend's test sender automatically. Real guest invites require a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
 
 ## 🚨 Notes
 

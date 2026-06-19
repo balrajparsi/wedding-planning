@@ -380,14 +380,38 @@ function getSiteUrl(req) {
   return 'https://wedding-planning-two.vercel.app';
 }
 
+const DEFAULT_INVITE_FROM_EMAIL = 'Akhila and Akshay <onboarding@resend.dev>';
+
 function getInviteFromEmail() {
-  const configured = process.env.INVITE_FROM_EMAIL || 'Akhila and Akshay <onboarding@resend.dev>';
+  const configured = process.env.INVITE_FROM_EMAIL || DEFAULT_INVITE_FROM_EMAIL;
   const cleaned = String(configured).trim().replace(/^['"]|['"]$/g, '');
   const validFromPattern = /^([^<>]+<[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>|[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+)$/;
-  if (!validFromPattern.test(cleaned)) {
-    throw new Error('INVITE_FROM_EMAIL must include an email address. Use Akhila and Akshay <onboarding@resend.dev> for testing, or Akhila and Akshay <invites@your-verified-domain.com> after verifying a domain in Resend.');
+
+  if (validFromPattern.test(cleaned)) {
+    return cleaned;
   }
-  return cleaned;
+
+  const emailMatch = cleaned.match(/[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+/);
+  if (emailMatch) {
+    const email = emailMatch[0];
+    const displayName = cleaned
+      .replace(email, '')
+      .replace(/[<>]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return displayName ? `${displayName} <${email}>` : email;
+  }
+
+  const displayNameOnly = cleaned
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (displayNameOnly) {
+    return `${displayNameOnly} <onboarding@resend.dev>`;
+  }
+
+  return DEFAULT_INVITE_FROM_EMAIL;
 }
 
 function summarizeResendError(errorText) {
