@@ -246,6 +246,7 @@ PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
 
 - **Development**: Uses in-memory KV fallback if env vars not set
 - **RSVP**: Guest email links open `rsvp.html` with a signed token and offer an Apple Calendar `.ics` download
+- **Guest Events**: Guest rows can select invited events individually. CSV import accepts an `Events`, `Invited Events`, or `Events Invited To` column with values like `All Events`, `Haldi + Sangeet`, or `Marriage|Satyanarayana Swamy Vratam`
 - **Guest Side**: Akhila/Akshay side only changes Pellikuthuru/Pellikoduku details and addresses; all other events use the common address
 - **Security**: Never commit `.env.local` or `.env.*.local`
 - **Polling**: 5-second sync interval is suitable for wedding planning

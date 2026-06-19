@@ -125,6 +125,7 @@ const guestModule = {
         g.email?.toLowerCase().includes(search) ||
         g.phone?.includes(search) ||
         g.relationship?.toLowerCase().includes(search) ||
+        (Array.isArray(g.events) ? g.events.join(' ') : String(g.events || '')).toLowerCase().includes(search) ||
         g.side?.toLowerCase().includes(search) ||
         (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
       );

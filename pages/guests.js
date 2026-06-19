@@ -13,6 +13,22 @@ const guestListPage = {
     sortDir: 'asc'
   },
 
+  guestEventNames: [
+    'Haldi',
+    'Sangeet',
+    'Pellikuthuru',
+    'Marriage',
+    'Satyanarayana Swamy Vratam'
+  ],
+
+  guestEventAliases: [
+    { name: 'Haldi', pattern: /\bhaldi\b/i },
+    { name: 'Sangeet', pattern: /\bsangeeth?\b/i },
+    { name: 'Pellikuthuru', pattern: /\b(pellikuthuru|pelli\s*kuthuru|pellikoduku|pelli\s*koduku|nalugu|mehendi)\b/i },
+    { name: 'Marriage', pattern: /\b(marriage|wedding|ceremony|muhurtham)\b/i },
+    { name: 'Satyanarayana Swamy Vratam', pattern: /\b(satyanarayana|vratam)\b/i }
+  ],
+
   async init() {
     // Only wire up listeners once — fixes 7× CSV download bug
     if (!this.listenersSetup) {
@@ -146,7 +162,7 @@ const guestListPage = {
 
     const tbody = guests.map(g => {
       const dietaryIcon = '';
-      const eventTags = (g.events || []).map(ev => `<span style="display:inline-block;background:#e8f0fe;color:#2a5f7f;padding:0.15rem 0.4rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;">${ev}</span>`).join('');
+      const eventTags = this.renderEventTags(g);
       return `
       <tr>
         <td><strong>${g.name || '—'}</strong></td>
@@ -195,11 +211,79 @@ const guestListPage = {
     this.applyFilters();
   },
 
+  setupGuestEventChecklist(modal) {
+    const checklist = modal.querySelector('[data-guest-event-checklist]');
+    if (!checklist || checklist.dataset.ready === 'true') return;
+
+    const allCheckbox = checklist.querySelector('[data-guest-event-all]');
+    const eventCheckboxes = [...checklist.querySelectorAll('[name="events"]')];
+
+    allCheckbox?.addEventListener('change', () => {
+      eventCheckboxes.forEach(checkbox => {
+        checkbox.checked = allCheckbox.checked;
+      });
+      allCheckbox.indeterminate = false;
+    });
+
+    eventCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.syncGuestEventAllCheckbox(checklist));
+    });
+
+    checklist.dataset.ready = 'true';
+  },
+
+  syncGuestEventAllCheckbox(checklist) {
+    const allCheckbox = checklist?.querySelector('[data-guest-event-all]');
+    const eventCheckboxes = [...(checklist?.querySelectorAll('[name="events"]') || [])];
+    if (!allCheckbox || eventCheckboxes.length === 0) return;
+
+    const checkedCount = eventCheckboxes.filter(checkbox => checkbox.checked).length;
+    allCheckbox.checked = checkedCount === eventCheckboxes.length;
+    allCheckbox.indeterminate = checkedCount > 0 && checkedCount < eventCheckboxes.length;
+  },
+
+  setGuestEventSelections(form, input) {
+    const events = this.normalizeEvents(input);
+    const selectedEvents = events.length ? events : [...this.guestEventNames];
+
+    form.querySelectorAll('[name="events"]').forEach(checkbox => {
+      checkbox.checked = selectedEvents.includes(checkbox.value);
+    });
+    this.syncGuestEventAllCheckbox(form.querySelector('[data-guest-event-checklist]'));
+  },
+
+  getSelectedGuestEvents(form) {
+    return [...form.querySelectorAll('[name="events"]:checked')].map(checkbox => checkbox.value);
+  },
+
+  getGuestEvents(guest) {
+    const events = this.normalizeEvents(guest?.events || []);
+    return events.length ? events : [...this.guestEventNames];
+  },
+
+  isAllGuestEvents(events) {
+    return this.guestEventNames.every(eventName => events.includes(eventName));
+  },
+
+  renderEventTags(guest) {
+    const events = this.getGuestEvents(guest);
+    if (this.isAllGuestEvents(events)) {
+      return '<span style="display:inline-block;background:#f8f0d8;color:#8c5f11;padding:0.15rem 0.45rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;font-weight:600;">All Events</span>';
+    }
+
+    return events
+      .map(ev => `<span style="display:inline-block;background:#e8f0fe;color:#2a5f7f;padding:0.15rem 0.4rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;">${ev}</span>`)
+      .join('');
+  },
+
   /* ── MODALS ── */
   openAddGuestModal() {
     const modal = document.querySelector('[data-modal="addGuest"]');
     if (!modal) return;
-    modal.querySelector('form')?.reset();
+    this.setupGuestEventChecklist(modal);
+    const form = modal.querySelector('form');
+    form?.reset();
+    if (form) this.setGuestEventSelections(form, this.guestEventNames);
     modal.style.display = 'flex';
 
     // Use { once: true } so listener doesn't stack
@@ -216,7 +300,7 @@ const guestListPage = {
 
   async submitAddGuest(modal) {
     const form = modal.querySelector('form');
-    const events = [...form.querySelectorAll('[name="events"]:checked')].map(cb => cb.value);
+    const events = this.getSelectedGuestEvents(form);
     const data = {
       name:                 form.querySelector('[name="name"]')?.value?.trim(),
       email:                form.querySelector('[name="email"]')?.value?.trim(),
@@ -230,6 +314,7 @@ const guestListPage = {
     };
 
     if (!data.name) { showNotification('Guest name is required', 'error'); return; }
+    if (events.length === 0) { showNotification('Select at least one event for this guest', 'error'); return; }
 
     try {
       await apiCall('/api/guests', 'POST', data);
@@ -245,6 +330,7 @@ const guestListPage = {
   openEditGuestModal(guest) {
     const modal = document.querySelector('[data-modal="editGuest"]');
     if (!modal) return;
+    this.setupGuestEventChecklist(modal);
 
     const form = modal.querySelector('form');
     if (form) {
@@ -257,11 +343,7 @@ const guestListPage = {
       form.querySelector('[name="dietary"]').value     = guest.dietaryRestrictions || 'none';
       form.querySelector('[name="rsvpStatus"]').value  = guest.rsvpStatus || 'pending';
       form.querySelector('[name="notes"]').value       = guest.notes || '';
-      // Populate event checkboxes
-      const guestEvents = guest.events || [];
-      form.querySelectorAll('[name="events"]').forEach(cb => {
-        cb.checked = guestEvents.includes(cb.value);
-      });
+      this.setGuestEventSelections(form, this.getGuestEvents(guest));
     }
 
     modal.style.display = 'flex';
@@ -281,7 +363,7 @@ const guestListPage = {
   async submitEditGuest(modal) {
     const guestId = modal.dataset.guestId;
     const form = modal.querySelector('form');
-    const events = [...form.querySelectorAll('[name="events"]:checked')].map(cb => cb.value);
+    const events = this.getSelectedGuestEvents(form);
     const data = {
       name:                form.querySelector('[name="name"]')?.value?.trim(),
       email:               form.querySelector('[name="email"]')?.value?.trim(),
@@ -294,6 +376,8 @@ const guestListPage = {
       events:              events,
       notes:               form.querySelector('[name="notes"]')?.value?.trim()
     };
+
+    if (events.length === 0) { showNotification('Select at least one event for this guest', 'error'); return; }
 
     try {
       await apiCall(`/api/guests?id=${guestId}`, 'PUT', data);
@@ -527,7 +611,15 @@ const guestListPage = {
       dietaryrestrictions: 'dietaryRestrictions',
       events: 'events',
       event: 'events',
+      ceremony: 'events',
       ceremonies: 'events',
+      function: 'events',
+      functions: 'events',
+      invitedevents: 'events',
+      eventsinvited: 'events',
+      eventsinvitedto: 'events',
+      invitedto: 'events',
+      invitedfor: 'events',
       rsvp: 'rsvpStatus',
       rsvpstatus: 'rsvpStatus',
       status: 'rsvpStatus',
@@ -620,9 +712,7 @@ const guestListPage = {
   },
 
   normalizeImportedGuest(data) {
-    const events = Array.isArray(data.events)
-      ? data.events
-      : String(data.events || '').split(/[|;,]/);
+    const events = this.normalizeEvents(data.events);
 
     return {
       name: String(data.name || '').trim(),
@@ -636,6 +726,31 @@ const guestListPage = {
       rsvpStatus: this.normalizeRsvpStatus(data.rsvpStatus),
       notes: String(data.notes || '').trim()
     };
+  },
+
+  normalizeEvents(value) {
+    if (Array.isArray(value)) {
+      return [...new Set(value.flatMap(item => this.normalizeEvents(item)))];
+    }
+
+    const text = String(value || '').trim();
+    if (!text) return [];
+
+    if (/^(all|all events|all ceremonies|all functions|all festivities|every event|full)$/i.test(text)) {
+      return [...this.guestEventNames];
+    }
+
+    const found = this.guestEventAliases
+      .filter(({ pattern }) => pattern.test(text))
+      .map(({ name }) => name);
+    if (found.length > 0) return [...new Set(found)];
+
+    return [...new Set(
+      text
+        .split(/[|;,+/&\n]/)
+        .map(eventName => this.normalizeEventName(eventName))
+        .filter(Boolean)
+    )];
   },
 
   normalizeEventName(value) {

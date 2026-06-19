@@ -11,6 +11,7 @@
 const crypto = require('crypto');
 const kv = require('../lib/kv');
 const {
+  RSVP_EVENTS,
   buildRsvpUrl,
   buildCalendarUrl,
   getInvitedEvents,
@@ -21,6 +22,15 @@ const {
 
 // Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
+
+function allGuestEventNames() {
+  return RSVP_EVENTS.map(event => event.name);
+}
+
+function ensureGuestEvents(events) {
+  const normalized = normalizeEvents(events);
+  return normalized.length > 0 ? normalized : allGuestEventNames();
+}
 
 module.exports = async function handler(req, res) {
   try {
@@ -92,6 +102,7 @@ async function handleListGuests(req, res) {
       g.email?.toLowerCase().includes(search) ||
       g.phone?.includes(search) ||
       g.relationship?.toLowerCase().includes(search) ||
+      normalizeEvents(g.events || []).join(' ').toLowerCase().includes(search) ||
       displayGuestSide(g.side).toLowerCase().includes(search) ||
       g.side?.toLowerCase().includes(search) ||
       (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
@@ -157,7 +168,7 @@ async function handleAddGuest(req, res) {
     partySize: partySize || 1,
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
-    events: normalizeEvents(events),
+    events: ensureGuestEvents(events),
     rsvpStatus: 'pending',
     invitedDate: new Date().toISOString(),
     rsvpDate: null,
@@ -200,7 +211,7 @@ async function handleUpdateGuest(req, res) {
   if (partySize !== undefined) guest.partySize = partySize;
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
-  if (events !== undefined) guest.events = normalizeEvents(events);
+  if (events !== undefined) guest.events = ensureGuestEvents(events);
 
   if (rsvpStatus !== undefined) {
     guest.rsvpStatus = rsvpStatus;
@@ -269,7 +280,7 @@ async function handleImportGuests(req, res) {
       side: guestData.side || '',
       partySize: guestData.partySize || 1,
       dietaryRestrictions: guestData.dietaryRestrictions || 'none',
-      events: guestData.events || [],
+      events: guestData.events?.length ? guestData.events : allGuestEventNames(),
       notes: guestData.notes || '',
       rsvpStatus: guestData.rsvpStatus || 'pending',
       invitedDate: now,

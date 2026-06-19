@@ -494,7 +494,8 @@ label {
   color: var(--text-dark);
 }
 
-.vendor-event-checklist {
+.vendor-event-checklist,
+.guest-event-checklist {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.55rem;
@@ -505,7 +506,8 @@ label {
   background: rgba(245, 241, 232, 0.55);
 }
 
-.vendor-event-option {
+.vendor-event-option,
+.guest-event-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -519,11 +521,13 @@ label {
   line-height: 1.25;
 }
 
-.vendor-event-option:hover {
+.vendor-event-option:hover,
+.guest-event-option:hover {
   background: rgba(184, 134, 11, 0.08);
 }
 
-.vendor-event-option-all {
+.vendor-event-option-all,
+.guest-event-option-all {
   grid-column: 1 / -1;
   border-bottom: 1px solid rgba(184, 134, 11, 0.16);
   border-radius: 0;
@@ -836,7 +840,8 @@ tr:hover {
     font-size: 0.9rem;
   }
 
-  .vendor-event-checklist {
+  .vendor-event-checklist,
+  .guest-event-checklist {
     grid-template-columns: 1fr;
   }
 }

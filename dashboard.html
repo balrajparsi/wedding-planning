@@ -524,12 +524,16 @@
                 </select>
 
                 <label>Events Invited To</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Haldi"> Haldi (11 AM)</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Sangeet"> Sangeet</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Pellikuthuru"> Pellikuthuru</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Marriage"> Marriage (11 AM)</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Satyanarayana Swamy Vratam"> Satyanarayana Swamy Vratam</label>
+                <div class="guest-event-checklist" data-guest-event-checklist>
+                    <label class="guest-event-option guest-event-option-all">
+                        <input type="checkbox" name="eventsAll" value="all" data-guest-event-all>
+                        <span>All events</span>
+                    </label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Haldi"> <span>Haldi (11 AM)</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Sangeet"> <span>Sangeet</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Pellikuthuru"> <span>Pellikuthuru / Pellikoduku</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Marriage"> <span>Marriage (11 AM)</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Satyanarayana Swamy Vratam"> <span>Satyanarayana Swamy Vratam</span></label>
                 </div>
 
                 <label>Notes</label>
@@ -593,12 +597,16 @@
                 </select>
 
                 <label>Events Invited To</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Haldi"> Haldi (11 AM)</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Sangeet"> Sangeet</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Pellikuthuru"> Pellikuthuru</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Marriage"> Marriage (11 AM)</label>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-weight:400;cursor:pointer;"><input type="checkbox" name="events" value="Satyanarayana Swamy Vratam"> Satyanarayana Swamy Vratam</label>
+                <div class="guest-event-checklist" data-guest-event-checklist>
+                    <label class="guest-event-option guest-event-option-all">
+                        <input type="checkbox" name="eventsAll" value="all" data-guest-event-all>
+                        <span>All events</span>
+                    </label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Haldi"> <span>Haldi (11 AM)</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Sangeet"> <span>Sangeet</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Pellikuthuru"> <span>Pellikuthuru / Pellikoduku</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Marriage"> <span>Marriage (11 AM)</span></label>
+                    <label class="guest-event-option"><input type="checkbox" name="events" value="Satyanarayana Swamy Vratam"> <span>Satyanarayana Swamy Vratam</span></label>
                 </div>
 
                 <label>Notes</label>
@@ -628,7 +636,7 @@
                 </select>
 
                 <p style="color: var(--text-muted); margin-top: 1rem;">
-                    Invitations will be sent to guests with valid email addresses and will include private RSVP plus Apple Calendar links.
+                    Invitations are sent only for each guest's selected events. Check the Events column before sending; the private RSVP and Apple Calendar links follow that guest's event list.
                 </p>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
