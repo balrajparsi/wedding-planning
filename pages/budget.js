@@ -6,6 +6,27 @@
 const budgetPage = {
   listenersSetup: false,
   currentFilters: { category: '', status: '' },
+  categoryLabels: {
+    venue: 'Venue',
+    catering: 'Catering',
+    photography: 'Photography',
+    florist: 'Florist',
+    music: 'Music',
+    decor: 'Decor',
+    attire: 'Attire',
+    rings: 'Rings/Jewelry',
+    invitations: 'Invitations',
+    transportation: 'Transportation',
+    food: 'Food',
+    'makeup-hair': 'Makeup/Hair',
+    misc: 'Miscellaneous'
+  },
+
+  displayCategory(category) {
+    const value = String(category || '').trim();
+    if (!value) return 'Uncategorized';
+    return this.categoryLabels[value] || value.replace(/-/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+  },
 
   async init() {
     if (!this.listenersSetup) {
@@ -105,13 +126,14 @@ const budgetPage = {
       const grid = document.createElement('div');
       grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;';
       Object.entries(byCategory).forEach(([cat, d]) => {
+        const categoryLabel = this.displayCategory(cat);
         const rem   = d.totalCost - d.paid;
         const pct   = d.totalCost > 0 ? ((d.paid / d.totalCost) * 100).toFixed(0) : 0;
         const card  = document.createElement('div');
         card.style.cssText = 'background:white;padding:1rem;border-radius:0.5rem;border-left:4px solid var(--gold);box-shadow:var(--shadow-sm);';
         card.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-            <h5 style="margin:0;color:var(--blue);text-transform:capitalize;">${cat}</h5>
+            <h5 style="margin:0;color:var(--blue);">${categoryLabel}</h5>
             <span style="font-size:0.75rem;color:#888;">${d.count} item${d.count !== 1 ? 's' : ''}</span>
           </div>
           <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">Paid: <strong>$${d.paid.toFixed(2)}</strong> / $${d.totalCost.toFixed(2)}</div>
@@ -138,6 +160,7 @@ const budgetPage = {
 
       const statusColor = { paid: '#27ae60', partial: '#f39c12', unpaid: '#95a5a6' }[expense.status] || '#95a5a6';
       const pct = expense.totalCost > 0 ? Math.min((expense.paidAmount / expense.totalCost) * 100, 100).toFixed(0) : 0;
+      const categoryLabel = this.displayCategory(expense.category);
 
       card.innerHTML = `
         <div style="padding:1.25rem;">
@@ -145,8 +168,9 @@ const budgetPage = {
             <div>
               <h4 style="color:var(--blue);margin:0 0 0.25rem 0;">${expense.description}</h4>
               <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <span style="background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;text-transform:capitalize;">${expense.category}</span>
+                <span style="background:#ecf0f1;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">${categoryLabel}</span>
                 ${expense.vendor ? `<span style="background:#e8f4fd;color:#2a5f7f;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">${expense.vendor}</span>` : ''}
+                ${expense.source === 'vendor' ? '<span style="background:#f8f0d8;color:#8c5f11;padding:0.2rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">Vendor Sync</span>' : ''}
               </div>
             </div>
             <span style="background:${statusColor};color:white;padding:0.25rem 0.6rem;border-radius:0.25rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;white-space:nowrap;">${expense.status}</span>

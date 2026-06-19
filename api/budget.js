@@ -13,7 +13,27 @@ const kv     = require('../lib/kv');
 
 const WEDDING_ID = 'akhila-akshay-2026';
 const BUDGET_KEY = `wedding:${WEDDING_ID}:budget`;
-const CATEGORIES = ['venue','catering','photography','florist','music','decor','attire','rings','invitations','transportation','food','misc'];
+const CATEGORIES = ['venue','catering','photography','florist','music','decor','attire','rings','invitations','transportation','food','makeup-hair','misc'];
+
+function normalizeCategory(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  const compact = raw.replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const aliases = {
+    'makeup': 'makeup-hair',
+    'hair': 'makeup-hair',
+    'makeup-hair': 'makeup-hair',
+    'makeup-and-hair': 'makeup-hair',
+    'makeup-hair-beauty': 'makeup-hair',
+    'music-dj': 'music',
+    'dj': 'music',
+    'rings-jewelry': 'rings',
+    'jewelry': 'rings',
+    'other': 'misc',
+    'miscellaneous': 'misc'
+  };
+  const normalized = aliases[compact] || compact;
+  return CATEGORIES.includes(normalized) ? normalized : 'misc';
+}
 
 function computeExpense(item) {
   const paid = (item.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
@@ -55,17 +75,19 @@ async function handleList(res) {
 }
 
 async function handleAdd(req, res) {
-  const { description, category, totalCost, vendor, notes } = req.body || {};
+  const { description, category, totalCost, vendor, notes, source, vendorId } = req.body || {};
   if (!description || !category) return res.status(400).json({ error: 'Description and category required' });
 
   const item = {
     id:          crypto.randomBytes(8).toString('hex'),
     weddingId:   WEDDING_ID,
     description,
-    category,
+    category:    normalizeCategory(category),
     totalCost:   parseFloat(totalCost) || 0,
     vendor:      vendor || '',
     notes:       notes  || '',
+    source:      source || '',
+    vendorId:    vendorId || '',
     payments:    [],
     createdAt:   new Date().toISOString(),
     updatedAt:   new Date().toISOString()
@@ -106,10 +128,12 @@ async function handleUpdate(id, req, res) {
   const item = items[idx];
   const b    = req.body || {};
   if (b.description !== undefined) item.description = b.description;
-  if (b.category    !== undefined) item.category    = b.category;
+  if (b.category    !== undefined) item.category    = normalizeCategory(b.category);
   if (b.totalCost   !== undefined) item.totalCost   = parseFloat(b.totalCost) || 0;
   if (b.vendor      !== undefined) item.vendor      = b.vendor;
   if (b.notes       !== undefined) item.notes       = b.notes;
+  if (b.source      !== undefined) item.source      = b.source;
+  if (b.vendorId    !== undefined) item.vendorId    = b.vendorId;
   item.updatedAt = new Date().toISOString();
   items[idx] = item;
   await kv.set(BUDGET_KEY, items);

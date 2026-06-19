@@ -202,6 +202,10 @@ const vendorPage = {
     };
   },
 
+  isBudgetSyncedStatus(status) {
+    return ['confirmed', 'paid'].includes(String(status || '').toLowerCase());
+  },
+
   createVendorCard(vendor) {
     const card = document.createElement('div');
     card.style.cssText = `background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid var(--gold); box-shadow: var(--shadow-sm); transition: all 0.2s ease;`;
@@ -264,7 +268,7 @@ const vendorPage = {
     if (!data.name || !data.category) { showNotification('Vendor name and category required', 'error'); return; }
     try {
       await vendorModule.addVendor(data);
-      showNotification('Vendor added', 'success');
+      showNotification(this.isBudgetSyncedStatus(data.status) ? 'Vendor added and synced to budget' : 'Vendor added', 'success');
       modal.style.display = 'none';
       await this.loadVendors();
       this.render();
@@ -319,7 +323,7 @@ const vendorPage = {
     };
     try {
       await vendorModule.updateVendor(vendorId, data);
-      showNotification('Vendor updated', 'success');
+      showNotification(this.isBudgetSyncedStatus(data.status) ? 'Vendor updated and synced to budget' : 'Vendor updated', 'success');
       modal.style.display = 'none';
       await this.loadVendors();
       this.render();

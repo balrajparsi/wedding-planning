@@ -4,6 +4,7 @@
 
 const kv = require('../lib/kv');
 const WEDDING_ID = 'akhila-akshay-2026';
+const BUDGET_KEY = `wedding:${WEDDING_ID}:budget`;
 const EVENT_TYPES = [
   'Haldi',
   'Sangeet',
@@ -64,6 +65,125 @@ function vendorHasEvent(vendor, eventType) {
   return normalizeEventTypes(vendor.eventTypes, vendor.eventType).includes(eventType);
 }
 
+function normalizeMoney(value) {
+  return parseFloat(value) || 0;
+}
+
+function shouldSyncVendorToBudget(vendor) {
+  return ['confirmed', 'paid'].includes(String(vendor.status || '').toLowerCase());
+}
+
+function getVendorBudgetCategory(category) {
+  const raw = String(category || '').trim().toLowerCase();
+  const compact = raw.replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const aliases = {
+    venue: 'venue',
+    catering: 'catering',
+    food: 'food',
+    photography: 'photography',
+    florist: 'florist',
+    floral: 'florist',
+    flowers: 'florist',
+    music: 'music',
+    dj: 'music',
+    'music-dj': 'music',
+    decor: 'decor',
+    decoration: 'decor',
+    transportation: 'transportation',
+    transport: 'transportation',
+    invitations: 'invitations',
+    invitation: 'invitations',
+    'makeup-hair': 'makeup-hair',
+    'makeup-and-hair': 'makeup-hair',
+    makeup: 'makeup-hair',
+    hair: 'makeup-hair',
+    'rings-jewelry': 'rings',
+    jewelry: 'rings',
+    rings: 'rings'
+  };
+  return aliases[compact] || 'misc';
+}
+
+function getVendorPaidAmount(vendor, totalCost) {
+  const paidAmount = normalizeMoney(vendor.costActual);
+  if (paidAmount > 0) return paidAmount;
+  return String(vendor.status || '').toLowerCase() === 'paid' ? totalCost : 0;
+}
+
+function buildVendorBudgetPayments(vendor, totalCost, existingPayments = []) {
+  const manualPayments = (existingPayments || []).filter(payment => payment.source !== 'vendor-sync');
+  const paidAmount = getVendorPaidAmount(vendor, totalCost);
+  if (paidAmount <= 0) return manualPayments;
+
+  return [
+    ...manualPayments,
+    {
+      id: `vendor_sync_${vendor.id}`,
+      amount: paidAmount,
+      date: vendor.bookedDate || vendor.serviceDate || new Date().toISOString().split('T')[0],
+      notes: 'Synced from vendor amount paid',
+      source: 'vendor-sync',
+      vendorId: vendor.id,
+      loggedAt: new Date().toISOString()
+    }
+  ];
+}
+
+function buildVendorBudgetItem(vendor, existingItem = null) {
+  const now = new Date().toISOString();
+  const estimate = normalizeMoney(vendor.costEstimate);
+  const paidAmount = normalizeMoney(vendor.costActual);
+  const totalCost = Math.max(estimate, paidAmount);
+  const eventLabel = vendor.eventType ? ` - ${vendor.eventType}` : '';
+
+  return {
+    ...(existingItem || {}),
+    id: existingItem?.id || `vendor_budget_${vendor.id}`,
+    weddingId: WEDDING_ID,
+    source: 'vendor',
+    vendorId: vendor.id,
+    description: `${vendor.category} - ${vendor.name}`,
+    category: getVendorBudgetCategory(vendor.category),
+    totalCost,
+    vendor: vendor.name,
+    notes: `Synced from ${vendor.status} vendor${eventLabel}${vendor.notes ? `. ${vendor.notes}` : ''}`,
+    payments: buildVendorBudgetPayments(vendor, totalCost, existingItem?.payments),
+    createdAt: existingItem?.createdAt || now,
+    updatedAt: now
+  };
+}
+
+async function syncVendorBudgetItem(vendor) {
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const existingIndex = items.findIndex(item => item.source === 'vendor' && item.vendorId === vendor.id);
+
+  if (!shouldSyncVendorToBudget(vendor)) {
+    if (existingIndex !== -1) {
+      items.splice(existingIndex, 1);
+      await kv.set(BUDGET_KEY, items);
+    }
+    return null;
+  }
+
+  const budgetItem = buildVendorBudgetItem(vendor, existingIndex !== -1 ? items[existingIndex] : null);
+  if (existingIndex === -1) {
+    items.push(budgetItem);
+  } else {
+    items[existingIndex] = budgetItem;
+  }
+
+  await kv.set(BUDGET_KEY, items);
+  return budgetItem;
+}
+
+async function removeVendorBudgetItem(vendorId) {
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const filtered = items.filter(item => !(item.source === 'vendor' && item.vendorId === vendorId));
+  if (filtered.length !== items.length) {
+    await kv.set(BUDGET_KEY, filtered);
+  }
+}
+
 module.exports = async (req, res) => {
   const method = req.method;
   const url    = new URL(req.url, `http://localhost`);
@@ -107,7 +227,7 @@ module.exports = async (req, res) => {
 
     if (method === 'POST') {
       const { name, category, contactName, email, phone, website, eventType, eventTypes,
-              status, bookedDate, serviceDate, costEstimate, notes } = req.body || {};
+              status, bookedDate, serviceDate, costEstimate, costActual, notes } = req.body || {};
       if (!name || !category) return res.status(400).json({ error: 'Name and category required' });
       const normalizedEventTypes = normalizeEventTypes(eventTypes, eventType);
       const vendor = {
@@ -117,13 +237,14 @@ module.exports = async (req, res) => {
         website: website||'', eventTypes: normalizedEventTypes,
         eventType: getEventTypeLabel(normalizedEventTypes),
         status: status||'inquiry', bookedDate: bookedDate||'',
-        serviceDate: serviceDate||'', costEstimate: costEstimate||0,
-        costActual: 0, notes: notes||'', documents: [],
+        serviceDate: serviceDate||'', costEstimate: normalizeMoney(costEstimate),
+        costActual: normalizeMoney(costActual), notes: notes||'', documents: [],
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
       };
       let vendors = await kv.get(key) || [];
       vendors.push(vendor);
       await kv.set(key, vendors);
+      await syncVendorBudgetItem(vendor);
       return res.status(201).json(vendor);
     }
 
@@ -138,9 +259,13 @@ module.exports = async (req, res) => {
         updates.eventTypes = normalizedEventTypes;
         updates.eventType = getEventTypeLabel(normalizedEventTypes);
       }
+      if ('costEstimate' in updates) updates.costEstimate = normalizeMoney(updates.costEstimate);
+      if ('costActual' in updates) updates.costActual = normalizeMoney(updates.costActual);
       vendors[idx] = { ...vendors[idx], ...updates, updatedAt: new Date().toISOString() };
       await kv.set(key, vendors);
-      return res.status(200).json(normalizeVendorRecord(vendors[idx]));
+      const normalizedVendor = normalizeVendorRecord(vendors[idx]);
+      await syncVendorBudgetItem(normalizedVendor);
+      return res.status(200).json(normalizedVendor);
     }
 
     // DELETE — remove vendor or document (?id=...&action=documents&docIndex=N)
@@ -160,6 +285,7 @@ module.exports = async (req, res) => {
       let vendors = await kv.get(key) || [];
       vendors = vendors.filter(v => v.id !== id);
       await kv.set(key, vendors);
+      await removeVendorBudgetItem(id);
       return res.status(200).json({ success: true });
     }
 
