@@ -474,6 +474,13 @@ input, textarea, select {
   color: var(--text-dark);
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  margin: 0;
+  accent-color: var(--gold);
+}
+
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--gold);
@@ -485,6 +492,44 @@ label {
   margin-bottom: 0.4rem;
   font-weight: 600;
   color: var(--text-dark);
+}
+
+.vendor-event-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(184, 134, 11, 0.18);
+  border-radius: 8px;
+  background: rgba(245, 241, 232, 0.55);
+}
+
+.vendor-event-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  color: var(--text-dark);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.vendor-event-option:hover {
+  background: rgba(184, 134, 11, 0.08);
+}
+
+.vendor-event-option-all {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid rgba(184, 134, 11, 0.16);
+  border-radius: 0;
+  padding-bottom: 0.65rem;
+  font-weight: 700;
+  color: var(--blue);
 }
 
 /* ========================================
@@ -789,6 +834,10 @@ tr:hover {
   input, textarea, select {
     padding: 0.7rem;
     font-size: 0.9rem;
+  }
+
+  .vendor-event-checklist {
+    grid-template-columns: 1fr;
   }
 }
 

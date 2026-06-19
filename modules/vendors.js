@@ -27,9 +27,47 @@ const vendorModule = {
     'Sangeet',
     'Pellikuthuru',
     'Marriage',
-    'Satyanarayana Swamy Vratam',
-    'Multiple Events'
+    'Satyanarayana Swamy Vratam'
   ],
+
+  normalizeEventTypes(input, fallback = '') {
+    const rawValues = Array.isArray(input)
+      ? input
+      : String(input || '')
+          .split(',')
+          .map(value => value.trim());
+
+    if ((!rawValues || rawValues.length === 0 || rawValues.every(value => !value)) && fallback) {
+      return this.normalizeEventTypes(fallback);
+    }
+
+    const normalized = [];
+    rawValues.forEach(rawValue => {
+      const value = String(rawValue || '').trim();
+      if (!value) return;
+
+      if (/^(all|all events|multiple events)$/i.test(value)) {
+        this.eventTypes.forEach(eventType => {
+          if (!normalized.includes(eventType)) normalized.push(eventType);
+        });
+        return;
+      }
+
+      const knownEvent = this.eventTypes.find(eventType => eventType.toLowerCase() === value.toLowerCase());
+      const finalValue = knownEvent || value;
+      if (!normalized.includes(finalValue)) normalized.push(finalValue);
+    });
+
+    return normalized;
+  },
+
+  eventTypeLabel(input, fallback = '') {
+    const eventTypes = this.normalizeEventTypes(input, fallback);
+    if (eventTypes.length === 0) return '';
+    if (this.eventTypes.every(eventType => eventTypes.includes(eventType))) return 'All Events';
+    if (eventTypes.length === 1) return eventTypes[0];
+    return eventTypes.join(', ');
+  },
 
   async fetch(filters = {}) {
     try {
@@ -49,7 +87,7 @@ const vendorModule = {
   },
 
   filter(filters = {}) {
-    this.filteredVendors = this.vendors;
+    this.filteredVendors = [...this.vendors];
 
     if (filters.category) {
       this.filteredVendors = this.filteredVendors.filter(v => v.category === filters.category);
@@ -58,15 +96,23 @@ const vendorModule = {
       this.filteredVendors = this.filteredVendors.filter(v => v.status === filters.status);
     }
     if (filters.eventType) {
-      this.filteredVendors = this.filteredVendors.filter(v => v.eventType === filters.eventType);
+      this.filteredVendors = this.filteredVendors.filter(v =>
+        this.normalizeEventTypes(v.eventTypes, v.eventType).includes(filters.eventType)
+      );
     }
     if (filters.search) {
       const query = filters.search.toLowerCase();
-      this.filteredVendors = this.filteredVendors.filter(v =>
-        v.name.toLowerCase().includes(query) ||
-        v.contactName.toLowerCase().includes(query) ||
-        v.email.toLowerCase().includes(query)
-      );
+      this.filteredVendors = this.filteredVendors.filter(v => {
+        const eventLabel = this.eventTypeLabel(v.eventTypes, v.eventType).toLowerCase();
+        const eventValues = this.normalizeEventTypes(v.eventTypes, v.eventType).join(' ').toLowerCase();
+        return (
+          (v.name || '').toLowerCase().includes(query) ||
+          (v.contactName || '').toLowerCase().includes(query) ||
+          (v.email || '').toLowerCase().includes(query) ||
+          eventLabel.includes(query) ||
+          eventValues.includes(query)
+        );
+      });
     }
   },
 

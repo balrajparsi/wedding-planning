@@ -57,6 +57,7 @@ const vendorPage = {
 
     const addVendorModal = document.querySelector('[data-modal="addVendor"]');
     if (addVendorModal) {
+      this.setupEventChecklist(addVendorModal);
       const form = addVendorModal.querySelector('form');
       if (form) {
         form.addEventListener('submit', (e) => {
@@ -68,6 +69,7 @@ const vendorPage = {
 
     const editVendorModal = document.querySelector('[data-modal="editVendor"]');
     if (editVendorModal) {
+      this.setupEventChecklist(editVendorModal);
       const form = editVendorModal.querySelector('form');
       if (form) {
         form.addEventListener('submit', (e) => {
@@ -149,15 +151,68 @@ const vendorPage = {
     listContainer.appendChild(list);
   },
 
+  setupEventChecklist(modal) {
+    const checklist = modal.querySelector('[data-event-checklist]');
+    if (!checklist || checklist.dataset.ready === 'true') return;
+
+    const allCheckbox = checklist.querySelector('[data-event-all]');
+    const eventCheckboxes = [...checklist.querySelectorAll('[name="eventTypes"]')];
+
+    allCheckbox?.addEventListener('change', () => {
+      eventCheckboxes.forEach(checkbox => {
+        checkbox.checked = allCheckbox.checked;
+      });
+      allCheckbox.indeterminate = false;
+    });
+
+    eventCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.syncAllEventCheckbox(checklist));
+    });
+
+    checklist.dataset.ready = 'true';
+  },
+
+  syncAllEventCheckbox(checklist) {
+    const allCheckbox = checklist?.querySelector('[data-event-all]');
+    const eventCheckboxes = [...(checklist?.querySelectorAll('[name="eventTypes"]') || [])];
+    if (!allCheckbox || eventCheckboxes.length === 0) return;
+
+    const checkedCount = eventCheckboxes.filter(checkbox => checkbox.checked).length;
+    allCheckbox.checked = checkedCount === eventCheckboxes.length;
+    allCheckbox.indeterminate = checkedCount > 0 && checkedCount < eventCheckboxes.length;
+  },
+
+  setVendorEventSelections(form, input, fallback = '') {
+    const eventTypes = vendorModule.normalizeEventTypes(input, fallback);
+    form.querySelectorAll('[name="eventTypes"]').forEach(checkbox => {
+      checkbox.checked = eventTypes.includes(checkbox.value);
+    });
+    this.syncAllEventCheckbox(form.querySelector('[data-event-checklist]'));
+  },
+
+  getVendorEventSelections(form) {
+    return [...form.querySelectorAll('[name="eventTypes"]:checked')].map(checkbox => checkbox.value);
+  },
+
+  getVendorEventPayload(form) {
+    const eventTypes = this.getVendorEventSelections(form);
+    return {
+      eventTypes,
+      eventType: vendorModule.eventTypeLabel(eventTypes)
+    };
+  },
+
   createVendorCard(vendor) {
     const card = document.createElement('div');
     card.style.cssText = `background: white; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid var(--gold); box-shadow: var(--shadow-sm); transition: all 0.2s ease;`;
     const statusColor = { inquiry: '#95a5a6', negotiating: '#f39c12', confirmed: '#3498db', paid: '#27ae60' }[vendor.status] || '#95a5a6';
+    const eventLabel = vendorModule.eventTypeLabel(vendor.eventTypes, vendor.eventType);
     card.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
         <div><h4 style="color: var(--blue); margin: 0 0 0.25rem 0;">${vendor.name}</h4><p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${vendor.category}</p></div>
         <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${vendor.status}</span>
       </div>
+      ${eventLabel ? `<p style="color: var(--blue); font-size: 0.85rem; margin: 0.5rem 0;"><strong>Events:</strong> ${eventLabel}</p>` : ''}
       ${vendor.contactName ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.contactName}</p>` : ''}
       ${vendor.email ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.email}</p>` : ''}
       ${vendor.phone ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0;">${vendor.phone}</p>` : ''}
@@ -180,13 +235,17 @@ const vendorPage = {
     const modal = document.querySelector('[data-modal="addVendor"]');
     if (modal) {
       const form = modal.querySelector('form');
-      if (form) form.reset();
+      if (form) {
+        form.reset();
+        this.setVendorEventSelections(form, []);
+      }
       modal.style.display = 'flex';
     }
   },
 
   async submitAddVendor(modal) {
     const form = modal.querySelector('form');
+    const eventPayload = this.getVendorEventPayload(form);
     const data = {
       name: form.querySelector('[name="name"]')?.value,
       category: form.querySelector('[name="category"]')?.value,
@@ -194,7 +253,8 @@ const vendorPage = {
       email: form.querySelector('[name="email"]')?.value,
       phone: form.querySelector('[name="phone"]')?.value,
       website: form.querySelector('[name="website"]')?.value,
-      eventType: form.querySelector('[name="eventType"]')?.value,
+      eventTypes: eventPayload.eventTypes,
+      eventType: eventPayload.eventType,
       status: form.querySelector('[name="status"]')?.value || 'inquiry',
       bookedDate: form.querySelector('[name="bookedDate"]')?.value,
       serviceDate: form.querySelector('[name="serviceDate"]')?.value,
@@ -224,7 +284,7 @@ const vendorPage = {
         form.querySelector('[name="email"]').value = vendor.email || '';
         form.querySelector('[name="phone"]').value = vendor.phone || '';
         form.querySelector('[name="website"]').value = vendor.website || '';
-        form.querySelector('[name="eventType"]').value = vendor.eventType || '';
+        this.setVendorEventSelections(form, vendor.eventTypes, vendor.eventType);
         form.querySelector('[name="status"]').value = vendor.status;
         form.querySelector('[name="bookedDate"]').value = vendor.bookedDate || '';
         form.querySelector('[name="serviceDate"]').value = vendor.serviceDate || '';
@@ -240,6 +300,7 @@ const vendorPage = {
   async submitEditVendor(modal) {
     const vendorId = modal.dataset.vendorId;
     const form = modal.querySelector('form');
+    const eventPayload = this.getVendorEventPayload(form);
     const data = {
       name: form.querySelector('[name="name"]')?.value,
       category: form.querySelector('[name="category"]')?.value,
@@ -247,7 +308,8 @@ const vendorPage = {
       email: form.querySelector('[name="email"]')?.value,
       phone: form.querySelector('[name="phone"]')?.value,
       website: form.querySelector('[name="website"]')?.value,
-      eventType: form.querySelector('[name="eventType"]')?.value,
+      eventTypes: eventPayload.eventTypes,
+      eventType: eventPayload.eventType,
       status: form.querySelector('[name="status"]')?.value,
       bookedDate: form.querySelector('[name="bookedDate"]')?.value,
       serviceDate: form.querySelector('[name="serviceDate"]')?.value,
