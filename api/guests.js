@@ -380,6 +380,37 @@ function getSiteUrl(req) {
   return 'https://wedding-planning-two.vercel.app';
 }
 
+function getInviteFromEmail() {
+  const configured = process.env.INVITE_FROM_EMAIL || 'Akhila and Akshay <onboarding@resend.dev>';
+  const cleaned = String(configured).trim().replace(/^['"]|['"]$/g, '');
+  const validFromPattern = /^([^<>]+<[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>|[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+)$/;
+  if (!validFromPattern.test(cleaned)) {
+    throw new Error('INVITE_FROM_EMAIL must include an email address. Use Akhila and Akshay <onboarding@resend.dev> for testing, or Akhila and Akshay <invites@your-verified-domain.com> after verifying a domain in Resend.');
+  }
+  return cleaned;
+}
+
+function summarizeResendError(errorText) {
+  let message = errorText;
+
+  try {
+    const parsed = JSON.parse(errorText);
+    message = parsed.message || parsed.error || errorText;
+  } catch (_) {
+    // Resend usually returns JSON, but keep the raw body if it does not.
+  }
+
+  if (/invalid\s+`?from`?\s+field/i.test(message)) {
+    return 'Resend rejected the sender. INVITE_FROM_EMAIL must be a real email sender, such as Akhila and Akshay <onboarding@resend.dev> for testing or a sender on your verified domain.';
+  }
+
+  if (/verify a domain|domain is not verified|resend\.dev/i.test(message)) {
+    return 'Resend test sending only works for your verified account email. To send guests real invites, verify a domain in Resend and use that domain in INVITE_FROM_EMAIL.';
+  }
+
+  return String(message || 'Resend send failed').slice(0, 220);
+}
+
 async function handleDeleteGuest(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const guestId = url.searchParams.get('id') || req.url.match(/\/guests\/([a-zA-Z0-9_]+)/)?.[1];
@@ -426,8 +457,25 @@ async function handleBulkInvite(req, res) {
 
   // ── Attempt to actually send via Resend (if API key present) ──
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM_EMAIL     = process.env.INVITE_FROM_EMAIL || 'Akhila & Akshay <onboarding@resend.dev>';
   const SITE_URL       = getSiteUrl(req);
+  let FROM_EMAIL;
+
+  try {
+    FROM_EMAIL = getInviteFromEmail();
+  } catch (error) {
+    return res.json({
+      success: false,
+      sendingEnabled: !!RESEND_API_KEY,
+      configError: 'INVITE_FROM_EMAIL',
+      message: error.message,
+      invitedCount: withEmail.length,
+      totalMatched: selectedGuests.length,
+      sent: 0,
+      failed: withEmail.length,
+      errors: [{ error: error.message }],
+      invitedGuests: withEmail.map(g => ({ id: g.id, name: g.name, email: g.email }))
+    });
+  }
 
   let sent = 0;
   let failed = 0;
@@ -458,7 +506,7 @@ async function handleBulkInvite(req, res) {
         } else {
           const errText = await r.text();
           failed++;
-          errors.push({ email: g.email, error: errText.slice(0, 200) });
+          errors.push({ email: g.email, error: summarizeResendError(errText) });
         }
       } catch (e) {
         failed++;

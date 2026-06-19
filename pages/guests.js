@@ -356,8 +356,9 @@ const guestListPage = {
 
     try {
       const res = await apiCall('/api/guests?action=bulk-invite', 'POST', { filterStatus, subject, message });
-      const failedCompletely = !res.sendingEnabled || (res.failed && !res.sent);
-      const firstError = res.errors?.[0]?.error ? `: ${res.errors[0].error}` : '';
+      const failedCompletely = !res.success || !res.sendingEnabled || (res.failed && !res.sent);
+      const firstErrorText = res.errors?.[0]?.error || '';
+      const firstError = firstErrorText && firstErrorText !== res.message ? `: ${firstErrorText}` : '';
       showNotification((res.message || `Invites prepared for ${res.invitedCount || 0} guests`) + (failedCompletely ? firstError : ''), failedCompletely ? 'error' : 'success');
       modal.style.display = 'none';
       await this.loadGuests();
