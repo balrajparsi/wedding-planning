@@ -79,7 +79,7 @@
         </div>
         <fieldset>
           <legend>Your celebrations</legend>
-          <p class="hint">For every event choose Yes, Maybe, or No. For Yes, tell us how many people are attending and their meal choices.</p>
+          <p class="hint">For every event choose Yes, Maybe, or No. For Yes, enter the total number coming. For events with both meal options, split that total between vegetarian and non-vegetarian guests.</p>
           <div class="events" id="eventsList"></div>
         </fieldset>
         <div class="action-row"><button type="submit">Send RSVP</button><a class="calendar-link hidden" id="calendarLink" href="#" download>Add to calendar</a></div>
@@ -108,6 +108,18 @@
         const response = eventResponse(event);
         const name = eventInputName(event);
         const mealsVisible = response === 'attending' ? 'visible' : '';
+        const vegetarianOnly = event.mealPolicy === 'vegetarian-only';
+        const mealInputs = vegetarianOnly
+          ? `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
+              <div><label>How many people are coming?</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
+              <p class="hint full" style="margin:0;align-self:end;">This celebration is vegetarian-only, so we only need the total number attending.</p>
+            </div>`
+          : `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
+              <div><label>Total people coming</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
+              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="number" min="0" value="${event.vegetarianCount || 0}"></div>
+              <div><label>Of those, non-vegetarian</label><input data-count="nonVegetarianCount" type="number" min="0" value="${event.nonVegetarianCount || 0}"></div>
+              <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
+            </div>`;
         return `<article class="event" data-event-id="${event.id}">
           <div class="event-top"><div><h3>${event.name}</h3><p>${event.displayDate} · ${event.time}<br>${event.subtitle}<br>Venue · ${event.venue || 'To Be Confirmed'}</p></div>
           <div class="choices" aria-label="${event.name} response">
@@ -115,11 +127,7 @@
             <label class="choice"><input type="radio" name="${name}" value="maybe" ${response === 'maybe' || response === 'pending' ? 'checked' : ''}><span>Maybe</span></label>
             <label class="choice"><input type="radio" name="${name}" value="not_attending" ${response === 'not_attending' ? 'checked' : ''}><span>No</span></label>
           </div></div>
-          <div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
-            <div><label>Attending</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
-            <div><label>Vegetarian meals</label><input data-count="vegetarianCount" type="number" min="0" value="${event.vegetarianCount || 0}"></div>
-            <div><label>Non-vegetarian meals</label><input data-count="nonVegetarianCount" type="number" min="0" value="${event.nonVegetarianCount || 0}"></div>
-          </div></article>`;
+          ${mealInputs}</article>`;
       }).join('');
       eventsList.querySelectorAll('input[type="radio"]').forEach(input => input.addEventListener('change', () => {
         const card = input.closest('.event');
@@ -160,7 +168,7 @@
         const response = selected?.value;
         const readCount = key => number(card.querySelector(`[data-count="${key}"]`)?.value);
         eventResponses[item.name] = response === 'attending'
-          ? { response, attendanceCount: readCount('attendanceCount'), vegetarianCount: readCount('vegetarianCount'), nonVegetarianCount: readCount('nonVegetarianCount') }
+          ? { response, attendanceCount: readCount('attendanceCount'), vegetarianCount: item.mealPolicy === 'vegetarian-only' ? readCount('attendanceCount') : readCount('vegetarianCount'), nonVegetarianCount: item.mealPolicy === 'vegetarian-only' ? 0 : readCount('nonVegetarianCount') }
           : { response };
       }
       const payload = { token, name: document.getElementById('name').value.trim(), phone: document.getElementById('phone').value.trim(), email: document.getElementById('email').value.trim(), rsvpNotes: document.getElementById('rsvpNotes').value.trim(), eventResponses };

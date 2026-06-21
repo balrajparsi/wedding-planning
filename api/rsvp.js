@@ -107,7 +107,10 @@ function validatePublicSubmission(body) {
     if (response.response === 'pending') throw publicError(`Choose Yes, Maybe, or No for ${event.name}.`, 400);
     if (response.response === 'attending') {
       if (response.attendanceCount < 1) throw publicError(`Enter the number attending ${event.name}.`, 400);
-      if (response.vegetarianCount + response.nonVegetarianCount !== response.attendanceCount) {
+      if (event.mealPolicy === 'vegetarian-only') {
+        response.vegetarianCount = response.attendanceCount;
+        response.nonVegetarianCount = 0;
+      } else if (response.vegetarianCount + response.nonVegetarianCount !== response.attendanceCount) {
         throw publicError(`Vegetarian and non-vegetarian meals must equal the attendees for ${event.name}.`, 400);
       }
     }
