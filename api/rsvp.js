@@ -190,6 +190,11 @@ async function handlePublicRsvp(req, res, body) {
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
   const guests = (await kv.get(guestsKey)) || [];
   const existing = findPublicGuestMatch(guests, submission);
+  if (existing?.rsvpLockedAt) {
+    return res.status(409).json({
+      error: 'Your RSVP has already been received. Please contact the family for any changes.'
+    });
+  }
   const now = new Date().toISOString();
   const rsvpStatus = deriveRsvpStatus(submission.eventResponses);
   const partySize = Math.max(1, ...Object.values(submission.eventResponses).map(response => response.attendanceCount || 0));
@@ -204,6 +209,7 @@ async function handlePublicRsvp(req, res, body) {
     rsvpNotes: submission.rsvpNotes,
     eventResponses: submission.eventResponses,
     lastRsvpSource: 'public_rsvp',
+    rsvpLockedAt: now,
     updatedAt: now
   };
 
