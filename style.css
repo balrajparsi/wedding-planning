@@ -454,6 +454,39 @@ header::before {
   color: var(--danger);
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.75rem;
+  padding: 0.34rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.badge-accepted {
+  background: #e4f4e8;
+  color: #1f6a35;
+  border: 1px solid #98c9a5;
+}
+
+.badge-pending,
+.badge-maybe {
+  background: #fff0d6;
+  color: #8c5f11;
+  border: 1px solid #e2c37d;
+}
+
+.badge-declined {
+  background: #f8e2df;
+  color: #9f1d22;
+  border: 1px solid #dca39f;
+}
+
 /* ========================================
    FORMS & INPUTS
    ======================================== */

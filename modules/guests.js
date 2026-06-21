@@ -15,7 +15,6 @@ const guestModule = {
       const params = new URLSearchParams({
         rsvpStatus: filters.rsvpStatus || '',
         search: filters.search || '',
-        dietary: filters.dietary || '',
         sortBy: filters.sortBy || 'name',
         sortDir: filters.sortDir || 'asc'
       });
@@ -124,16 +123,9 @@ const guestModule = {
         g.name.toLowerCase().includes(search) ||
         g.email?.toLowerCase().includes(search) ||
         g.phone?.includes(search) ||
-        g.relationship?.toLowerCase().includes(search) ||
         (Array.isArray(g.events) ? g.events.join(' ') : String(g.events || '')).toLowerCase().includes(search) ||
         g.side?.toLowerCase().includes(search) ||
         (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
-      );
-    }
-
-    if (filters.dietary && filters.dietary !== 'all') {
-      filtered = filtered.filter(g =>
-        g.dietaryRestrictions?.toLowerCase().includes(filters.dietary.toLowerCase())
       );
     }
 

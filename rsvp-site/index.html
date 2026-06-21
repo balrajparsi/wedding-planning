@@ -50,6 +50,9 @@
     .status { margin:1rem .7rem 0; padding:.9rem 1rem; border:1px solid rgba(140,95,17,.22); background:rgba(255,252,241,.62); color:var(--muted); line-height:1.5; }
     .status.success { color:var(--leaf); border-color:rgba(49,90,49,.45); }
     .status.error { color:var(--kumkum); border-color:rgba(159,29,34,.45); }
+    .confirmation { margin:1rem .7rem 0;padding:clamp(1.5rem,4vw,2.5rem);border:1px solid rgba(49,90,49,.38);background:rgba(255,252,241,.78);text-align:center; }
+    .confirmation h3 { margin:.3rem 0 .8rem;color:var(--leaf);font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(2.2rem,4vw,3.4rem);line-height:.95; }
+    .confirmation p { max-width:30rem;margin:0 auto;color:var(--muted);line-height:1.65; }
     .hidden { display:none !important; }
     @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .intro{padding-top:0;position:static;} }
     @media (max-width:620px) { main{padding:.75rem;} .form-grid,.meal-grid{grid-template-columns:1fr;} .event-top{display:block;} .choices{margin-top:.8rem;} button,.calendar-link{width:100%;text-align:center;} }
@@ -85,6 +88,11 @@
         <div class="action-row"><button type="submit">Send RSVP</button><a class="calendar-link hidden" id="calendarLink" href="#" download>Add to calendar</a></div>
         <div class="status hidden" id="statusBox"></div>
       </form>
+      <section class="confirmation hidden" id="confirmationBox">
+        <p class="eyebrow">Mana Pelli Veduka</p>
+        <h3>Your RSVP is received</h3>
+        <p id="confirmationMessage">Thank you for celebrating with Akhila and Akshay. Please contact the family for any changes.</p>
+      </section>
     </section>
   </main>
   <script>
@@ -95,9 +103,17 @@
     const statusBox = document.getElementById('statusBox');
     const eventsList = document.getElementById('eventsList');
     const calendarLink = document.getElementById('calendarLink');
+    const confirmationBox = document.getElementById('confirmationBox');
+    const confirmationMessage = document.getElementById('confirmationMessage');
     let events = [];
 
     function setStatus(message, type = '') { statusBox.textContent = message; statusBox.className = `status ${type}`.trim(); statusBox.classList.remove('hidden'); }
+    function showConfirmation(message) {
+      loadingBox.classList.add('hidden');
+      form.classList.add('hidden');
+      confirmationMessage.textContent = message || 'Thank you for celebrating with Akhila and Akshay. Please contact the family for any changes.';
+      confirmationBox.classList.remove('hidden');
+    }
     function eventInputName(event) { return `event-${event.id}`; }
     function number(value) { return Math.max(0, parseInt(value, 10) || 0); }
     function eventResponse(event) { return event.response || 'maybe'; }
@@ -111,13 +127,13 @@
         const vegetarianOnly = event.mealPolicy === 'vegetarian-only';
         const mealInputs = vegetarianOnly
           ? `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
-              <div><label>How many people are coming?</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
+              <div><label>How many people are coming?</label><input data-count="attendanceCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.attendanceCount || 1}"></div>
               <p class="hint full" style="margin:0;align-self:end;">This celebration is vegetarian-only, so we only need the total number attending.</p>
             </div>`
           : `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
-              <div><label>Total people coming</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
-              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="number" min="0" value="${event.vegetarianCount || 0}"></div>
-              <div><label>Of those, non-vegetarian</label><input data-count="nonVegetarianCount" type="number" min="0" value="${event.nonVegetarianCount || 0}"></div>
+              <div><label>Total people coming</label><input data-count="attendanceCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.attendanceCount || 1}"></div>
+              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.vegetarianCount || 0}"></div>
+              <div><label>Of those, non-vegetarian</label><input data-count="nonVegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.nonVegetarianCount || 0}"></div>
               <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
             </div>`;
         return `<article class="event" data-event-id="${event.id}">
@@ -143,6 +159,10 @@
         if (!response.ok) throw new Error(data.error || 'Unable to open RSVP');
         if (data.guest) {
           const guest = data.guest;
+          if (guest.rsvpLocked) {
+            showConfirmation('Your RSVP has already been received. Please contact the family for any changes.');
+            return;
+          }
           document.getElementById('name').value = guest.name || '';
           document.getElementById('email').value = guest.email || '';
           document.getElementById('phone').value = guest.phone || '';
@@ -177,7 +197,7 @@
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to save RSVP');
         if (data.guest?.events) renderEvents(data.guest.events);
-        setStatus(data.message || 'Your RSVP has been received. Thank you for celebrating with Akhila and Akshay.', 'success');
+        showConfirmation(data.message || 'Your RSVP has been received. Thank you for celebrating with Akhila and Akshay. Please contact the family for any changes.');
       } catch (error) { setStatus(error.message || 'Unable to save RSVP right now.', 'error'); }
     });
     loadRsvp();

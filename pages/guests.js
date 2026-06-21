@@ -8,12 +8,12 @@ const guestListPage = {
   currentFilters: {
     rsvpStatus: '',
     search: '',
-    dietary: '',
     sortBy: 'name',
     sortDir: 'asc'
   },
 
   rsvpSummary: [],
+  publicRsvpUrl: 'https://akhila-akshay-rsvp.vercel.app/',
 
   guestEventNames: [
     'Haldi',
@@ -57,18 +57,11 @@ const guestListPage = {
       this.applyFilters();
     });
 
-    // Dietary filter
-    view.querySelector('.guest-dietary-filter')?.addEventListener('change', (e) => {
-      this.currentFilters.dietary = e.target.value;
-      this.applyFilters();
-    });
-
     // Clear filters
     view.querySelector('.guest-clear-btn')?.addEventListener('click', () => {
-      this.currentFilters = { rsvpStatus: '', search: '', dietary: '', sortBy: 'name', sortDir: 'asc' };
+      this.currentFilters = { rsvpStatus: '', search: '', sortBy: 'name', sortDir: 'asc' };
       view.querySelector('.guest-search').value = '';
       view.querySelector('.guest-rsvp-filter').value = '';
-      view.querySelector('.guest-dietary-filter').value = '';
       guestModule.filteredGuests = [...guestModule.guests];
       this.render();
     });
@@ -103,6 +96,7 @@ const guestListPage = {
       const response = await apiCall('/api/guests', 'GET');
       guestModule.guests = response.guests || [];
       guestModule.stats  = response.stats  || {};
+      this.publicRsvpUrl = response.publicRsvpUrl || this.publicRsvpUrl;
       try {
         const summary = await apiCall('/api/guests?action=rsvp-summary', 'GET');
         this.rsvpSummary = summary.events || [];
@@ -197,7 +191,6 @@ const guestListPage = {
     }
 
     const tbody = guests.map(g => {
-      const dietaryIcon = '';
       const eventTags = this.renderEventTags(g);
       const rsvpDetails = this.renderRsvpDetails(g);
       return `
@@ -205,10 +198,8 @@ const guestListPage = {
         <td><strong>${g.name || '—'}</strong></td>
         <td>${g.email || '—'}</td>
         <td>${g.phone || '—'}</td>
-        <td>${g.relationship || '—'}</td>
         <td>${this.displayGuestSide(g.side) || '—'}</td>
         <td style="text-align:center">${g.partySize || 1}</td>
-        <td>${dietaryIcon} ${g.dietaryRestrictions || 'None'}</td>
         <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
         <td>${rsvpDetails}</td>
@@ -227,10 +218,8 @@ const guestListPage = {
             <th style="cursor:pointer" onclick="guestListPage.sortBy('name')">Name ↕</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Relationship</th>
             <th>Side</th>
             <th>Party Size</th>
-            <th>Dietary</th>
             <th>Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
             <th>Event RSVP & Meals</th>
@@ -336,7 +325,7 @@ const guestListPage = {
   },
 
   async copyPublicRsvpLink() {
-    const link = `${window.location.origin}/rsvp.html`;
+    const link = this.publicRsvpUrl || 'https://akhila-akshay-rsvp.vercel.app/';
     try {
       await navigator.clipboard.writeText(link);
       showNotification('Public RSVP link copied — ready to share on WhatsApp.', 'success');
@@ -356,9 +345,9 @@ const guestListPage = {
       return `<div data-manual-rsvp-event="${name}" style="display:grid;grid-template-columns:1.3fr 1fr repeat(3,.8fr);gap:.45rem;align-items:end;margin:.5rem 0;padding:.55rem;border:1px solid rgba(184,134,11,.2);">
         <strong style="font-size:.8rem;">${name}</strong>
         <label style="font-size:.68rem;">Response<select data-response><option value="pending" ${response === 'pending' ? 'selected' : ''}>No response</option><option value="attending" ${response === 'attending' ? 'selected' : ''}>Yes</option><option value="maybe" ${response === 'maybe' ? 'selected' : ''}>Maybe</option><option value="not_attending" ${response === 'not_attending' ? 'selected' : ''}>No</option></select></label>
-        <label style="font-size:.68rem;">Guests<input data-count="attendanceCount" type="number" min="0" value="${response === 'attending' ? attending : 0}"></label>
-        <label style="font-size:.68rem;">Veg<input data-count="vegetarianCount" type="number" min="0" value="${response === 'attending' ? veg : 0}"></label>
-        <label style="font-size:.68rem;">Non-veg<input data-count="nonVegetarianCount" type="number" min="0" value="${response === 'attending' ? nonVeg : 0}"></label>
+        <label style="font-size:.68rem;">Guests<input data-count="attendanceCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? attending : 0}"></label>
+        <label style="font-size:.68rem;">Veg<input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? veg : 0}"></label>
+        <label style="font-size:.68rem;">Non-veg<input data-count="nonVegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? nonVeg : 0}"></label>
       </div>`;
     }).join('');
     let container = form.querySelector('[data-manual-rsvp-events]');
@@ -438,10 +427,8 @@ const guestListPage = {
       name:                 form.querySelector('[name="name"]')?.value?.trim(),
       email:                form.querySelector('[name="email"]')?.value?.trim(),
       phone:                form.querySelector('[name="phone"]')?.value?.trim(),
-      relationship:         form.querySelector('[name="relationship"]')?.value?.trim(),
       side:                 form.querySelector('[name="side"]')?.value,
-      partySize:            parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
-      dietaryRestrictions:  form.querySelector('[name="dietary"]')?.value,
+      partySize:            parseInt(form.querySelector('[name="partySize"]')?.value, 10) || 1,
       events:               events,
       eventResponses,
       rsvpStatus:           this.deriveRsvpStatus(eventResponses),
@@ -472,10 +459,8 @@ const guestListPage = {
       form.querySelector('[name="name"]').value        = guest.name || '';
       form.querySelector('[name="email"]').value       = guest.email || '';
       form.querySelector('[name="phone"]').value       = guest.phone || '';
-      form.querySelector('[name="relationship"]').value= guest.relationship || '';
       form.querySelector('[name="side"]').value        = this.normalizeGuestSide(guest.side) || '';
       form.querySelector('[name="partySize"]').value   = guest.partySize || 1;
-      form.querySelector('[name="dietary"]').value     = guest.dietaryRestrictions || 'none';
       form.querySelector('[name="rsvpStatus"]').value  = guest.rsvpStatus || 'pending';
       form.querySelector('[name="notes"]').value       = guest.notes || '';
       this.setGuestEventSelections(form, this.getGuestEvents(guest));
@@ -511,10 +496,8 @@ const guestListPage = {
       name:                form.querySelector('[name="name"]')?.value?.trim(),
       email:               form.querySelector('[name="email"]')?.value?.trim(),
       phone:               form.querySelector('[name="phone"]')?.value?.trim(),
-      relationship:        form.querySelector('[name="relationship"]')?.value?.trim(),
       side:                form.querySelector('[name="side"]')?.value,
-      partySize:           parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
-      dietaryRestrictions: form.querySelector('[name="dietary"]')?.value,
+      partySize:           parseInt(form.querySelector('[name="partySize"]')?.value, 10) || 1,
       rsvpStatus:          this.deriveRsvpStatus(eventResponses),
       events:              events,
       eventResponses,

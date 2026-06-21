@@ -85,7 +85,7 @@
 
                 <!-- Filters & Search -->
                 <div class="card" style="margin-bottom: 2rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                         <input type="text" placeholder="Search name/email..." class="guest-search" style="margin-bottom: 0;">
                         <select class="guest-rsvp-filter" style="margin-bottom: 0;">
                             <option value="">All RSVP Status</option>
@@ -93,15 +93,6 @@
                             <option value="accepted">Accepted</option>
                             <option value="declined">Declined</option>
                             <option value="maybe">Maybe</option>
-                        </select>
-                        <select class="guest-dietary-filter" style="margin-bottom: 0;">
-                            <option value="">All Dietary</option>
-                            <option value="vegetarian">Vegetarian</option>
-                            <option value="non-vegetarian">Non-Vegetarian</option>
-                            <option value="vegan">Vegan</option>
-                            <option value="gluten-free">Gluten-Free</option>
-                            <option value="apane">Apane (Family)</option>
-                            <option value="none">None</option>
                         </select>
                         <button class="btn btn-secondary guest-clear-btn" style="cursor: pointer;">Clear Filters</button>
                     </div>
@@ -508,9 +499,6 @@
                 <label>Phone</label>
                 <input type="tel" name="phone" placeholder="Contact number">
 
-                <label>Relationship</label>
-                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
-
                 <label>Guest Side</label>
                 <select name="side">
                     <option value="">Select side</option>
@@ -519,18 +507,7 @@
                 </select>
 
                 <label>Party Size</label>
-                <input type="number" name="partySize" value="1" min="1">
-
-                <label>Dietary Preference</label>
-                <select name="dietary">
-                    <option value="none">None</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="non-vegetarian">Non-Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="gluten-free">Gluten-Free</option>
-                    <option value="apane">Apane (Family)</option>
-                    <option value="other">Other</option>
-                </select>
+                <input type="text" name="partySize" value="1" inputmode="numeric" pattern="[0-9]*">
 
                 <label>Events Invited To</label>
                 <div class="guest-event-checklist" data-guest-event-checklist>
@@ -573,9 +550,6 @@
                 <label>Phone</label>
                 <input type="tel" name="phone" placeholder="Contact number">
 
-                <label>Relationship</label>
-                <input type="text" name="relationship" placeholder="Friend, family member, etc.">
-
                 <label>Guest Side</label>
                 <select name="side">
                     <option value="">Select side</option>
@@ -584,18 +558,7 @@
                 </select>
 
                 <label>Party Size</label>
-                <input type="number" name="partySize" value="1" min="1">
-
-                <label>Dietary Preference</label>
-                <select name="dietary">
-                    <option value="none">None</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="non-vegetarian">Non-Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="gluten-free">Gluten-Free</option>
-                    <option value="apane">Apane (Family)</option>
-                    <option value="other">Other</option>
-                </select>
+                <input type="text" name="partySize" value="1" inputmode="numeric" pattern="[0-9]*">
 
                 <label>RSVP Status</label>
                 <select name="rsvpStatus">

@@ -235,6 +235,9 @@ RESEND_API_KEY            # Optional: sends formal email invitations
 INVITE_FROM_EMAIL         # Optional: verified Resend sender address
 SITE_URL                  # Optional: base URL used in email/token RSVP links
 RSVP_SITE_URL             # Optional: standalone public RSVP URL used in invitations
+TWILIO_ACCOUNT_SID        # Twilio account ID for RSVP confirmation SMS
+TWILIO_AUTH_TOKEN         # Twilio API secret for RSVP confirmation SMS
+TWILIO_FROM_NUMBER        # One US Twilio sender number, in +15551234567 format
 WEDDING_TIMEZONE          # Calendar timezone, defaults to America/Chicago
 COMMON_EVENT_ADDRESS      # Shared address for Haldi, Sangeet, Marriage, and Vratam
 PELLIKUTHURU_ADDRESS      # Bride-side Pellikuthuru address
@@ -244,6 +247,8 @@ PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
 The standalone public RSVP route is `https://akhila-akshay-rsvp.vercel.app/`; share it directly on WhatsApp. Set `RSVP_SITE_URL` to this value in the private dashboard's Vercel Production environment so formal invitations send guest-specific links to the same site. It works with Vercel KV alone—guests do not need a Resend account or an email invitation. The public form asks for name, phone, and email, updates a uniquely matched guest, or creates a new guest when no match exists.
 
 `INVITE_FROM_EMAIL` is only needed for formal email invitations. It should be an email sender, not only a display name. For testing without a domain, use `Akhila and Akshay <onboarding@resend.dev>`. Real delivery to all guests requires a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
+
+After a guest submits a final RSVP, the system sends a detailed email confirmation through Resend and a concise SMS confirmation through Twilio. Add the same Resend and Twilio environment variables to both the private dashboard and standalone public RSVP Vercel projects. Notification delivery failures are recorded without discarding the RSVP.
 
 ## 🚨 Notes
 

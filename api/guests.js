@@ -90,7 +90,6 @@ async function handleListGuests(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const rsvpStatus = url.searchParams.get('rsvpStatus');
   const search = url.searchParams.get('search')?.toLowerCase();
-  const dietary = url.searchParams.get('dietary');
   const sortBy = url.searchParams.get('sortBy') || 'name';
   const sortDir = url.searchParams.get('sortDir') || 'asc';
 
@@ -105,17 +104,10 @@ async function handleListGuests(req, res) {
       g.name.toLowerCase().includes(search) ||
       g.email?.toLowerCase().includes(search) ||
       g.phone?.includes(search) ||
-      g.relationship?.toLowerCase().includes(search) ||
       normalizeEvents(g.events || []).join(' ').toLowerCase().includes(search) ||
       displayGuestSide(g.side).toLowerCase().includes(search) ||
       g.side?.toLowerCase().includes(search) ||
       (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
-    );
-  }
-
-  if (dietary && dietary !== 'all') {
-    filtered = filtered.filter(g =>
-      g.dietaryRestrictions?.toLowerCase().includes(dietary.toLowerCase())
     );
   }
 
@@ -149,7 +141,8 @@ async function handleListGuests(req, res) {
 
   res.json({
     guests: filtered,
-    stats
+    stats,
+    publicRsvpUrl: getPublicRsvpUrl(req)
   });
 }
 
@@ -457,6 +450,11 @@ function getSiteUrl(req) {
   }
 
   return 'https://wedding-planning-two.vercel.app';
+}
+
+function getPublicRsvpUrl(req) {
+  const configured = String(process.env.RSVP_SITE_URL || '').trim().replace(/\/+$/g, '');
+  return configured ? `${configured}/` : `${getSiteUrl(req)}/rsvp.html`;
 }
 
 const DEFAULT_INVITE_FROM_EMAIL = 'Akhila and Akshay <onboarding@resend.dev>';

@@ -9,6 +9,7 @@ const {
   getInvitedEvents,
   normalizeEvents
 } = require('../lib/rsvp');
+const { sendRsvpConfirmations } = require('../lib/rsvp-confirmations');
 
 function parseBody(req) {
   if (!req.body) return {};
@@ -63,9 +64,13 @@ function normalizeEventResponse(value, fallbackStatus = 'pending') {
 function normalizeEventResponses(rawResponses, fallbackStatus = 'pending', events = RSVP_EVENTS) {
   const raw = rawResponses && typeof rawResponses === 'object' ? rawResponses : {};
   return Object.fromEntries(events.map(event => [
-    event.name,
-    normalizeEventResponse(raw[event.name], fallbackStatus)
+    canonicalEventName(event),
+    normalizeEventResponse(raw[event.name] ?? raw[canonicalEventName(event)], fallbackStatus)
   ]));
+}
+
+function canonicalEventName(event) {
+  return RSVP_EVENTS.find(item => item.id === event.id)?.name || event.name;
 }
 
 function deriveRsvpStatus(eventResponses) {
@@ -147,11 +152,16 @@ function getPublicEvents(guest = null) {
   return RSVP_EVENTS.map(event => ({ ...event, ...responses[event.name] }));
 }
 
+function getGuestEvents(guest) {
+  const responses = normalizeEventResponses(guest.eventResponses, guest.rsvpStatus);
+  return getInvitedEvents(guest).map(event => ({
+    ...event,
+    ...responses[canonicalEventName(event)]
+  }));
+}
+
 function publicGuest(guest, allEvents = false) {
-  const events = allEvents ? getPublicEvents(guest) : getInvitedEvents(guest).map(event => {
-    const response = normalizeEventResponses(guest.eventResponses, guest.rsvpStatus)[event.name];
-    return { ...event, ...response };
-  });
+  const events = allEvents ? getPublicEvents(guest) : getGuestEvents(guest);
   const sideDetails = getGuestSideDetails(guest);
   return {
     id: guest.id,
@@ -164,6 +174,7 @@ function publicGuest(guest, allEvents = false) {
     dietaryRestrictions: guest.dietaryRestrictions || 'none',
     rsvpStatus: guest.rsvpStatus || 'pending',
     rsvpNotes: guest.rsvpNotes || '',
+    rsvpLocked: Boolean(guest.rsvpLockedAt),
     events
   };
 }
@@ -175,6 +186,21 @@ async function findGuestFromToken(token) {
   const index = guests.findIndex(guest => guest.id === payload.guestId);
   if (index === -1) throw publicError('Guest not found', 404);
   return { guestsKey, guests, guest: guests[index], index };
+}
+
+async function sendAndStoreRsvpConfirmations(guestsKey, guests, guest) {
+  const confirmations = await sendRsvpConfirmations(guest, getGuestEvents(guest));
+  const index = guests.findIndex(item => item.id === guest.id);
+  if (index === -1) return guest;
+
+  const updatedGuest = { ...guest, rsvpConfirmations: confirmations };
+  guests[index] = updatedGuest;
+  try {
+    await kv.set(guestsKey, guests);
+  } catch (error) {
+    console.error('Unable to save RSVP confirmation results:', error);
+  }
+  return updatedGuest;
 }
 
 async function handlePublicRsvp(req, res, body) {
@@ -240,6 +266,7 @@ async function handlePublicRsvp(req, res, body) {
   }
 
   await kv.set(guestsKey, guests);
+  guest = await sendAndStoreRsvpConfirmations(guestsKey, guests, guest);
   return res.status(200).json({
     success: true,
     message: 'Your RSVP has been received. Thank you for celebrating with Akhila and Akshay.',
@@ -261,24 +288,30 @@ async function handleTokenRsvp(req, res, url, body, token) {
     res.setHeader('Allow', 'GET,POST,OPTIONS');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (guest.rsvpLockedAt) {
+    throw publicError('Your RSVP has already been received. Please contact the family for any changes.', 409);
+  }
 
   const fallbackStatus = normalizeRsvpStatus(body.rsvpStatus);
   const invitedEvents = getInvitedEvents(guest);
   const eventResponses = normalizeEventResponses(body.eventResponses, fallbackStatus, invitedEvents);
   const rsvpStatus = body.eventResponses ? deriveRsvpStatus(eventResponses) : fallbackStatus;
-  const updatedGuest = {
+  const now = new Date().toISOString();
+  let updatedGuest = {
     ...guest,
     partySize: Math.max(1, parseInt(body.partySize, 10) || parseInt(guest.partySize, 10) || 1),
     dietaryRestrictions: cleanText(body.dietaryRestrictions || guest.dietaryRestrictions || 'none', 80),
     rsvpStatus,
-    rsvpDate: rsvpStatus === 'pending' ? guest.rsvpDate || null : new Date().toISOString(),
+    rsvpDate: rsvpStatus === 'pending' ? guest.rsvpDate || null : now,
     rsvpNotes: cleanText(body.rsvpNotes || body.notes || ''),
     eventResponses: { ...(guest.eventResponses || {}), ...eventResponses },
     events: normalizeEvents(guest.events || []).length ? normalizeEvents(guest.events) : invitedEvents.map(event => event.name),
-    updatedAt: new Date().toISOString()
+    rsvpLockedAt: now,
+    updatedAt: now
   };
   guests[index] = updatedGuest;
   await kv.set(guestsKey, guests);
+  updatedGuest = await sendAndStoreRsvpConfirmations(guestsKey, guests, updatedGuest);
   return res.status(200).json({ success: true, message: 'RSVP received', guest: publicGuest(updatedGuest) });
 }
 
