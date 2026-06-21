@@ -38,6 +38,10 @@ module.exports = async function handler(req, res) {
       return handleExportGuests(req, res);
     }
 
+    if (req.method === 'GET' && req.url.includes('action=rsvp-summary')) {
+      return handleRsvpSummary(req, res);
+    }
+
     if (req.method === 'DELETE' && (req.url.includes('action=reset') || req.url.includes('/reset'))) {
       return handleResetGuests(req, res);
     }
@@ -149,8 +153,63 @@ async function handleListGuests(req, res) {
   });
 }
 
+function normalizeStoredEventResponse(value, fallbackStatus = 'pending') {
+  const raw = value && typeof value === 'object' ? value : { response: value };
+  const responseValue = String(raw.response || raw.status || '').trim().toLowerCase();
+  const response = ['attending', 'yes', 'accepted'].includes(responseValue)
+    ? 'attending'
+    : ['maybe', 'tentative'].includes(responseValue)
+      ? 'maybe'
+      : ['not_attending', 'not-attending', 'no', 'declined'].includes(responseValue)
+        ? 'not_attending'
+        : fallbackStatus === 'accepted' ? 'attending' : fallbackStatus === 'maybe' ? 'maybe' : fallbackStatus === 'declined' ? 'not_attending' : 'pending';
+  return {
+    response,
+    attendanceCount: response === 'attending' ? Math.max(0, parseInt(raw.attendanceCount ?? raw.attendees, 10) || 0) : 0,
+    vegetarianCount: response === 'attending' ? Math.max(0, parseInt(raw.vegetarianCount ?? raw.vegetarian, 10) || 0) : 0,
+    nonVegetarianCount: response === 'attending' ? Math.max(0, parseInt(raw.nonVegetarianCount ?? raw.nonVegetarian, 10) || 0) : 0
+  };
+}
+
+async function handleRsvpSummary(req, res) {
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
+  const guests = (await kv.get(guestsKey)) || [];
+  const events = RSVP_EVENTS.map(event => ({
+    id: event.id,
+    name: event.name,
+    confirmedGuests: 0,
+    vegetarianMeals: 0,
+    nonVegetarianMeals: 0,
+    maybeGuests: 0,
+    respondedGuests: 0
+  }));
+
+  guests.forEach(guest => {
+    events.forEach(summary => {
+      const rawResponse = guest.eventResponses?.[summary.name];
+      // Older guest-level RSVPs did not identify individual events or meals;
+      // leave them out of catering totals until a per-event response is recorded.
+      const response = normalizeStoredEventResponse(rawResponse, rawResponse === undefined ? 'pending' : guest.rsvpStatus);
+      if (response.response === 'attending') {
+        const attendanceCount = response.attendanceCount || Math.max(1, parseInt(guest.partySize, 10) || 1);
+        summary.confirmedGuests += attendanceCount;
+        summary.vegetarianMeals += response.vegetarianCount;
+        summary.nonVegetarianMeals += response.nonVegetarianCount;
+        summary.respondedGuests++;
+      } else if (response.response === 'maybe') {
+        summary.maybeGuests++;
+        summary.respondedGuests++;
+      } else if (response.response === 'not_attending') {
+        summary.respondedGuests++;
+      }
+    });
+  });
+
+  res.json({ events });
+}
+
 async function handleAddGuest(req, res) {
-  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, events } = req.body;
+  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, events, eventResponses, rsvpStatus } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'Guest name required' });
@@ -169,11 +228,12 @@ async function handleAddGuest(req, res) {
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
     events: ensureGuestEvents(events),
-    rsvpStatus: 'pending',
+    eventResponses: eventResponses && typeof eventResponses === 'object' ? eventResponses : {},
+    rsvpStatus: rsvpStatus || 'pending',
     invitedDate: null,
     lastInviteAttemptDate: null,
     lastInviteError: '',
-    rsvpDate: null,
+    rsvpDate: rsvpStatus && rsvpStatus !== 'pending' ? new Date().toISOString() : null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -203,7 +263,7 @@ async function handleUpdateGuest(req, res) {
   const guest = guests[guestIndex];
 
   // Update fields
-  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, rsvpStatus, events } = req.body;
+  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, rsvpStatus, events, eventResponses } = req.body;
 
   if (name !== undefined) guest.name = name;
   if (email !== undefined) guest.email = email;
@@ -214,6 +274,7 @@ async function handleUpdateGuest(req, res) {
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
   if (events !== undefined) guest.events = ensureGuestEvents(events);
+  if (eventResponses !== undefined && eventResponses && typeof eventResponses === 'object') guest.eventResponses = eventResponses;
 
   if (rsvpStatus !== undefined) {
     guest.rsvpStatus = rsvpStatus;

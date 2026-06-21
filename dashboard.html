@@ -64,6 +64,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Guest List</h2>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end;">
+                        <button class="btn btn-secondary btn-sm guest-copy-rsvp-btn">Copy RSVP Link</button>
                         <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">Bulk Invite</button>
                         <button class="btn btn-secondary btn-sm guest-import-btn">Import List</button>
                         <input type="file" class="guest-import-input" accept=".csv,.txt,text/csv,text/plain" style="display:none;">
@@ -314,6 +315,10 @@
                 <!-- Stats -->
                 <div class="food-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                     <!-- Stats will be rendered here -->
+                </div>
+
+                <div class="food-catering-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-bottom:2rem;">
+                    <!-- RSVP catering totals will be rendered here -->
                 </div>
 
                 <!-- Filters -->

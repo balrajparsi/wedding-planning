@@ -66,9 +66,9 @@ const foodPage = {
 
   async loadFood() {
     try {
-      await foodModule.fetch();
+      await Promise.all([foodModule.fetch(), foodModule.fetchRsvpSummary()]);
     } catch (error) {
-      showNotification('Failed to load menu', 'error');
+      showNotification('Failed to load menu or RSVP catering totals', 'error');
     }
   },
 
@@ -81,7 +81,29 @@ const foodPage = {
     const foodView = document.querySelector('[data-view="food"]');
     if (!foodView) return;
     this.renderStats();
+    this.renderCateringSummary();
     this.renderMenuItems();
+  },
+
+  renderCateringSummary() {
+    const foodView = document.querySelector('[data-view="food"]');
+    const container = foodView?.querySelector('.food-catering-summary');
+    if (!container) return;
+    const events = foodModule.rsvpSummary || [];
+    if (!events.length) {
+      container.innerHTML = '<p class="empty-state">No RSVP catering responses yet.</p>';
+      return;
+    }
+    container.innerHTML = events.map(event => `
+      <article class="card" style="margin:0;border-left:3px solid var(--gold);">
+        <h4 style="margin:0 0 .65rem;color:var(--blue);">${event.name}</h4>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;font-size:.84rem;">
+          <span><strong>${event.confirmedGuests || 0}</strong> confirmed</span>
+          <span><strong>${event.maybeGuests || 0}</strong> maybe</span>
+          <span style="color:#278a4b;"><strong>${event.vegetarianMeals || 0}</strong> vegetarian</span>
+          <span style="color:#c0392b;"><strong>${event.nonVegetarianMeals || 0}</strong> non-veg</span>
+        </div>
+      </article>`).join('');
   },
 
   renderStats() {

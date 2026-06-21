@@ -80,6 +80,8 @@ const guestListPage = {
     // Bulk invite
     view.querySelector('.guest-bulk-invite-btn')?.addEventListener('click', () => this.openBulkInviteModal());
 
+    view.querySelector('.guest-copy-rsvp-btn')?.addEventListener('click', () => this.copyPublicRsvpLink());
+
     // Import guest list
     view.querySelector('.guest-import-btn')?.addEventListener('click', () => {
       const input = view.querySelector('.guest-import-input');
@@ -163,6 +165,7 @@ const guestListPage = {
     const tbody = guests.map(g => {
       const dietaryIcon = '';
       const eventTags = this.renderEventTags(g);
+      const rsvpDetails = this.renderRsvpDetails(g);
       return `
       <tr>
         <td><strong>${g.name || '—'}</strong></td>
@@ -174,6 +177,8 @@ const guestListPage = {
         <td>${dietaryIcon} ${g.dietaryRestrictions || 'None'}</td>
         <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
+        <td>${rsvpDetails}</td>
+        <td><span style="font-size:0.75rem;color:var(--text-muted);">${g.lastRsvpSource === 'public_rsvp' || g.source === 'public_rsvp' ? 'Public RSVP' : 'Dashboard'}</span></td>
         <td>
           <button class="btn-icon" onclick="guestListPage.openEditGuestModal(${JSON.stringify(g).replace(/"/g, '&quot;')})" title="Edit">✎</button>
           <button class="btn-icon" style="color:#c0392b" onclick="guestListPage.deleteGuest('${g.id}')" title="Delete">✕</button>
@@ -194,6 +199,8 @@ const guestListPage = {
             <th>Dietary</th>
             <th>Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
+            <th>Event RSVP & Meals</th>
+            <th>Source</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -276,6 +283,88 @@ const guestListPage = {
       .join('');
   },
 
+  renderRsvpDetails(guest) {
+    const responses = guest.eventResponses || {};
+    const details = this.guestEventNames.map(name => {
+      const raw = responses[name];
+      const response = typeof raw === 'object' ? raw.response : raw;
+      if (response === 'attending') {
+        const attending = parseInt(raw.attendanceCount, 10) || parseInt(guest.partySize, 10) || 1;
+        const veg = parseInt(raw.vegetarianCount, 10) || 0;
+        const nonVeg = parseInt(raw.nonVegetarianCount, 10) || 0;
+        return `<div style="font-size:0.72rem;line-height:1.45;"><strong>${name}</strong>: Yes · ${attending} (${veg} V / ${nonVeg} NV)</div>`;
+      }
+      if (response === 'maybe') return `<div style="font-size:0.72rem;line-height:1.45;"><strong>${name}</strong>: Maybe</div>`;
+      if (response === 'not_attending') return `<div style="font-size:0.72rem;line-height:1.45;"><strong>${name}</strong>: No</div>`;
+      return '';
+    }).filter(Boolean);
+    return details.join('') || '<span style="color:#aaa;font-size:0.8rem;">No event response</span>';
+  },
+
+  async copyPublicRsvpLink() {
+    const link = `${window.location.origin}/rsvp.html`;
+    try {
+      await navigator.clipboard.writeText(link);
+      showNotification('Public RSVP link copied — ready to share on WhatsApp.', 'success');
+    } catch (_) {
+      window.prompt('Copy this public RSVP link:', link);
+    }
+  },
+
+  renderManualEventResponses(form, guest = {}) {
+    const existing = guest.eventResponses || {};
+    const html = this.guestEventNames.map(name => {
+      const raw = existing[name] || {};
+      const response = typeof raw === 'object' ? raw.response : raw || 'pending';
+      const attending = parseInt(raw.attendanceCount, 10) || parseInt(guest.partySize, 10) || 1;
+      const veg = parseInt(raw.vegetarianCount, 10) || 0;
+      const nonVeg = parseInt(raw.nonVegetarianCount, 10) || 0;
+      return `<div data-manual-rsvp-event="${name}" style="display:grid;grid-template-columns:1.3fr 1fr repeat(3,.8fr);gap:.45rem;align-items:end;margin:.5rem 0;padding:.55rem;border:1px solid rgba(184,134,11,.2);">
+        <strong style="font-size:.8rem;">${name}</strong>
+        <label style="font-size:.68rem;">Response<select data-response><option value="pending" ${response === 'pending' ? 'selected' : ''}>No response</option><option value="attending" ${response === 'attending' ? 'selected' : ''}>Yes</option><option value="maybe" ${response === 'maybe' ? 'selected' : ''}>Maybe</option><option value="not_attending" ${response === 'not_attending' ? 'selected' : ''}>No</option></select></label>
+        <label style="font-size:.68rem;">Guests<input data-count="attendanceCount" type="number" min="0" value="${response === 'attending' ? attending : 0}"></label>
+        <label style="font-size:.68rem;">Veg<input data-count="vegetarianCount" type="number" min="0" value="${response === 'attending' ? veg : 0}"></label>
+        <label style="font-size:.68rem;">Non-veg<input data-count="nonVegetarianCount" type="number" min="0" value="${response === 'attending' ? nonVeg : 0}"></label>
+      </div>`;
+    }).join('');
+    let container = form.querySelector('[data-manual-rsvp-events]');
+    if (!container) {
+      container = document.createElement('section');
+      container.dataset.manualRsvpEvents = 'true';
+      container.innerHTML = '<label style="margin-top:1rem;">Per-Event RSVP & Meals</label><p style="font-size:.75rem;color:var(--text-muted);">For Yes, vegetarian + non-vegetarian must equal guests.</p><div data-manual-rsvp-list></div>';
+      form.querySelector('[name="notes"]')?.closest('label')?.before(container);
+      if (!container.parentNode) form.insertBefore(container, form.querySelector('[name="notes"]'));
+    }
+    container.querySelector('[data-manual-rsvp-list]').innerHTML = html;
+  },
+
+  getManualEventResponses(form) {
+    const responses = {};
+    for (const row of form.querySelectorAll('[data-manual-rsvp-event]')) {
+      const name = row.dataset.manualRsvpEvent;
+      const response = row.querySelector('[data-response]').value;
+      const value = key => Math.max(0, parseInt(row.querySelector(`[data-count="${key}"]`)?.value, 10) || 0);
+      const attendanceCount = value('attendanceCount');
+      const vegetarianCount = value('vegetarianCount');
+      const nonVegetarianCount = value('nonVegetarianCount');
+      if (response === 'attending' && (!attendanceCount || vegetarianCount + nonVegetarianCount !== attendanceCount)) {
+        throw new Error(`${name}: vegetarian and non-vegetarian meals must equal guests.`);
+      }
+      responses[name] = response === 'attending'
+        ? { response, attendanceCount, vegetarianCount, nonVegetarianCount }
+        : { response };
+    }
+    return responses;
+  },
+
+  deriveRsvpStatus(eventResponses) {
+    const values = Object.values(eventResponses);
+    if (values.some(value => value.response === 'attending')) return 'accepted';
+    if (values.some(value => value.response === 'maybe')) return 'maybe';
+    if (values.some(value => value.response === 'pending')) return 'pending';
+    return 'declined';
+  },
+
   /* ── MODALS ── */
   openAddGuestModal() {
     const modal = document.querySelector('[data-modal="addGuest"]');
@@ -283,7 +372,10 @@ const guestListPage = {
     this.setupGuestEventChecklist(modal);
     const form = modal.querySelector('form');
     form?.reset();
-    if (form) this.setGuestEventSelections(form, this.guestEventNames);
+    if (form) {
+      this.setGuestEventSelections(form, this.guestEventNames);
+      this.renderManualEventResponses(form);
+    }
     modal.style.display = 'flex';
 
     // Use { once: true } so listener doesn't stack
@@ -301,6 +393,13 @@ const guestListPage = {
   async submitAddGuest(modal) {
     const form = modal.querySelector('form');
     const events = this.getSelectedGuestEvents(form);
+    let eventResponses;
+    try {
+      eventResponses = this.getManualEventResponses(form);
+    } catch (error) {
+      showNotification(error.message, 'error');
+      return;
+    }
     const data = {
       name:                 form.querySelector('[name="name"]')?.value?.trim(),
       email:                form.querySelector('[name="email"]')?.value?.trim(),
@@ -310,6 +409,8 @@ const guestListPage = {
       partySize:            parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
       dietaryRestrictions:  form.querySelector('[name="dietary"]')?.value,
       events:               events,
+      eventResponses,
+      rsvpStatus:           this.deriveRsvpStatus(eventResponses),
       notes:                form.querySelector('[name="notes"]')?.value?.trim()
     };
 
@@ -344,6 +445,7 @@ const guestListPage = {
       form.querySelector('[name="rsvpStatus"]').value  = guest.rsvpStatus || 'pending';
       form.querySelector('[name="notes"]').value       = guest.notes || '';
       this.setGuestEventSelections(form, this.getGuestEvents(guest));
+      this.renderManualEventResponses(form, guest);
     }
 
     modal.style.display = 'flex';
@@ -364,6 +466,13 @@ const guestListPage = {
     const guestId = modal.dataset.guestId;
     const form = modal.querySelector('form');
     const events = this.getSelectedGuestEvents(form);
+    let eventResponses;
+    try {
+      eventResponses = this.getManualEventResponses(form);
+    } catch (error) {
+      showNotification(error.message, 'error');
+      return;
+    }
     const data = {
       name:                form.querySelector('[name="name"]')?.value?.trim(),
       email:               form.querySelector('[name="email"]')?.value?.trim(),
@@ -372,8 +481,9 @@ const guestListPage = {
       side:                form.querySelector('[name="side"]')?.value,
       partySize:           parseInt(form.querySelector('[name="partySize"]')?.value) || 1,
       dietaryRestrictions: form.querySelector('[name="dietary"]')?.value,
-      rsvpStatus:          form.querySelector('[name="rsvpStatus"]')?.value,
+      rsvpStatus:          this.deriveRsvpStatus(eventResponses),
       events:              events,
+      eventResponses,
       notes:               form.querySelector('[name="notes"]')?.value?.trim()
     };
 

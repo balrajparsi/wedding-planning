@@ -231,21 +231,24 @@ JWT_SECRET                # Minimum 32 characters
 RSVP_SECRET               # Signs guest-specific RSVP links
 
 # Optional
-RESEND_API_KEY            # For email notifications
-INVITE_FROM_EMAIL         # Verified Resend sender address
-SITE_URL                  # Public site URL used in RSVP links
+RESEND_API_KEY            # Optional: sends formal email invitations
+INVITE_FROM_EMAIL         # Optional: verified Resend sender address
+SITE_URL                  # Optional: base URL used in email/token RSVP links
 WEDDING_TIMEZONE          # Calendar timezone, defaults to America/Chicago
 COMMON_EVENT_ADDRESS      # Shared address for Haldi, Sangeet, Marriage, and Vratam
 PELLIKUTHURU_ADDRESS      # Bride-side Pellikuthuru address
 PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
 ```
 
-`INVITE_FROM_EMAIL` should be an email sender, not only a display name. For testing without a domain, use `Akhila and Akshay <onboarding@resend.dev>`. If Vercel only has a display name such as `Akhila & Akshay`, the app will fall back to Resend's test sender automatically. Real guest invites require a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
+The primary RSVP route is the public Vercel URL ending in `/rsvp.html`; copy it from the Guest List and share it directly on WhatsApp. It works with Vercel KV alone—guests do not need a Resend account or an email invitation. The public form asks for name, phone, and email, updates a uniquely matched guest, or creates a new guest when no match exists.
+
+`INVITE_FROM_EMAIL` is only needed for formal email invitations. It should be an email sender, not only a display name. For testing without a domain, use `Akhila and Akshay <onboarding@resend.dev>`. Real delivery to all guests requires a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
 
 ## 🚨 Notes
 
 - **Development**: Uses in-memory KV fallback if env vars not set
-- **RSVP**: Guest email links open `rsvp.html` with a signed token and offer an Apple Calendar `.ics` download
+- **RSVP**: Public `rsvp.html` records Yes/Maybe/No and per-event attendee, vegetarian, and non-vegetarian counts. Existing signed email links still work and offer an Apple Calendar `.ics` download.
+- **Catering totals**: The Food page calculates confirmed attendees and meal counts per event from the latest RSVP responses; Maybe responses are shown separately and are not included in meal totals.
 - **Guest Events**: Guest rows can select invited events individually. CSV import accepts an `Events`, `Invited Events`, or `Events Invited To` column with values like `All Events`, `Haldi + Sangeet`, or `Marriage|Satyanarayana Swamy Vratam`
 - **Guest Side**: Akhila/Akshay side only changes Pellikuthuru/Pellikoduku details and addresses; all other events use the common address
 - **Security**: Never commit `.env.local` or `.env.*.local`

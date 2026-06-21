@@ -6,6 +6,7 @@
 const foodModule = {
   menuItems: [],
   filteredItems: [],
+  rsvpSummary: [],
 
   eventTypes: [
     'Haldi',
@@ -45,6 +46,18 @@ const foodModule = {
       return this.menuItems;
     } catch (error) {
       console.error('Failed to fetch menu items:', error);
+      throw error;
+    }
+  },
+
+  async fetchRsvpSummary() {
+    try {
+      const response = await apiCall('/api/guests?action=rsvp-summary', 'GET');
+      this.rsvpSummary = response.events || [];
+      return this.rsvpSummary;
+    } catch (error) {
+      console.error('Failed to fetch RSVP catering summary:', error);
+      this.rsvpSummary = [];
       throw error;
     }
   },
