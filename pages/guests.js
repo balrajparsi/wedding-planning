@@ -440,10 +440,13 @@ const guestListPage = {
 
     try {
       const res = await apiCall('/api/guests?action=bulk-invite', 'POST', { filterStatus, subject, message });
-      const failedCompletely = !res.success || !res.sendingEnabled || (res.failed && !res.sent);
-      const firstErrorText = res.errors?.[0]?.error || '';
+      const hasFailures = !res.success || !res.sendingEnabled || Number(res.failed || 0) > 0;
+      const firstErrorItem = res.errors?.[0] || {};
+      const failedGuest = [firstErrorItem.name, firstErrorItem.email].filter(Boolean).join(' ');
+      const firstErrorText = firstErrorItem.error ? `${failedGuest ? `${failedGuest} - ` : ''}${firstErrorItem.error}` : '';
       const firstError = firstErrorText && firstErrorText !== res.message ? `: ${firstErrorText}` : '';
-      showNotification((res.message || `Invites prepared for ${res.invitedCount || 0} guests`) + (failedCompletely ? firstError : ''), failedCompletely ? 'error' : 'success');
+      const errorAlreadyShown = firstErrorItem.error && res.message?.includes(firstErrorItem.error);
+      showNotification((res.message || `Invites prepared for ${res.invitedCount || 0} guests`) + (hasFailures && !errorAlreadyShown ? firstError : ''), hasFailures ? 'error' : 'success');
       modal.style.display = 'none';
       await this.loadGuests();
       this.render();

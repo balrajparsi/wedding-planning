@@ -170,7 +170,9 @@ async function handleAddGuest(req, res) {
     notes: notes || '',
     events: ensureGuestEvents(events),
     rsvpStatus: 'pending',
-    invitedDate: new Date().toISOString(),
+    invitedDate: null,
+    lastInviteAttemptDate: null,
+    lastInviteError: '',
     rsvpDate: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -261,7 +263,9 @@ async function handleImportGuests(req, res) {
         id: current.id,
         weddingId: current.weddingId || WEDDING_ID,
         rsvpStatus: guestData.rsvpStatus || current.rsvpStatus || 'pending',
-        invitedDate: current.invitedDate || now,
+        invitedDate: current.invitedDate || null,
+        lastInviteAttemptDate: current.lastInviteAttemptDate || null,
+        lastInviteError: current.lastInviteError || '',
         createdAt: current.createdAt || now,
         updatedAt: now
       };
@@ -283,7 +287,9 @@ async function handleImportGuests(req, res) {
       events: guestData.events?.length ? guestData.events : allGuestEventNames(),
       notes: guestData.notes || '',
       rsvpStatus: guestData.rsvpStatus || 'pending',
-      invitedDate: now,
+      invitedDate: null,
+      lastInviteAttemptDate: null,
+      lastInviteError: '',
       rsvpDate: null,
       createdAt: now,
       updatedAt: now
@@ -435,15 +441,24 @@ function summarizeResendError(errorText) {
     // Resend usually returns JSON, but keep the raw body if it does not.
   }
 
+  if (/only send testing emails|own email address|resend\.dev|verify a domain|domain is not verified/i.test(message)) {
+    return 'Resend test sender can only email your Resend account address. To email other guests, verify a domain in Resend and set INVITE_FROM_EMAIL to Akhila and Akshay <invites@yourdomain.com>.';
+  }
+
   if (/invalid\s+`?from`?\s+field/i.test(message)) {
     return 'Resend rejected the sender. INVITE_FROM_EMAIL must be a real email sender, such as Akhila and Akshay <onboarding@resend.dev> for testing or a sender on your verified domain.';
   }
 
-  if (/verify a domain|domain is not verified|resend\.dev/i.test(message)) {
-    return 'Resend test sending only works for your verified account email. To send guests real invites, verify a domain in Resend and use that domain in INVITE_FROM_EMAIL.';
-  }
-
   return String(message || 'Resend send failed').slice(0, 220);
+}
+
+function buildInviteError(guest, error) {
+  return {
+    id: guest.id,
+    name: guest.name || '',
+    email: guest.email || '',
+    error
+  };
 }
 
 async function handleDeleteGuest(req, res) {
@@ -514,6 +529,8 @@ async function handleBulkInvite(req, res) {
 
   let sent = 0;
   let failed = 0;
+  const sentGuestIds = new Set();
+  const sentGuests = [];
   const errors = [];
 
   if (RESEND_API_KEY && withEmail.length > 0) {
@@ -538,39 +555,59 @@ async function handleBulkInvite(req, res) {
         });
         if (r.ok) {
           sent++;
+          sentGuestIds.add(g.id);
+          sentGuests.push({ id: g.id, name: g.name, email: g.email });
         } else {
           const errText = await r.text();
           failed++;
-          errors.push({ email: g.email, error: summarizeResendError(errText) });
+          errors.push(buildInviteError(g, summarizeResendError(errText)));
         }
       } catch (e) {
         failed++;
-        errors.push({ email: g.email, error: e.message });
+        errors.push(buildInviteError(g, e.message));
       }
     }
   }
 
-  // Mark invitedDate on the guests we attempted (or just prepared)
+  // Track invite attempts; invitedDate means the email actually sent.
   withEmail.forEach(g => {
     const idx = guests.findIndex(x => x.id === g.id);
-    if (idx !== -1) {
+    if (idx === -1) return;
+
+    const guestError = errors.find(error => error.id === g.id);
+    guests[idx].lastInviteAttemptDate = now;
+
+    if (RESEND_API_KEY && sentGuestIds.has(g.id)) {
       guests[idx].invitedDate = now;
+      guests[idx].lastInviteError = '';
+      guests[idx].updatedAt = now;
+      return;
+    }
+
+    if (guestError) {
+      guests[idx].lastInviteError = guestError.error || 'Invite failed';
       guests[idx].updatedAt = now;
     }
   });
   await kv.set(guestsKey, guests);
 
   const wasSent = !!RESEND_API_KEY;
+  const firstError = errors[0];
+  const failedWho = firstError ? firstError.name || firstError.email : '';
+  const sentMessage = failed
+    ? `Sent ${sent} of ${withEmail.length} invites. ${failed} failed${failedWho ? `: ${failedWho}` : ''}${firstError?.error ? ` - ${firstError.error}` : ''}`
+    : `Sent ${sent} of ${withEmail.length} invites`;
   res.json({
-    success: true,
+    success: wasSent ? failed === 0 : true,
     sendingEnabled: wasSent,
     message: wasSent
-      ? `Sent ${sent} of ${withEmail.length} invites${failed ? ` (${failed} failed)` : ''}`
+      ? sentMessage
       : `Preview only — ${withEmail.length} invites prepared. Add RESEND_API_KEY env var on Vercel to actually send.`,
     invitedCount: withEmail.length,
     totalMatched: selectedGuests.length,
     sent, failed,
     errors: errors.slice(0, 5),
+    sentGuests,
     invitedGuests: withEmail.map(g => ({ id: g.id, name: g.name, email: g.email }))
   });
 }
