@@ -1,9 +1,186 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RSVP | Akhila & Akshay</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
-:root{--ivory:#fff8e9;--gold:#c89422;--deep:#281309;--wine:#8c151a;--muted:#705843}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 10%,#5c2316,#1d0b06 65%);font-family:Inter,Arial,sans-serif;color:var(--deep)}main{max-width:920px;margin:auto;padding:clamp(1rem,4vw,4rem)}header{text-align:center;color:var(--ivory);margin:1rem 0 2rem}.eyebrow{font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:#f8d680;font-weight:800}h1{font:700 clamp(3.8rem,10vw,6rem)/.82 "Cormorant Garamond",Georgia,serif;margin:.7rem 0;color:var(--ivory)}h1 span{color:#f8c647;font-style:italic}header p{font:1.25rem/1.45 "Cormorant Garamond",Georgia,serif;margin:1rem auto;max-width:36rem}.panel{background:linear-gradient(145deg,#fff9e8,#f4dfb0);border:1px solid #dfb54f;box-shadow:0 24px 70px #10060399;padding:clamp(1rem,4vw,2.5rem)}h2,h3{font-family:"Cormorant Garamond",Georgia,serif}h2{font-size:2.5rem;margin:0}.intro{color:var(--muted);line-height:1.5}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1.25rem 0}.full{grid-column:1/-1}label{display:block;font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:#8c5f11;margin-bottom:.4rem}input,textarea{width:100%;padding:.85rem;border:1px solid #c9ab68;background:#fffdf7;font:inherit;color:var(--deep)}textarea{min-height:5rem;resize:vertical}.events{display:grid;gap:.9rem}.event{padding:1rem;border:1px solid #d9bd7c;background:#fffdf7}.event-top{display:flex;justify-content:space-between;gap:1rem}.event h3{font-size:1.7rem;margin:0}.event p,.hint{margin:.35rem 0;color:var(--muted);font-size:.84rem;line-height:1.45}.choices{display:flex;gap:.35rem;flex-wrap:wrap}.choice input{position:absolute;opacity:0}.choice span{display:block;min-width:3.5rem;padding:.65rem;border:1px solid #ceb67d;text-align:center;font-size:.75rem;font-weight:800;cursor:pointer}.choice input:checked+span{color:#fff;background:linear-gradient(135deg,var(--wine),var(--gold))}.counts{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;margin-top:1rem;padding-top:1rem;border-top:1px solid #ead6a8}.counts.show{display:grid}.status{margin-top:1rem;padding:.9rem;background:#fffdf7;border:1px solid #d9bd7c;color:var(--muted)}.status.error{color:#9f1d22;border-color:#9f1d22}.status.success{color:#315a31;border-color:#315a31}button{margin-top:1.25rem;width:100%;border:0;padding:1rem;color:#fff;background:linear-gradient(135deg,var(--wine),var(--gold));font:800 .74rem Inter,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}.hidden{display:none}@media(max-width:620px){main{padding:.75rem}.grid,.counts{grid-template-columns:1fr}.event-top{display:block}.choices{margin-top:.8rem}}
-</style></head><body><main><header><div class="eyebrow">Mana Pelli Veduka</div><h1>Akhila <span>&amp;</span> Akshay</h1><p>Please join us for a Telugu wedding celebration full of family, blessings, music, and joy.</p></header><section class="panel"><h2>Kindly Respond</h2><p class="intro">Please share your details, then choose Yes, Maybe, or No for every celebration.</p><form id="form"><div class="grid"><div class="full"><label>Full name<input id="name" required autocomplete="name"></label></div><div><label>Phone number<input id="phone" required autocomplete="tel"></label></div><div><label>Email address<input id="email" type="email" required autocomplete="email"></label></div><div class="full"><label>Notes for the family<textarea id="notes" placeholder="Anything we should know?"></textarea></label></div></div><h3>Your Celebrations</h3><p class="hint">For Yes, enter the total people coming. At events with both meal options, split that total into vegetarian and non-vegetarian guests.</p><div class="events" id="events"></div><button type="submit">Send RSVP</button><div id="status" class="status hidden"></div></form></section></main><script>
-const form=document.getElementById('form'),eventsEl=document.getElementById('events'),statusEl=document.getElementById('status');let events=[];const num=v=>Math.max(0,parseInt(v,10)||0);function status(message,type=''){statusEl.textContent=message;statusEl.className=`status ${type}`;}
-function render(items){events=items;eventsEl.innerHTML=items.map(event=>{const vegOnly=event.mealPolicy==='vegetarian-only';const counts=vegOnly?`<div class="counts" data-counts><div><label>How many people are coming?<input data-count="attendanceCount" type="number" min="1" value="1"></label></div><p class="hint full">This celebration is vegetarian-only, so we only need the total number attending.</p></div>`:`<div class="counts" data-counts><div><label>Total people coming<input data-count="attendanceCount" type="number" min="1" value="1"></label></div><div><label>Of those, vegetarian<input data-count="vegetarianCount" type="number" min="0" value="0"></label></div><div><label>Of those, non-vegetarian<input data-count="nonVegetarianCount" type="number" min="0" value="0"></label></div><p class="hint full">Example: 3 people coming with 2 vegetarian guests means 3 total, 2 vegetarian, and 1 non-vegetarian.</p></div>`;return `<article class="event" data-id="${event.id}"><div class="event-top"><div><h3>${event.name}</h3><p>${event.displayDate} · ${event.time}<br>${event.subtitle}<br>Venue · ${event.venue}</p></div><div class="choices"><label class="choice"><input type="radio" name="${event.id}" value="attending"><span>Yes</span></label><label class="choice"><input type="radio" name="${event.id}" value="maybe" checked><span>Maybe</span></label><label class="choice"><input type="radio" name="${event.id}" value="not_attending"><span>No</span></label></div></div>${counts}</article>`}).join('');eventsEl.querySelectorAll('input[type=radio]').forEach(input=>input.addEventListener('change',()=>input.closest('.event').querySelector('[data-counts]').classList.toggle('show',input.value==='attending')))}
-async function init(){try{const response=await fetch('/api/rsvp'),data=await response.json();if(!response.ok)throw Error(data.error);render(data.events)}catch(error){status(error.message||'Unable to load RSVP details.','error')}}
-form.addEventListener('submit',async e=>{e.preventDefault();const eventResponses={};for(const event of events){const card=eventsEl.querySelector(`[data-id="${event.id}"]`),response=card.querySelector(`input[name="${event.id}"]:checked`).value,read=key=>num(card.querySelector(`[data-count="${key}"]`)?.value);eventResponses[event.name]=response==='attending'?{response,attendanceCount:read('attendanceCount'),vegetarianCount:event.mealPolicy==='vegetarian-only'?read('attendanceCount'):read('vegetarianCount'),nonVegetarianCount:event.mealPolicy==='vegetarian-only'?0:read('nonVegetarianCount')}:{response}}try{const response=await fetch('/api/rsvp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('name').value.trim(),phone:document.getElementById('phone').value.trim(),email:document.getElementById('email').value.trim(),rsvpNotes:document.getElementById('notes').value.trim(),eventResponses})}),data=await response.json();if(!response.ok)throw Error(data.error);form.querySelector('button').disabled=true;status(data.message,'success')}catch(error){status(error.message||'Unable to save RSVP.','error')}});init();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP | Akhila & Akshay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ivory:#fff5dc; --gold:#c89422; --gold-deep:#8c5f11; --kumkum:#9f1d22; --leaf:#315a31; --ink:#281309; --muted:#705843; --panel:rgba(255,248,226,.97); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); font-family:Inter,Arial,sans-serif; background:linear-gradient(90deg,rgba(32,12,4,.70),rgba(32,12,4,.26),rgba(32,12,4,.68)),url("assets/images/nalugu-telugu-wedding-decor.jpg") center / cover fixed no-repeat; }
+    main { min-height:100vh; max-width:1260px; margin:auto; padding:clamp(1rem,4vw,4rem); display:grid; grid-template-columns:minmax(240px,.75fr) minmax(350px,1.25fr); gap:clamp(2rem,5vw,5rem); align-items:start; }
+    .intro { color:var(--ivory); padding-top:clamp(1rem,8vh,6rem); text-shadow:0 2px 18px rgba(0,0,0,.45); position:sticky; top:1rem; }
+    .eyebrow { margin:0 0 .8rem; color:#f8d680; font-size:.72rem; font-weight:800; letter-spacing:.26em; text-transform:uppercase; }
+    h1 { margin:0; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(4rem,8vw,7rem); line-height:.82; }
+    h1 span { color:#f8c647; font-style:italic; }
+    .intro p { max-width:30rem; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(1.35rem,2.1vw,1.85rem); line-height:1.3; }
+    .date-strip { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:2rem; }
+    .date-strip span { border:1px solid rgba(248,214,128,.5); background:rgba(44,16,5,.3); padding:.55rem .7rem; color:#ffe6a7; font-size:.68rem; font-weight:700; letter-spacing:.08em; }
+    .panel { background:var(--panel); border:1px solid rgba(219,172,77,.7); box-shadow:0 28px 80px rgba(48,20,8,.3); padding:clamp(1rem,3vw,2.5rem); }
+    .panel-header { padding:.7rem .7rem 1.25rem; border-bottom:1px solid rgba(140,95,17,.24); }
+    .panel-header h2 { margin:.2rem 0 .55rem; color:var(--ink); font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(2.3rem,4vw,3.8rem); line-height:.95; }
+    .panel-header p { margin:0; color:var(--muted); line-height:1.55; }
+    form { padding:.85rem .7rem .25rem; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin:1rem 0; }
+    .full { grid-column:1 / -1; }
+    label, legend { display:block; margin-bottom:.42rem; color:var(--gold-deep); font-size:.68rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    input, textarea { width:100%; border:1px solid rgba(140,95,17,.28); background:rgba(255,255,255,.72); color:var(--ink); font:inherit; padding:.82rem .88rem; }
+    input:focus, textarea:focus { outline:3px solid rgba(200,148,34,.22); border-color:var(--gold); }
+    textarea { min-height:5rem; resize:vertical; }
+    fieldset { margin:1.25rem 0; padding:0; border:0; }
+    .hint { color:var(--muted); font-size:.84rem; line-height:1.5; margin:-.2rem 0 1rem; }
+    .events { display:grid; gap:.85rem; }
+    .event { border:1px solid rgba(140,95,17,.22); background:rgba(255,252,241,.64); padding:1rem; }
+    .event-top { display:flex; align-items:start; justify-content:space-between; gap:1rem; }
+    .event h3 { margin:0; font-family:"Cormorant Garamond",Georgia,serif; font-size:1.65rem; line-height:1; }
+    .event p { margin:.35rem 0 0; color:var(--muted); font-size:.84rem; line-height:1.45; }
+    .choices { display:flex; gap:.35rem; flex-wrap:wrap; }
+    .choice input { position:absolute; opacity:0; pointer-events:none; }
+    .choice span { display:grid; place-items:center; min-width:3.5rem; padding:.62rem .65rem; border:1px solid rgba(140,95,17,.28); color:var(--muted); background:rgba(255,255,255,.55); cursor:pointer; font-size:.73rem; font-weight:800; }
+    .choice input:checked + span { background:linear-gradient(145deg,#9f1d22,#c89422); border-color:var(--gold); color:#fff8e8; }
+    .meal-grid { display:none; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(140,95,17,.18); }
+    .meal-grid.visible { display:grid; }
+    .meal-grid label { font-size:.61rem; letter-spacing:.08em; }
+    .action-row { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; margin-top:1.2rem; }
+    button, .calendar-link { border:0; color:#fff8e8; background:linear-gradient(135deg,#8c151a,#c89422); padding:1rem 1.25rem; font:800 .72rem Inter,Arial,sans-serif; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; text-decoration:none; }
+    .calendar-link { color:var(--gold-deep); background:rgba(255,255,255,.45); border:1px solid rgba(140,95,17,.28); }
+    .status { margin:1rem .7rem 0; padding:.9rem 1rem; border:1px solid rgba(140,95,17,.22); background:rgba(255,252,241,.62); color:var(--muted); line-height:1.5; }
+    .status.success { color:var(--leaf); border-color:rgba(49,90,49,.45); }
+    .status.error { color:var(--kumkum); border-color:rgba(159,29,34,.45); }
+    .hidden { display:none !important; }
+    @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .intro{padding-top:0;position:static;} }
+    @media (max-width:620px) { main{padding:.75rem;} .form-grid,.meal-grid{grid-template-columns:1fr;} .event-top{display:block;} .choices{margin-top:.8rem;} button,.calendar-link{width:100%;text-align:center;} }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="intro" aria-label="Wedding invitation">
+      <p class="eyebrow">Mana Pelli Veduka</p>
+      <h1>Akhila <span>&amp;</span><br>Akshay</h1>
+      <p>A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
+      <div class="date-strip"><span>28 Aug · Haldi 11 AM</span><span>28 Aug · Sangeet 6 PM</span><span>30 Aug · Marriage 11 AM</span></div>
+    </section>
+    <section class="panel" aria-live="polite">
+      <div class="panel-header">
+        <p class="eyebrow">Wedding RSVP</p>
+        <h2 id="guestName">Celebrate with us</h2>
+        <p id="guestSub">Please share your details and let us know which celebrations you will join.</p>
+      </div>
+      <div class="status" id="loadingBox">Preparing your RSVP...</div>
+      <form id="rsvpForm" class="hidden">
+        <div class="form-grid">
+          <div class="full"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name" placeholder="Your full name"></div>
+          <div><label for="phone">Phone number</label><input id="phone" name="phone" required autocomplete="tel" inputmode="tel" placeholder="Phone number"></div>
+          <div><label for="email">Email address</label><input id="email" name="email" required autocomplete="email" type="email" placeholder="Email address"></div>
+          <div class="full"><label for="rsvpNotes">Notes for the family</label><textarea id="rsvpNotes" name="rsvpNotes" placeholder="Anything we should know?"></textarea></div>
+        </div>
+        <fieldset>
+          <legend>Your celebrations</legend>
+          <p class="hint">For every event choose Yes, Maybe, or No. For Yes, enter the total number coming. For events with both meal options, split that total between vegetarian and non-vegetarian guests.</p>
+          <div class="events" id="eventsList"></div>
+        </fieldset>
+        <div class="action-row"><button type="submit">Send RSVP</button><a class="calendar-link hidden" id="calendarLink" href="#" download>Add to calendar</a></div>
+        <div class="status hidden" id="statusBox"></div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const form = document.getElementById('rsvpForm');
+    const loadingBox = document.getElementById('loadingBox');
+    const statusBox = document.getElementById('statusBox');
+    const eventsList = document.getElementById('eventsList');
+    const calendarLink = document.getElementById('calendarLink');
+    let events = [];
+
+    function setStatus(message, type = '') { statusBox.textContent = message; statusBox.className = `status ${type}`.trim(); statusBox.classList.remove('hidden'); }
+    function eventInputName(event) { return `event-${event.id}`; }
+    function number(value) { return Math.max(0, parseInt(value, 10) || 0); }
+    function eventResponse(event) { return event.response || 'maybe'; }
+
+    function renderEvents(items) {
+      events = items;
+      eventsList.innerHTML = items.map(event => {
+        const response = eventResponse(event);
+        const name = eventInputName(event);
+        const mealsVisible = response === 'attending' ? 'visible' : '';
+        const vegetarianOnly = event.mealPolicy === 'vegetarian-only';
+        const mealInputs = vegetarianOnly
+          ? `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
+              <div><label>How many people are coming?</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
+              <p class="hint full" style="margin:0;align-self:end;">This celebration is vegetarian-only, so we only need the total number attending.</p>
+            </div>`
+          : `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
+              <div><label>Total people coming</label><input data-count="attendanceCount" type="number" min="1" value="${event.attendanceCount || 1}"></div>
+              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="number" min="0" value="${event.vegetarianCount || 0}"></div>
+              <div><label>Of those, non-vegetarian</label><input data-count="nonVegetarianCount" type="number" min="0" value="${event.nonVegetarianCount || 0}"></div>
+              <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
+            </div>`;
+        return `<article class="event" data-event-id="${event.id}">
+          <div class="event-top"><div><h3>${event.name}</h3><p>${event.displayDate} · ${event.time}<br>${event.subtitle}<br>Venue · ${event.venue || 'To Be Confirmed'}</p></div>
+          <div class="choices" aria-label="${event.name} response">
+            <label class="choice"><input type="radio" name="${name}" value="attending" ${response === 'attending' ? 'checked' : ''}><span>Yes</span></label>
+            <label class="choice"><input type="radio" name="${name}" value="maybe" ${response === 'maybe' || response === 'pending' ? 'checked' : ''}><span>Maybe</span></label>
+            <label class="choice"><input type="radio" name="${name}" value="not_attending" ${response === 'not_attending' ? 'checked' : ''}><span>No</span></label>
+          </div></div>
+          ${mealInputs}</article>`;
+      }).join('');
+      eventsList.querySelectorAll('input[type="radio"]').forEach(input => input.addEventListener('change', () => {
+        const card = input.closest('.event');
+        card.querySelector('[data-meals-for]').classList.toggle('visible', input.value === 'attending');
+      }));
+    }
+
+    async function loadRsvp() {
+      try {
+        const endpoint = token ? `/api/rsvp?token=${encodeURIComponent(token)}` : '/api/rsvp';
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to open RSVP');
+        if (data.guest) {
+          const guest = data.guest;
+          document.getElementById('name').value = guest.name || '';
+          document.getElementById('email').value = guest.email || '';
+          document.getElementById('phone').value = guest.phone || '';
+          document.getElementById('rsvpNotes').value = guest.rsvpNotes || '';
+          document.getElementById('guestName').textContent = guest.name || 'Dear Guest';
+          document.getElementById('guestSub').textContent = 'Please confirm your attendance and meal choices for the celebrations below.';
+          calendarLink.href = `/api/rsvp?action=calendar&token=${encodeURIComponent(token)}`;
+          calendarLink.classList.remove('hidden');
+          renderEvents(guest.events || []);
+        } else {
+          renderEvents(data.events || []);
+        }
+        loadingBox.classList.add('hidden'); form.classList.remove('hidden');
+      } catch (error) { loadingBox.textContent = error.message || 'This RSVP could not be opened.'; loadingBox.classList.add('error'); }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const eventResponses = {};
+      for (const item of events) {
+        const card = eventsList.querySelector(`[data-event-id="${item.id}"]`);
+        const selected = card.querySelector(`input[name="${eventInputName(item)}"]:checked`);
+        const response = selected?.value;
+        const readCount = key => number(card.querySelector(`[data-count="${key}"]`)?.value);
+        eventResponses[item.name] = response === 'attending'
+          ? { response, attendanceCount: readCount('attendanceCount'), vegetarianCount: item.mealPolicy === 'vegetarian-only' ? readCount('attendanceCount') : readCount('vegetarianCount'), nonVegetarianCount: item.mealPolicy === 'vegetarian-only' ? 0 : readCount('nonVegetarianCount') }
+          : { response };
+      }
+      const payload = { token, name: document.getElementById('name').value.trim(), phone: document.getElementById('phone').value.trim(), email: document.getElementById('email').value.trim(), rsvpNotes: document.getElementById('rsvpNotes').value.trim(), eventResponses };
+      try {
+        const response = await fetch('/api/rsvp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to save RSVP');
+        if (data.guest?.events) renderEvents(data.guest.events);
+        setStatus(data.message || 'Your RSVP has been received. Thank you for celebrating with Akhila and Akshay.', 'success');
+      } catch (error) { setStatus(error.message || 'Unable to save RSVP right now.', 'error'); }
+    });
+    loadRsvp();
+  </script>
+</body>
+</html>
