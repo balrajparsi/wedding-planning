@@ -177,6 +177,7 @@ async function handleRsvpSummary(req, res) {
   const events = RSVP_EVENTS.map(event => ({
     id: event.id,
     name: event.name,
+    mealPolicy: event.mealPolicy || 'mixed',
     confirmedGuests: 0,
     vegetarianMeals: 0,
     nonVegetarianMeals: 0,

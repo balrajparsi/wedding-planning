@@ -13,6 +13,8 @@ const guestListPage = {
     sortDir: 'asc'
   },
 
+  rsvpSummary: [],
+
   guestEventNames: [
     'Haldi',
     'Sangeet',
@@ -101,12 +103,19 @@ const guestListPage = {
       const response = await apiCall('/api/guests', 'GET');
       guestModule.guests = response.guests || [];
       guestModule.stats  = response.stats  || {};
+      try {
+        const summary = await apiCall('/api/guests?action=rsvp-summary', 'GET');
+        this.rsvpSummary = summary.events || [];
+      } catch (_) {
+        this.rsvpSummary = [];
+      }
       // Always sync filteredGuests after a fresh fetch
       guestModule.filteredGuests = [...guestModule.guests];
     } catch (error) {
       showNotification('Failed to load guests', 'error');
       guestModule.guests = [];
       guestModule.filteredGuests = [];
+      this.rsvpSummary = [];
     }
   },
 
@@ -117,6 +126,7 @@ const guestListPage = {
 
   render() {
     this.renderStats();
+    this.renderEventRsvpSummary();
     this.renderTable();
   },
 
@@ -130,21 +140,45 @@ const guestListPage = {
     const accepted    = g.filter(x => x.rsvpStatus === 'accepted').length;
     const pending     = g.filter(x => x.rsvpStatus === 'pending').length;
     const declined    = g.filter(x => x.rsvpStatus === 'declined').length;
-    const partySize   = g.reduce((s, x) => s + (parseInt(x.partySize) || 1), 0);
-    const veg         = g.filter(x => x.dietaryRestrictions === 'vegetarian' || x.dietaryRestrictions === 'vegan').length;
-    const nonVeg      = g.filter(x => x.dietaryRestrictions === 'non-vegetarian').length;
-    const apane       = g.filter(x => x.dietaryRestrictions === 'apane').length;
+    const maybe       = g.filter(x => x.rsvpStatus === 'maybe').length;
 
     container.innerHTML = `
       <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total Guests</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#27ae60">${accepted}</div><div class="stat-label">Accepted</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#2a5f7f">${partySize}</div><div class="stat-label">Total Party Size</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#27ae60">${veg}</div><div class="stat-label">Vegetarian</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#e74c3c">${nonVeg}</div><div class="stat-label">Non-Vegetarian</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${apane}</div><div class="stat-label">Apane (Family)</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${maybe}</div><div class="stat-label">Maybe</div></div>
     `;
+  },
+
+  renderEventRsvpSummary() {
+    const view = document.querySelector('[data-view="guests"]');
+    const container = view?.querySelector('.guest-event-rsvp-summary');
+    if (!container) return;
+    const events = this.rsvpSummary || [];
+    if (!events.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-bottom:.7rem;">
+        <div><h3 style="margin:0;color:var(--blue);">Event-by-Event Attendance & Meals</h3><p style="margin:.25rem 0 0;color:var(--text-muted);font-size:.82rem;">Each event uses its own RSVP count; meal totals do not carry over from another event.</p></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;">
+        ${events.map(event => {
+          const vegetarianOnly = event.mealPolicy === 'vegetarian-only';
+          return `<article class="card" style="margin:0;border-left:3px solid var(--gold);">
+            <h4 style="margin:0 0 .65rem;color:var(--blue);">${event.name}</h4>
+            <div style="display:grid;gap:.38rem;font-size:.84rem;line-height:1.4;">
+              <span><strong>${event.confirmedGuests || 0}</strong> confirmed attending</span>
+              <span style="color:#278a4b;"><strong>${event.vegetarianMeals || 0}</strong> ${vegetarianOnly ? 'vegetarian meals' : 'vegetarian'}</span>
+              ${vegetarianOnly ? '' : `<span style="color:#c0392b;"><strong>${event.nonVegetarianMeals || 0}</strong> non-vegetarian</span>`}
+              <span style="color:#8e44ad;"><strong>${event.maybeGuests || 0}</strong> maybe replies</span>
+            </div>
+          </article>`;
+        }).join('')}
+      </div>`;
   },
 
   renderTable() {
