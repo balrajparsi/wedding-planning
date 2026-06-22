@@ -35,6 +35,42 @@ function getFromEmail() {
   return displayName ? `${displayName} <${emailMatch[0]}>` : emailMatch[0];
 }
 
+function getGmailConfiguration() {
+  return {
+    senderEmail: String(process.env.GMAIL_SENDER_EMAIL || '').trim(),
+    senderName: cleanText(process.env.GMAIL_SENDER_NAME || 'Akhila & Akshay', 120),
+    clientId: String(process.env.GMAIL_OAUTH_CLIENT_ID || '').trim(),
+    clientSecret: String(process.env.GMAIL_OAUTH_CLIENT_SECRET || '').trim(),
+    refreshToken: String(process.env.GMAIL_OAUTH_REFRESH_TOKEN || '').trim()
+  };
+}
+
+function gmailIsConfigured() {
+  const config = getGmailConfiguration();
+  return Boolean(config.senderEmail || config.clientId || config.clientSecret || config.refreshToken);
+}
+
+function buildGmailRawMessage({ from, to, subject, html }) {
+  const encodedSubject = `=?UTF-8?B?${Buffer.from(subject, 'utf8').toString('base64')}?=`;
+  const message = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Reply-To: ${from}`,
+    `Subject: ${encodedSubject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset="UTF-8"',
+    'Content-Transfer-Encoding: base64',
+    '',
+    Buffer.from(html, 'utf8').toString('base64')
+  ].join('\r\n');
+
+  return Buffer.from(message, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
 function normalizeUsPhone(value) {
   const digits = String(value || '').replace(/\D/g, '');
   if (digits.length === 10) return `+1${digits}`;
@@ -112,7 +148,69 @@ function buildConfirmationSms(guest, events) {
   return cleanText(`Akhila & Akshay: RSVP received for ${guest.name || 'your family'}. ${summary} Full details are in your email. Reply STOP to opt out.`, 320);
 }
 
-async function sendEmailConfirmation(guest, events, attemptedAt) {
+async function sendGmailConfirmation(guest, events, attemptedAt) {
+  const config = getGmailConfiguration();
+  const missing = [
+    ['GMAIL_SENDER_EMAIL', config.senderEmail],
+    ['GMAIL_OAUTH_CLIENT_ID', config.clientId],
+    ['GMAIL_OAUTH_CLIENT_SECRET', config.clientSecret],
+    ['GMAIL_OAUTH_REFRESH_TOKEN', config.refreshToken]
+  ].filter(([, value]) => !value).map(([name]) => name);
+
+  if (missing.length) {
+    return { status: 'skipped', attemptedAt, error: `Gmail confirmation is missing: ${missing.join(', ')}.` };
+  }
+  if (!guest.email) {
+    return { status: 'skipped', attemptedAt, error: 'Guest email is unavailable.' };
+  }
+
+  try {
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        refresh_token: config.refreshToken,
+        grant_type: 'refresh_token'
+      }).toString()
+    });
+    if (!tokenResponse.ok) {
+      return { status: 'failed', attemptedAt, error: parseProviderError(await tokenResponse.text(), 'Unable to refresh Gmail authorization.') };
+    }
+    const tokenPayload = await tokenResponse.json();
+    if (!tokenPayload.access_token) {
+      return { status: 'failed', attemptedAt, error: 'Gmail did not return an access token.' };
+    }
+
+    const senderName = config.senderName.replace(/[\r\n<>]/g, '').trim() || 'Akhila & Akshay';
+    const sender = `${senderName} <${config.senderEmail}>`;
+    const sendResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${tokenPayload.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        raw: buildGmailRawMessage({
+          from: sender,
+          to: guest.email,
+          subject: `RSVP received - Akhila & Akshay's Wedding`,
+          html: buildConfirmationEmail(guest, events)
+        })
+      })
+    });
+    if (!sendResponse.ok) {
+      return { status: 'failed', attemptedAt, error: parseProviderError(await sendResponse.text(), 'Gmail confirmation failed.') };
+    }
+    const payload = await sendResponse.json().catch(() => ({}));
+    return { status: 'sent', attemptedAt, sentAt: new Date().toISOString(), id: cleanText(payload.id, 120) };
+  } catch (error) {
+    return { status: 'failed', attemptedAt, error: cleanText(error.message || 'Gmail confirmation failed.') };
+  }
+}
+
+async function sendResendConfirmation(guest, events, attemptedAt) {
   if (!process.env.RESEND_API_KEY) {
     return { status: 'skipped', attemptedAt, error: 'RESEND_API_KEY is not configured.' };
   }
@@ -142,6 +240,12 @@ async function sendEmailConfirmation(guest, events, attemptedAt) {
   } catch (error) {
     return { status: 'failed', attemptedAt, error: cleanText(error.message || 'Resend confirmation failed.') };
   }
+}
+
+async function sendEmailConfirmation(guest, events, attemptedAt) {
+  return gmailIsConfigured()
+    ? sendGmailConfirmation(guest, events, attemptedAt)
+    : sendResendConfirmation(guest, events, attemptedAt);
 }
 
 async function sendSmsConfirmation(guest, events, attemptedAt) {
@@ -187,6 +291,8 @@ async function sendRsvpConfirmations(guest, events) {
 }
 
 module.exports = {
+  buildGmailRawMessage,
   normalizeUsPhone,
+  sendEmailConfirmation,
   sendRsvpConfirmations
 };
