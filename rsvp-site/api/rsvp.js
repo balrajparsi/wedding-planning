@@ -175,6 +175,10 @@ function publicGuest(guest, allEvents = false) {
   };
 }
 
+function getPublicRsvpEvents() {
+  return getInvitedEvents({ events: RSVP_EVENTS.map(event => event.name) });
+}
+
 async function findGuestFromToken(token) {
   const payload = verifyRsvpToken(token);
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
@@ -201,7 +205,7 @@ async function sendAndStoreRsvpConfirmations(guestsKey, guests, guest) {
 
 async function handlePublicRsvp(req, res, body) {
   if (req.method === 'GET') {
-    return res.status(200).json({ success: true, events: RSVP_EVENTS });
+    return res.status(200).json({ success: true, events: getPublicRsvpEvents() });
   }
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'GET,POST,OPTIONS');
@@ -278,7 +282,7 @@ async function handleTokenRsvp(req, res, url, body, token) {
     res.setHeader('Content-Disposition', 'attachment; filename="akhila-akshay-wedding.ics"');
     return res.status(200).send(ics);
   }
-  if (req.method === 'GET') return res.status(200).json({ success: true, guest: publicGuest(guest), events: RSVP_EVENTS });
+  if (req.method === 'GET') return res.status(200).json({ success: true, guest: publicGuest(guest), events: getPublicRsvpEvents() });
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'GET,POST,OPTIONS');
     return res.status(405).json({ error: 'Method not allowed' });
