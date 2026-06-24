@@ -198,7 +198,6 @@ const guestListPage = {
         <td><strong>${g.name || '—'}</strong></td>
         <td>${g.email || '—'}</td>
         <td>${g.phone || '—'}</td>
-        <td>${this.displayGuestSide(g.side) || '—'}</td>
         <td style="text-align:center">${g.partySize || 1}</td>
         <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
@@ -218,7 +217,6 @@ const guestListPage = {
             <th style="cursor:pointer" onclick="guestListPage.sortBy('name')">Name ↕</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Side</th>
             <th>Party Size</th>
             <th>Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
@@ -427,7 +425,6 @@ const guestListPage = {
       name:                 form.querySelector('[name="name"]')?.value?.trim(),
       email:                form.querySelector('[name="email"]')?.value?.trim(),
       phone:                form.querySelector('[name="phone"]')?.value?.trim(),
-      side:                 form.querySelector('[name="side"]')?.value,
       partySize:            parseInt(form.querySelector('[name="partySize"]')?.value, 10) || 1,
       events:               events,
       eventResponses,
@@ -459,7 +456,6 @@ const guestListPage = {
       form.querySelector('[name="name"]').value        = guest.name || '';
       form.querySelector('[name="email"]').value       = guest.email || '';
       form.querySelector('[name="phone"]').value       = guest.phone || '';
-      form.querySelector('[name="side"]').value        = this.normalizeGuestSide(guest.side) || '';
       form.querySelector('[name="partySize"]').value   = guest.partySize || 1;
       form.querySelector('[name="rsvpStatus"]').value  = guest.rsvpStatus || 'pending';
       form.querySelector('[name="notes"]').value       = guest.notes || '';
@@ -496,7 +492,6 @@ const guestListPage = {
       name:                form.querySelector('[name="name"]')?.value?.trim(),
       email:               form.querySelector('[name="email"]')?.value?.trim(),
       phone:               form.querySelector('[name="phone"]')?.value?.trim(),
-      side:                form.querySelector('[name="side"]')?.value,
       partySize:           parseInt(form.querySelector('[name="partySize"]')?.value, 10) || 1,
       rsvpStatus:          this.deriveRsvpStatus(eventResponses),
       events:              events,
@@ -700,7 +695,7 @@ const guestListPage = {
 
   mapStructuredRows(rows) {
     const header = rows[0].map(value => this.normalizeHeader(value));
-    const hasHeader = header.some(value => ['name', 'email', 'phone', 'relationship', 'side', 'partySize', 'dietaryRestrictions', 'events', 'notes', 'rsvpStatus'].includes(value));
+    const hasHeader = header.some(value => ['name', 'email', 'phone', 'relationship', 'partySize', 'dietaryRestrictions', 'events', 'notes', 'rsvpStatus'].includes(value));
     const dataRows = hasHeader ? rows.slice(1) : rows;
 
     return dataRows
@@ -724,12 +719,7 @@ const guestListPage = {
       contact: 'phone',
       relationship: 'relationship',
       relation: 'relationship',
-      side: 'side',
-      guestside: 'side',
-      weddingside: 'side',
       group: 'relationship',
-      familyside: 'side',
-      bridegroomside: 'side',
       partysize: 'partySize',
       guests: 'partySize',
       count: 'partySize',
@@ -793,7 +783,6 @@ const guestListPage = {
       dietary = cleanParts.find(part => /(veg|vegan|non|meat|chicken|gluten|apane|family|none|diet)/i.test(part)) || '';
     }
     const rsvpStatus = cleanParts.find(part => /(accepted|confirmed|pending|declined|maybe|attending|not attending)/i.test(part)) || '';
-    const side = this.normalizeGuestSide(text);
     const eventPattern = /\b(satyanarayana(?:\s+swamy)?(?:\s+vratam)?|vratam|pelli\s*koduku|pellikoduku|pelli\s*kuthuru|pellikuthuru|nalugu|marriage|wedding|sangeet|pre-wedding|reception|mehendi|haldi|ceremony|cocktail)\b/gi;
     const eventWords = text.match(eventPattern) || [];
     const extractEvents = value => [...new Set((String(value || '').match(eventPattern) || [])
@@ -836,9 +825,9 @@ const guestListPage = {
       : cleanParts.find(part => /(bride|groom|friend|family|work|college|school|relative|cousin|uncle|aunt)/i.test(part) && part !== dietary) || '';
     const notes = singleLine
       ? ''
-      : cleanParts.filter(part => ![namePart, email, phone, partySize, dietary, rsvpStatus, relationship, side].includes(part) && !events.includes(part)).join('; ');
+      : cleanParts.filter(part => ![namePart, email, phone, partySize, dietary, rsvpStatus, relationship].includes(part) && !events.includes(part)).join('; ');
 
-    return this.normalizeImportedGuest({ name: namePart, email, phone, relationship, side, partySize, dietaryRestrictions: dietary, events, rsvpStatus, notes });
+    return this.normalizeImportedGuest({ name: namePart, email, phone, relationship, partySize, dietaryRestrictions: dietary, events, rsvpStatus, notes });
   },
 
   normalizeImportedGuest(data) {
@@ -849,7 +838,6 @@ const guestListPage = {
       email: String(data.email || '').trim(),
       phone: String(data.phone || '').trim(),
       relationship: String(data.relationship || '').trim(),
-      side: this.normalizeGuestSide(data.side),
       partySize: Math.max(1, parseInt(data.partySize, 10) || 1),
       dietaryRestrictions: this.normalizeDietary(data.dietaryRestrictions),
       events: events.map(e => this.normalizeEventName(e)).filter(Boolean),
@@ -891,21 +879,6 @@ const guestListPage = {
     if (text.includes('pellikoduku') || text.includes('pelli koduku') || text.includes('pellikuthuru') || text.includes('pelli kuthuru') || text.includes('nalugu') || text.includes('mehendi')) return 'Pellikuthuru';
     if (text.includes('satyanarayana') || text.includes('vratam')) return 'Satyanarayana Swamy Vratam';
     if (text.includes('marriage') || text.includes('wedding') || text.includes('ceremony')) return 'Marriage';
-    return '';
-  },
-
-  normalizeGuestSide(value) {
-    const text = String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
-    if (!text) return '';
-    if (/\b(akhila|bride|chennaboina|girl|girl's|girls)\b/i.test(text)) return 'akhila';
-    if (/\b(akshay|groom|lenkalapally|boy|boy's|boys)\b/i.test(text)) return 'akshay';
-    return '';
-  },
-
-  displayGuestSide(value) {
-    const side = this.normalizeGuestSide(value);
-    if (side === 'akhila') return "Akhila's side";
-    if (side === 'akshay') return "Akshay's side";
     return '';
   },
 

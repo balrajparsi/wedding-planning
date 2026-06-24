@@ -3,7 +3,6 @@ const kv = require('../lib/kv');
 const {
   WEDDING_ID,
   RSVP_EVENTS,
-  getGuestSideDetails,
   verifyRsvpToken,
   buildCalendarFile,
   getInvitedEvents,
@@ -162,14 +161,11 @@ function getGuestEvents(guest) {
 
 function publicGuest(guest, allEvents = false) {
   const events = allEvents ? getPublicEvents(guest) : getGuestEvents(guest);
-  const sideDetails = getGuestSideDetails(guest);
   return {
     id: guest.id,
     name: guest.name || '',
     email: guest.email || '',
     phone: guest.phone || '',
-    side: guest.side || '',
-    sideLabel: sideDetails?.label || '',
     partySize: parseInt(guest.partySize, 10) || 1,
     dietaryRestrictions: guest.dietaryRestrictions || 'none',
     rsvpStatus: guest.rsvpStatus || 'pending',
@@ -251,7 +247,6 @@ async function handlePublicRsvp(req, res, body) {
       id: crypto.randomBytes(8).toString('hex'),
       weddingId: WEDDING_ID,
       relationship: '',
-      side: '',
       dietaryRestrictions: 'none',
       notes: '',
       events: RSVP_EVENTS.map(event => event.name),

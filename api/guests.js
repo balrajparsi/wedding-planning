@@ -15,8 +15,6 @@ const {
   buildRsvpUrl,
   buildCalendarUrl,
   getInvitedEvents,
-  getGuestSideDetails,
-  normalizeGuestSide,
   normalizeEvents
 } = require('../lib/rsvp');
 
@@ -104,10 +102,7 @@ async function handleListGuests(req, res) {
       g.name.toLowerCase().includes(search) ||
       g.email?.toLowerCase().includes(search) ||
       g.phone?.includes(search) ||
-      normalizeEvents(g.events || []).join(' ').toLowerCase().includes(search) ||
-      displayGuestSide(g.side).toLowerCase().includes(search) ||
-      g.side?.toLowerCase().includes(search) ||
-      (g.side === 'akhila' ? 'akhila bride chennaboina' : g.side === 'akshay' ? 'akshay groom lenkalapally' : '').includes(search)
+      normalizeEvents(g.events || []).join(' ').toLowerCase().includes(search)
     );
   }
 
@@ -203,7 +198,7 @@ async function handleRsvpSummary(req, res) {
 }
 
 async function handleAddGuest(req, res) {
-  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, events, eventResponses, rsvpStatus } = req.body;
+  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, events, eventResponses, rsvpStatus } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'Guest name required' });
@@ -217,7 +212,6 @@ async function handleAddGuest(req, res) {
     email: email || '',
     phone: phone || '',
     relationship: relationship || '',
-    side: normalizeGuestSide(side),
     partySize: partySize || 1,
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
@@ -257,13 +251,12 @@ async function handleUpdateGuest(req, res) {
   const guest = guests[guestIndex];
 
   // Update fields
-  const { name, email, phone, relationship, side, partySize, dietaryRestrictions, notes, rsvpStatus, events, eventResponses } = req.body;
+  const { name, email, phone, relationship, partySize, dietaryRestrictions, notes, rsvpStatus, events, eventResponses } = req.body;
 
   if (name !== undefined) guest.name = name;
   if (email !== undefined) guest.email = email;
   if (phone !== undefined) guest.phone = phone;
   if (relationship !== undefined) guest.relationship = relationship;
-  if (side !== undefined) guest.side = normalizeGuestSide(side);
   if (partySize !== undefined) guest.partySize = partySize;
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
@@ -336,7 +329,6 @@ async function handleImportGuests(req, res) {
       email: guestData.email || '',
       phone: guestData.phone || '',
       relationship: guestData.relationship || '',
-      side: guestData.side || '',
       partySize: guestData.partySize || 1,
       dietaryRestrictions: guestData.dietaryRestrictions || 'none',
       events: guestData.events?.length ? guestData.events : allGuestEventNames(),
@@ -375,7 +367,6 @@ function normalizeImportedGuest(rawGuest = {}) {
     email: String(rawGuest.email || '').trim(),
     phone: String(rawGuest.phone || '').trim(),
     relationship: String(rawGuest.relationship || '').trim(),
-    side: normalizeGuestSide(rawGuest.side),
     partySize: Math.max(1, parseInt(rawGuest.partySize, 10) || 1),
     dietaryRestrictions: normalizeDietary(rawGuest.dietaryRestrictions),
     events,
@@ -423,13 +414,6 @@ function normalizeRsvpStatus(value) {
   if (['declined', 'decline', 'no', 'not attending'].includes(text)) return 'declined';
   if (['maybe', 'tentative'].includes(text)) return 'maybe';
   return 'pending';
-}
-
-function displayGuestSide(value) {
-  const side = normalizeGuestSide(value);
-  if (side === 'akhila') return "Akhila's side";
-  if (side === 'akshay') return "Akshay's side";
-  return '';
 }
 
 function getSiteUrl(req) {
@@ -683,10 +667,6 @@ function escapeHtml(value) {
 
 function buildInviteHtml(guest, customMessage, links) {
   const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
-  const sideDetails = getGuestSideDetails(guest);
-  const sideLine = sideDetails
-    ? `<p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8c5f11;margin:0 0 18px;">${escapeHtml(sideDetails.label)} · ${escapeHtml(sideDetails.family)} family</p>`
-    : '';
   const extra = customMessage
     ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
     : '';
@@ -710,7 +690,6 @@ function buildInviteHtml(guest, customMessage, links) {
           <p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.8px;color:#8c5f11;text-transform:uppercase;margin:0 0 24px;">28-31 August 2026</p>
           <div style="height:1px;background:linear-gradient(90deg,transparent,#c89422,transparent);width:70%;margin:0 auto 26px;"></div>
           <p style="font-size:17px;line-height:1.7;color:#281309;text-align:left;margin:18px 0;">${greeting}</p>
-          ${sideLine}
           <p style="font-size:17px;line-height:1.7;color:#4f3a28;text-align:left;margin:0 0 18px;">
             With hearts full of joy, we invite you to join the Telugu wedding celebrations of Akhila and Akshay.
           </p>
@@ -751,7 +730,7 @@ async function handleExportGuests(req, res) {
 
   // Generate CSV
   const csv = [
-    ['Name', 'Email', 'Phone', 'Relationship', 'Side', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
+    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
   ];
 
   guests.forEach(g => {
@@ -760,7 +739,6 @@ async function handleExportGuests(req, res) {
       `"${g.email || ''}"`,
       `"${g.phone || ''}"`,
       `"${g.relationship || ''}"`,
-      `"${displayGuestSide(g.side)}"`,
       g.partySize || 1,
       `"${g.dietaryRestrictions || ''}"`,
       `"${(g.events || []).join('|')}"`,
