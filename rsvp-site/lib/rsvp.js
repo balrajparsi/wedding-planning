@@ -222,7 +222,14 @@ function getInvitedEvents(guest) {
     : RSVP_EVENTS.filter(event => names.includes(event.name));
 
   return events.map(event => {
-    if (event.id !== 'pellikuthuru' || !sideDetails) return event;
+    if (event.id !== 'pellikuthuru') return event;
+    if (!sideDetails) {
+      return {
+        ...event,
+        name: 'Pellikuthuru / Pellikoduku',
+        subtitle: 'Bride-side / groom-side nalugu and blessings'
+      };
+    }
     return {
       ...event,
       name: sideDetails.pelliCeremonyName,
