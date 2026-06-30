@@ -248,8 +248,8 @@ SANGEETH_EVENT_ADDRESS    # Sangeeth venue address
 SANGEETH_MAP_URL          # Sangeeth map link
 PELLIKUTHURU_ADDRESS      # Pellikuthuru venue address
 PELLIKUTHURU_MAP_URL      # Pellikuthuru map link
-PELLIKODUKU_ADDRESS       # Pellikoduku venue address; shows "Location to be confirmed" if omitted
-PELLIKODUKU_MAP_URL       # Pellikoduku map link
+PELLIKODUKU_ADDRESS       # Pellikoduku venue address; omit until decided. The Pellikuthuru address is ignored here.
+PELLIKODUKU_MAP_URL       # Pellikoduku map link; ignored while Pellikoduku venue is undecided
 SATYANARAYANA_ADDRESS     # Satyanarayana Swamy Vratam venue address
 SATYANARAYANA_MAP_URL     # Satyanarayana Swamy Vratam map link
 MARRIAGE_ADDRESS          # Marriage venue address
