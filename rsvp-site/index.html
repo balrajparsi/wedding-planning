@@ -39,7 +39,7 @@
     .invitation-title, .invitation-copy { display:none; }
     .open-cue { color:var(--gold-deep); font-size:.72rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; transition:opacity .35s ease, transform .35s ease; }
     @keyframes invitePop { from { opacity:0; transform:translateY(44px) scale(.84); } to { opacity:1; transform:translateY(0) scale(1); } }
-    .panel.invitation-opening .envelope, .panel.invitation-open .envelope { transform:translateY(-24px) scale(1.045); }
+    .panel.invitation-opening .envelope, .panel.invitation-open .envelope { animation:none; transform:translateY(-24px) scale(1.045); }
     .panel.invitation-opening .envelope-flap, .panel.invitation-open .envelope-flap { transform:rotateX(-168deg); opacity:.92; }
     .panel.invitation-opening .envelope-card, .panel.invitation-open .envelope-card { transform:translateY(-42%) scale(1.05); opacity:1; }
     .panel.invitation-opening .envelope-card::before, .panel.invitation-open .envelope-card::before { opacity:1; }
@@ -81,7 +81,10 @@
     .confirmation h3 { margin:.3rem 0 .8rem;color:var(--leaf);font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(2.2rem,4vw,3.4rem);line-height:.95; }
     .confirmation p { max-width:30rem;margin:0 auto;color:var(--muted);line-height:1.65; }
     .hidden { display:none !important; }
-    @media (prefers-reduced-motion:reduce) { .invitation-gate, .invitation-gate-inner, .envelope, .envelope-card, .envelope-flap, .envelope-seal, .open-cue { animation:none !important; transition:none !important; } }
+    @media (prefers-reduced-motion:reduce) {
+      .envelope { animation:invitePop .28s ease-out both; transition-duration:.65s; }
+      .invitation-gate, .invitation-gate-inner, .envelope-card, .envelope-flap, .envelope-seal, .open-cue { transition-duration:.65s; }
+    }
     @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .panel{order:-1;} .intro{padding-top:0;position:static;} }
     @media (max-width:620px) { main{padding:.75rem;} .form-grid,.meal-grid{grid-template-columns:1fr;} .event-top{display:block;} .choices{margin-top:.8rem;} button,.calendar-link{width:100%;text-align:center;} }
   </style>
@@ -161,7 +164,7 @@
     invitationGate.addEventListener('click', () => {
       if (rsvpPanel.classList.contains('invitation-open')) return;
       rsvpPanel.classList.add('invitation-opening');
-      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1700;
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 900 : 1700;
       window.setTimeout(() => {
         rsvpPanel.classList.add('invitation-open');
         invitationGate.setAttribute('aria-hidden', 'true');
