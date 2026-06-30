@@ -152,9 +152,14 @@ function findPublicGuestMatch(guests, submission) {
   return ids.size === 1 ? guests.find(guest => guest.id === [...ids][0]) : null;
 }
 
+function publicEvent(event) {
+  const { venue, mapUrl, ...safeEvent } = event;
+  return safeEvent;
+}
+
 function getPublicEvents(guest = null) {
   const responses = normalizeEventResponses(guest?.eventResponses, guest?.rsvpStatus || 'pending');
-  return RSVP_EVENTS.map(event => ({ ...event, ...responses[event.name] }));
+  return RSVP_EVENTS.map(event => publicEvent({ ...event, ...responses[event.name] }));
 }
 
 function getGuestEvents(guest) {
@@ -166,7 +171,7 @@ function getGuestEvents(guest) {
 }
 
 function publicGuest(guest, allEvents = false) {
-  const events = allEvents ? getPublicEvents(guest) : getGuestEvents(guest);
+  const events = allEvents ? getPublicEvents(guest) : getGuestEvents(guest).map(publicEvent);
   return {
     id: guest.id,
     name: guest.name || '',
@@ -182,7 +187,7 @@ function publicGuest(guest, allEvents = false) {
 }
 
 function getPublicRsvpEvents() {
-  return getInvitedEvents({ events: RSVP_EVENTS.map(event => event.name) });
+  return getInvitedEvents({ events: RSVP_EVENTS.map(event => event.name) }).map(publicEvent);
 }
 
 async function findGuestFromToken(token) {
@@ -283,6 +288,9 @@ async function handlePublicRsvp(req, res, body) {
 async function handleTokenRsvp(req, res, url, body, token) {
   const { guestsKey, guests, guest, index } = await findGuestFromToken(token);
   if (req.method === 'GET' && url.searchParams.get('action') === 'calendar') {
+    if (!guest.rsvpLockedAt) {
+      throw publicError('Calendar is available after your RSVP is received.', 403);
+    }
     const ics = buildCalendarFile(guest);
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="akhila-akshay-wedding.ics"');

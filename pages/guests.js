@@ -121,6 +121,7 @@ const guestListPage = {
   render() {
     this.renderStats();
     this.renderEventRsvpSummary();
+    this.renderRsvpNotesSummary();
     this.renderTable();
   },
 
@@ -173,6 +174,60 @@ const guestListPage = {
           </article>`;
         }).join('')}
       </div>`;
+  },
+
+  renderRsvpNotesSummary() {
+    const view = document.querySelector('[data-view="guests"]');
+    const container = view?.querySelector('.guest-rsvp-notes-summary');
+    if (!container) return;
+
+    const notes = (guestModule.guests || [])
+      .filter(guest => String(guest.rsvpNotes || '').trim())
+      .sort((a, b) => String(b.rsvpDate || b.updatedAt || '').localeCompare(String(a.rsvpDate || a.updatedAt || '')));
+
+    if (!notes.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="card" style="margin:0;">
+        <div style="display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-bottom:.8rem;">
+          <div>
+            <h3 style="margin:0;color:var(--blue);">RSVP Notes</h3>
+            <p style="margin:.25rem 0 0;color:var(--text-muted);font-size:.82rem;">Messages guests typed in the RSVP notes box.</p>
+          </div>
+          <span style="color:var(--gold);font-weight:700;font-size:.82rem;">${notes.length} note${notes.length === 1 ? '' : 's'}</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="guest-notes-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="width:28%;">Name</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${notes.map(guest => `
+                <tr>
+                  <td><strong>${this.escapeHtml(guest.name || 'Guest')}</strong></td>
+                  <td>${this.escapeHtml(guest.rsvpNotes)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  },
+
+  escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char]));
   },
 
   renderTable() {

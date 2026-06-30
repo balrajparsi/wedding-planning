@@ -5,6 +5,10 @@ const EVENT_TIMEZONE = process.env.WEDDING_TIMEZONE || 'America/Chicago';
 const COMMON_EVENT_ADDRESS = process.env.COMMON_EVENT_ADDRESS || process.env.WEDDING_COMMON_ADDRESS || 'Venue To Be Confirmed';
 const SANGEETH_EVENT_ADDRESS = process.env.SANGEETH_EVENT_ADDRESS || 'Metroplex Event Center, 2305 S. 8th St., Rogers, AR 72758';
 const SANGEETH_MAP_URL = process.env.SANGEETH_MAP_URL || 'https://maps.app.goo.gl/mthgUzW9rQT5HZrF9';
+const PELLIKUTHURU_ADDRESS = process.env.PELLIKUTHURU_ADDRESS || '510 Peach Ave, Centerton, AR 72719';
+const PELLIKUTHURU_MAP_URL = process.env.PELLIKUTHURU_MAP_URL || 'https://maps.app.goo.gl/qEZZ4h5EdQEyCHmb7';
+const MARRIAGE_ADDRESS = process.env.MARRIAGE_ADDRESS || 'Osage House, 243 Pace Ln, Cave Springs, AR 72718';
+const MARRIAGE_MAP_URL = process.env.MARRIAGE_MAP_URL || 'https://maps.app.goo.gl/d8EAYPSXMwXVF8jL7';
 const RSVP_EVENTS = [
   {
     id: 'haldi',
@@ -40,7 +44,8 @@ const RSVP_EVENTS = [
     time: 'Time To Be Decided',
     startTime: null,
     durationMinutes: null,
-    venue: COMMON_EVENT_ADDRESS
+    venue: PELLIKUTHURU_ADDRESS,
+    mapUrl: PELLIKUTHURU_MAP_URL
   },
   {
     id: 'marriage',
@@ -52,7 +57,8 @@ const RSVP_EVENTS = [
     time: '11:00 AM',
     startTime: '11:00:00',
     durationMinutes: 180,
-    venue: COMMON_EVENT_ADDRESS
+    venue: MARRIAGE_ADDRESS,
+    mapUrl: MARRIAGE_MAP_URL
   },
   {
     id: 'satyanarayana-swamy-vratam',
@@ -229,7 +235,13 @@ function addMinutes(date, time, minutes) {
 
 function buildCalendarFile(guest) {
   const stamp = formatIcsTimestamp();
-  const events = getInvitedEvents(guest);
+  const responses = guest?.eventResponses && typeof guest.eventResponses === 'object' ? guest.eventResponses : {};
+  const hasResponses = Object.keys(responses).length > 0;
+  const events = getInvitedEvents(guest).filter(event => {
+    const raw = responses[event.name];
+    const response = raw && typeof raw === 'object' ? raw.response : raw;
+    return !hasResponses || response === 'attending';
+  });
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',

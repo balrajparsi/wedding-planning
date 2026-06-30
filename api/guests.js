@@ -740,7 +740,7 @@ async function handleResetGuests(req, res) {
 }
 
 async function handleExportGuests(req, res) {
-  
+  const csvValue = value => `"${String(value || '').replace(/"/g, '""')}"`;
 
   // Get all guests
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
@@ -748,21 +748,22 @@ async function handleExportGuests(req, res) {
 
   // Generate CSV
   const csv = [
-    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes'].join(',')
+    ['Name', 'Email', 'Phone', 'Relationship', 'Party Size', 'Dietary Restrictions', 'Events', 'RSVP Status', 'RSVP Date', 'Notes', 'RSVP Notes'].join(',')
   ];
 
   guests.forEach(g => {
     csv.push([
-      `"${g.name}"`,
-      `"${g.email || ''}"`,
-      `"${g.phone || ''}"`,
-      `"${g.relationship || ''}"`,
+      csvValue(g.name),
+      csvValue(g.email),
+      csvValue(g.phone),
+      csvValue(g.relationship),
       g.partySize || 1,
-      `"${g.dietaryRestrictions || ''}"`,
-      `"${(g.events || []).join('|')}"`,
+      csvValue(g.dietaryRestrictions),
+      csvValue((g.events || []).join('|')),
       g.rsvpStatus,
       g.rsvpDate ? new Date(g.rsvpDate).toLocaleDateString('en-US', { timeZone: 'America/Chicago' }) : '',
-      `"${g.notes || ''}"`
+      csvValue(g.notes),
+      csvValue(g.rsvpNotes)
     ].join(','));
   });
 

@@ -239,9 +239,13 @@ TWILIO_ACCOUNT_SID        # Twilio account ID for RSVP confirmation SMS
 TWILIO_AUTH_TOKEN         # Twilio API secret for RSVP confirmation SMS
 TWILIO_FROM_NUMBER        # One US Twilio sender number, in +15551234567 format
 WEDDING_TIMEZONE          # Calendar timezone, defaults to America/Chicago
-COMMON_EVENT_ADDRESS      # Shared address for Haldi, Sangeet, Marriage, and Vratam
-PELLIKUTHURU_ADDRESS      # Bride-side Pellikuthuru address
-PELLIKODUKU_ADDRESS       # Groom-side Pellikoduku address
+COMMON_EVENT_ADDRESS      # Shared address for events that are still to be confirmed
+SANGEETH_EVENT_ADDRESS    # Sangeeth venue address
+SANGEETH_MAP_URL          # Sangeeth map link
+PELLIKUTHURU_ADDRESS      # Pellikuthuru / Pellikoduku venue address
+PELLIKUTHURU_MAP_URL      # Pellikuthuru / Pellikoduku map link
+MARRIAGE_ADDRESS          # Marriage venue address
+MARRIAGE_MAP_URL          # Marriage map link
 ```
 
 The standalone public RSVP route is `https://akhila-akshay-rsvp.vercel.app/`; share it directly on WhatsApp. Set `RSVP_SITE_URL` to this value in the private dashboard's Vercel Production environment so formal invitations send guest-specific links to the same site. It works with Vercel KV alone—guests do not need a Resend account or an email invitation. The public form asks for name, phone, and email, updates a uniquely matched guest, or creates a new guest when no match exists.

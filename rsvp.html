@@ -19,7 +19,26 @@
     .intro p { max-width:30rem; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(1.35rem,2.1vw,1.85rem); line-height:1.3; }
     .date-strip { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:2rem; }
     .date-strip span { border:1px solid rgba(248,214,128,.5); background:rgba(44,16,5,.3); padding:.55rem .7rem; color:#ffe6a7; font-size:.68rem; font-weight:700; letter-spacing:.08em; }
-    .panel { background:var(--panel); border:1px solid rgba(219,172,77,.7); box-shadow:0 28px 80px rgba(48,20,8,.3); padding:clamp(1rem,3vw,2.5rem); }
+    .panel { position:relative; overflow:hidden; background:var(--panel); border:1px solid rgba(219,172,77,.7); box-shadow:0 28px 80px rgba(48,20,8,.3); padding:clamp(1rem,3vw,2.5rem); }
+    .invitation-gate { position:absolute; inset:0; z-index:20; min-height:100%; border:0; padding:clamp(2rem,6vw,4rem); display:grid; place-items:center; background:radial-gradient(circle at 50% 22%,rgba(255,245,220,.98),rgba(244,220,168,.97) 58%,rgba(222,177,88,.98)); color:var(--ink); cursor:pointer; transition:opacity .55s ease .55s, visibility .55s ease .55s; }
+    .invitation-gate-inner { display:grid; gap:1.2rem; justify-items:center; text-align:center; transition:transform .7s ease; }
+    .envelope { position:relative; width:min(72vw,360px); aspect-ratio:1.45; filter:drop-shadow(0 24px 34px rgba(80,38,10,.26)); perspective:900px; }
+    .envelope-card { position:absolute; left:10%; right:10%; top:8%; height:62%; background:#fffaf0; border:1px solid rgba(200,148,34,.46); box-shadow:0 10px 18px rgba(80,38,10,.12); transform:translateY(42%); transition:transform .8s cubic-bezier(.2,.75,.2,1); }
+    .envelope-card::before { content:'Akhila & Akshay'; position:absolute; inset:1.1rem; display:grid; place-items:center; border:1px solid rgba(200,148,34,.32); color:var(--gold-deep); font-family:"Cormorant Garamond",Georgia,serif; font-size:1.45rem; }
+    .envelope-pocket { position:absolute; left:0; right:0; bottom:0; height:72%; background:linear-gradient(145deg,#fffdf8,#eee8dc); border:1px solid rgba(80,38,10,.16); clip-path:polygon(0 0,50% 48%,100% 0,100% 100%,0 100%); }
+    .envelope-pocket::before, .envelope-pocket::after { content:''; position:absolute; bottom:0; width:55%; height:100%; background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(220,212,198,.5)); }
+    .envelope-pocket::before { left:0; clip-path:polygon(0 0,100% 68%,0 100%); }
+    .envelope-pocket::after { right:0; clip-path:polygon(100% 0,0 68%,100% 100%); }
+    .envelope-flap { position:absolute; left:0; right:0; top:0; height:52%; background:linear-gradient(160deg,#d7b65d,#f4de94 48%,#9b7625); clip-path:polygon(0 0,100% 0,50% 100%); transform-origin:50% 0; transition:transform .85s cubic-bezier(.2,.75,.2,1); z-index:3; box-shadow:0 8px 14px rgba(80,38,10,.18); }
+    .envelope-seal { position:absolute; left:50%; bottom:27%; width:3rem; height:3rem; transform:translateX(-50%); border-radius:50%; background:linear-gradient(135deg,#8c151a,#c89422); color:#fff8e8; display:grid; place-items:center; font-family:"Cormorant Garamond",Georgia,serif; font-size:1.15rem; z-index:4; box-shadow:0 8px 16px rgba(80,38,10,.24); }
+    .invitation-title { display:block; margin:.2rem 0 0; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(2rem,4vw,3.25rem); line-height:.95; }
+    .invitation-copy { display:block; margin:0; max-width:25rem; color:var(--muted); line-height:1.5; }
+    .open-cue { color:var(--gold-deep); font-size:.72rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
+    .panel.invitation-opening .envelope-flap, .panel.invitation-open .envelope-flap { transform:rotateX(-158deg); }
+    .panel.invitation-opening .envelope-card, .panel.invitation-open .envelope-card { transform:translateY(-12%); }
+    .panel.invitation-opening .envelope-seal, .panel.invitation-open .envelope-seal { opacity:0; transform:translateX(-50%) scale(.72); transition:opacity .35s ease, transform .35s ease; }
+    .panel.invitation-opening .invitation-gate-inner { transform:translateY(-10px); }
+    .panel.invitation-open .invitation-gate { opacity:0; visibility:hidden; pointer-events:none; }
     .panel-header { padding:.7rem .7rem 1.25rem; border-bottom:1px solid rgba(140,95,17,.24); }
     .panel-header h2 { margin:.2rem 0 .55rem; color:var(--ink); font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(2.3rem,4vw,3.8rem); line-height:.95; }
     .panel-header p { margin:0; color:var(--muted); line-height:1.55; }
@@ -54,6 +73,7 @@
     .confirmation h3 { margin:.3rem 0 .8rem;color:var(--leaf);font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(2.2rem,4vw,3.4rem);line-height:.95; }
     .confirmation p { max-width:30rem;margin:0 auto;color:var(--muted);line-height:1.65; }
     .hidden { display:none !important; }
+    @media (prefers-reduced-motion:reduce) { .invitation-gate, .invitation-gate-inner, .envelope-card, .envelope-flap, .envelope-seal { transition:none !important; } }
     @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .intro{padding-top:0;position:static;} }
     @media (max-width:620px) { main{padding:.75rem;} .form-grid,.meal-grid{grid-template-columns:1fr;} .event-top{display:block;} .choices{margin-top:.8rem;} button,.calendar-link{width:100%;text-align:center;} }
   </style>
@@ -72,7 +92,20 @@
         <span>31 Aug · Satyanarayana Swamy Vratam · TBD</span>
       </div>
     </section>
-    <section class="panel" aria-live="polite">
+    <section class="panel" id="rsvpPanel" aria-live="polite">
+      <button class="invitation-gate" id="invitationGate" type="button" aria-label="Open wedding RSVP invitation">
+        <span class="invitation-gate-inner">
+          <span class="envelope" aria-hidden="true">
+            <span class="envelope-card"></span>
+            <span class="envelope-pocket"></span>
+            <span class="envelope-flap"></span>
+            <span class="envelope-seal">A&amp;A</span>
+          </span>
+          <span class="open-cue">Tap to open RSVP</span>
+          <span class="invitation-title">Wedding Invitation</span>
+          <span class="invitation-copy">Open your private RSVP card for Akhila and Akshay's wedding celebrations.</span>
+        </span>
+      </button>
       <div class="panel-header">
         <p class="eyebrow">Wedding RSVP</p>
         <h2 id="guestName">Celebrate with us</h2>
@@ -108,11 +141,23 @@
     const form = document.getElementById('rsvpForm');
     const loadingBox = document.getElementById('loadingBox');
     const statusBox = document.getElementById('statusBox');
+    const rsvpPanel = document.getElementById('rsvpPanel');
+    const invitationGate = document.getElementById('invitationGate');
     const eventsList = document.getElementById('eventsList');
     const calendarLink = document.getElementById('calendarLink');
     const confirmationBox = document.getElementById('confirmationBox');
     const confirmationMessage = document.getElementById('confirmationMessage');
     let events = [];
+
+    invitationGate.addEventListener('click', () => {
+      if (rsvpPanel.classList.contains('invitation-open')) return;
+      rsvpPanel.classList.add('invitation-opening');
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 900;
+      window.setTimeout(() => {
+        rsvpPanel.classList.add('invitation-open');
+        invitationGate.setAttribute('aria-hidden', 'true');
+      }, delay);
+    });
 
     function setStatus(message, type = '') { statusBox.textContent = message; statusBox.className = `status ${type}`.trim(); statusBox.classList.remove('hidden'); }
     function showConfirmation(message) {
