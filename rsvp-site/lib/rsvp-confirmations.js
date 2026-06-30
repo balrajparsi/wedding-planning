@@ -108,32 +108,64 @@ function eventDisplayName(event) {
   return event.displayName || event.name;
 }
 
-function eventLocationHtml(event) {
-  const venue = escapeHtml(event.venue || 'Venue to be confirmed');
-  const map = event.mapUrl
-    ? `<br><a href="${escapeHtml(event.mapUrl)}" style="color:#8c5f11;text-decoration:underline;">Map location</a>`
-    : '';
-  return `${venue}${map}`;
+function eventVenueText(event) {
+  const venue = cleanText(event.venue || 'Location to be confirmed', 180).replace(/^["']|["']$/g, '');
+  return /^shared event address$/i.test(venue) ? 'Location to be confirmed' : venue;
+}
+
+function eventMapUrl(event) {
+  const explicit = String(event.mapUrl || '').trim();
+  if (explicit) return explicit;
+
+  const venue = eventVenueText(event);
+  if (/location to be confirmed/i.test(venue)) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
+}
+
+function eventCardHtml(event) {
+  const status = eventStatus(event);
+  const venue = eventVenueText(event);
+  const mapUrl = eventMapUrl(event);
+  const mapButton = mapUrl
+    ? `<a href="${escapeHtml(mapUrl)}" style="display:inline-block;margin-top:12px;padding:9px 12px;background:#ffffff;border:1px solid #d8d1c6;border-radius:6px;color:#1a5fd0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">Open in Maps</a>`
+    : `<span style="display:inline-block;margin-top:12px;padding:9px 12px;background:#f6f1e7;border:1px solid #ded4c4;border-radius:6px;color:#705843;font-family:Arial,sans-serif;font-size:13px;">Map link coming soon</span>`;
+
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:#fffdf8;border:1px solid #ead6a8;border-radius:10px;">
+    <tr><td style="padding:24px 24px 20px;">
+      <h2 style="margin:0 0 18px;font-family:Georgia,serif;font-size:28px;font-weight:700;line-height:1.1;color:#1f2a2e;">${escapeHtml(eventDisplayName(event))}</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="42%" style="padding:0 20px 0 0;vertical-align:top;">
+            <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4c4f53;">Date &amp; Time</p>
+            <p style="margin:0;font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#111820;">${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}</p>
+            <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:13px;line-height:1.5;color:#705843;">${escapeHtml(status.detail)}</p>
+          </td>
+          <td width="58%" style="padding:0;vertical-align:top;">
+            <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4c4f53;">Location</p>
+            <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#111820;">${escapeHtml(venue)}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf0ea;border:1px solid #d5ddd5;border-radius:10px;overflow:hidden;">
+              <tr>
+                <td style="height:142px;padding:16px;text-align:center;background:linear-gradient(135deg,#edf3ec 0%,#edf3ec 30%,#f7f0df 30%,#f7f0df 45%,#dcefe4 45%,#dcefe4 100%);">
+                  <div style="display:inline-block;width:34px;height:34px;border-radius:50% 50% 50% 0;background:#d83b2d;transform:rotate(-45deg);box-shadow:0 5px 12px rgba(80,38,10,.22);"></div>
+                  <div style="margin-top:10px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#4c4f53;letter-spacing:1px;text-transform:uppercase;">Location map</div>
+                  ${mapButton}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>`;
 }
 
 function buildConfirmationEmail(guest, events) {
   const guestName = escapeHtml(guest.name || 'Dear Guest');
   const acceptedEvents = events.filter(event => eventStatus(event).attending);
-  const rows = acceptedEvents.map(event => {
-    const status = eventStatus(event);
-    return `<tr>
-      <td style="padding:14px 0;border-bottom:1px solid #ead6a8;vertical-align:top;">
-        <strong style="font-family:Georgia,serif;font-size:19px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
-        <span style="font-family:Arial,sans-serif;font-size:12px;line-height:1.5;color:#705843;">${escapeHtml(event.displayDate)} | ${escapeHtml(event.time)}<br>${eventLocationHtml(event)}</span>
-      </td>
-      <td style="padding:14px 0;border-bottom:1px solid #ead6a8;text-align:right;vertical-align:top;font-family:Arial,sans-serif;">
-        <span style="display:inline-block;margin-top:2px;font-size:12px;line-height:1.4;color:#705843;max-width:190px;">${escapeHtml(status.detail)}</span>
-      </td>
-    </tr>`;
-  }).join('');
+  const eventCards = acceptedEvents.map(eventCardHtml).join('');
   const acceptedBlock = acceptedEvents.length
-    ? `<p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#9f1d22;">Accepted events</p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ead6a8;">${rows}</table>`
+    ? `<p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#9f1d22;">Accepted events</p>
+        ${eventCards}`
     : `<p style="margin:0;padding:16px 0;border-top:1px solid #ead6a8;border-bottom:1px solid #ead6a8;font-size:14px;line-height:1.6;color:#705843;">We have recorded that you are unable to attend the wedding celebrations.</p>`;
 
   return `<!DOCTYPE html>
