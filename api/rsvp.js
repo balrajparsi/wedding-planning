@@ -114,7 +114,7 @@ function validatePublicSubmission(body) {
       throw publicError(`Please answer for ${eventLabel}.`, 400);
     }
     const response = normalizeEventResponse(rawResponses[responseKey]);
-    if (response.response === 'pending') throw publicError(`Choose Yes, Maybe, or No for ${eventLabel}.`, 400);
+    if (response.response === 'pending' || response.response === 'maybe') throw publicError(`Choose Yes or No for ${eventLabel}.`, 400);
     if (response.response === 'attending') {
       if (response.attendanceCount < 1) throw publicError(`Enter the number attending ${eventLabel}.`, 400);
       if (event.mealPolicy === 'vegetarian-only') {
@@ -300,6 +300,15 @@ async function handleTokenRsvp(req, res, url, body, token) {
   const fallbackStatus = normalizeRsvpStatus(body.rsvpStatus);
   const invitedEvents = getInvitedEvents(guest);
   const eventResponses = normalizeEventResponses(body.eventResponses, fallbackStatus, invitedEvents);
+  if (body.eventResponses) {
+    invitedEvents.forEach(event => {
+      const eventLabel = event.displayName || event.name;
+      const response = eventResponses[canonicalEventName(event)];
+      if (!response || response.response === 'pending' || response.response === 'maybe') {
+        throw publicError(`Choose Yes or No for ${eventLabel}.`, 400);
+      }
+    });
+  }
   const rsvpStatus = body.eventResponses ? deriveRsvpStatus(eventResponses) : fallbackStatus;
   const now = new Date().toISOString();
   let updatedGuest = {

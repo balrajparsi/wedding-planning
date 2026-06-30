@@ -88,7 +88,7 @@
         </div>
         <fieldset>
           <legend>Your celebrations</legend>
-          <p class="hint">For every event choose Yes, Maybe, or No. For Yes, enter the total number coming. For events with both meal options, split that total between vegetarian and non-vegetarian guests.</p>
+          <p class="hint">For every event choose Yes or No. For Yes, enter the total number coming. For events with both meal options, split that total between vegetarian and non-vegetarian guests.</p>
           <div class="events" id="eventsList"></div>
         </fieldset>
         <div class="action-row"><button type="submit">Send RSVP</button><a class="calendar-link hidden" id="calendarLink" href="#" download>Add to calendar</a></div>
@@ -123,17 +123,11 @@
     }
     function eventInputName(event) { return `event-${event.id}`; }
     function number(value) { return Math.max(0, parseInt(value, 10) || 0); }
-    function eventResponse(event) { return quickResponse || event.response || 'maybe'; }
+    function eventResponse(event) { return quickResponse || event.response || ''; }
     function escapeHtml(value) {
       return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
     }
     function eventDisplayName(event) { return event.displayName || event.name; }
-    function eventLocationHtml(event) {
-      const venue = escapeHtml(event.venue || 'To Be Confirmed');
-      const map = event.mapUrl ? `<br><a href="${escapeHtml(event.mapUrl)}" target="_blank" rel="noopener" style="color:var(--gold-deep);">Map location</a>` : '';
-      return `${venue}${map}`;
-    }
-
     function renderEvents(items) {
       events = items;
       eventsList.innerHTML = items.map(event => {
@@ -153,10 +147,9 @@
               <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
             </div>`;
         return `<article class="event" data-event-id="${event.id}">
-          <div class="event-top"><div><h3>${eventDisplayName(event)}</h3><p>${escapeHtml(event.displayDate)} · ${escapeHtml(event.time)}<br>${escapeHtml(event.subtitle)}<br>Venue · ${eventLocationHtml(event)}</p></div>
+          <div class="event-top"><div><h3>${eventDisplayName(event)}</h3><p>${escapeHtml(event.displayDate)} · ${escapeHtml(event.time)}<br>${escapeHtml(event.subtitle)}</p></div>
           <div class="choices" aria-label="${eventDisplayName(event)} response">
             <label class="choice"><input type="radio" name="${name}" value="attending" ${response === 'attending' ? 'checked' : ''}><span>Yes</span></label>
-            <label class="choice"><input type="radio" name="${name}" value="maybe" ${response === 'maybe' || response === 'pending' ? 'checked' : ''}><span>Maybe</span></label>
             <label class="choice"><input type="radio" name="${name}" value="not_attending" ${response === 'not_attending' ? 'checked' : ''}><span>No</span></label>
           </div></div>
           ${mealInputs}</article>`;

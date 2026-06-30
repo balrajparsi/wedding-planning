@@ -118,7 +118,8 @@ function eventLocationHtml(event) {
 
 function buildConfirmationEmail(guest, events) {
   const guestName = escapeHtml(guest.name || 'Dear Guest');
-  const rows = events.map(event => {
+  const acceptedEvents = events.filter(event => eventStatus(event).attending);
+  const rows = acceptedEvents.map(event => {
     const status = eventStatus(event);
     return `<tr>
       <td style="padding:14px 0;border-bottom:1px solid #ead6a8;vertical-align:top;">
@@ -126,11 +127,14 @@ function buildConfirmationEmail(guest, events) {
         <span style="font-family:Arial,sans-serif;font-size:12px;line-height:1.5;color:#705843;">${escapeHtml(event.displayDate)} | ${escapeHtml(event.time)}<br>${eventLocationHtml(event)}</span>
       </td>
       <td style="padding:14px 0;border-bottom:1px solid #ead6a8;text-align:right;vertical-align:top;font-family:Arial,sans-serif;">
-        <strong style="display:inline-block;padding:5px 9px;border-radius:999px;background:${status.attending ? '#e4f4e8' : status.label === 'Maybe' ? '#fff0d6' : '#f8e2df'};color:${status.attending ? '#1f6a35' : status.label === 'Maybe' ? '#8c5f11' : '#9f1d22'};font-size:11px;letter-spacing:1px;text-transform:uppercase;">${status.label}</strong><br>
-        <span style="display:inline-block;margin-top:7px;font-size:12px;line-height:1.4;color:#705843;max-width:190px;">${escapeHtml(status.detail)}</span>
+        <span style="display:inline-block;margin-top:2px;font-size:12px;line-height:1.4;color:#705843;max-width:190px;">${escapeHtml(status.detail)}</span>
       </td>
     </tr>`;
   }).join('');
+  const acceptedBlock = acceptedEvents.length
+    ? `<p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#9f1d22;">Accepted events</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ead6a8;">${rows}</table>`
+    : `<p style="margin:0;padding:16px 0;border-top:1px solid #ead6a8;border-bottom:1px solid #ead6a8;font-size:14px;line-height:1.6;color:#705843;">We have recorded that you are unable to attend the wedding celebrations.</p>`;
 
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f3dfb7;font-family:Arial,sans-serif;color:#281309;">
@@ -141,7 +145,7 @@ function buildConfirmationEmail(guest, events) {
         <p style="margin:0 0 12px;color:#9f1d22;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">Mana Pelli Veduka</p>
         <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:42px;font-weight:400;line-height:1;color:#281309;">RSVP received</h1>
         <p style="margin:0 0 24px;font-family:Georgia,serif;font-size:19px;line-height:1.55;color:#4f3a28;">Thank you, ${guestName}. We are so happy to celebrate with you.</p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ead6a8;">${rows}</table>
+        ${acceptedBlock}
         <p style="margin:26px 0 0;font-size:13px;line-height:1.65;color:#705843;">Your response has been recorded. For any change, please contact the Chennaboina and Lenkalapally families.</p>
       </td></tr>
     </table>

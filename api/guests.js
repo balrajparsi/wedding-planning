@@ -669,14 +669,6 @@ function eventDisplayName(event) {
   return event.displayName || event.name;
 }
 
-function eventLocationHtml(event) {
-  const venue = escapeHtml(event.venue || 'Venue to be confirmed');
-  const map = event.mapUrl
-    ? `<br><a href="${escapeHtml(event.mapUrl)}" style="color:#8c5f11;text-decoration:underline;">Map location</a>`
-    : '';
-  return `${venue}${map}`;
-}
-
 function appendUrlParam(url, key, value) {
   const separator = String(url || '').includes('?') ? '&' : '?';
   return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
@@ -693,7 +685,7 @@ function buildInviteHtml(guest, customMessage, links) {
             <tr>
               <td style="padding:14px 0;border-bottom:1px solid rgba(184,134,11,0.18);vertical-align:top;">
                 <strong style="font-family:Georgia,serif;font-size:19px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
-                <span style="font-family:Arial,sans-serif;font-size:12px;line-height:1.55;color:#705843;">${eventLocationHtml(event)}</span>
+                <span style="font-family:Arial,sans-serif;font-size:12px;line-height:1.55;color:#705843;">${escapeHtml(event.subtitle || '')}</span>
               </td>
               <td style="padding:14px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;">${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}<br>
                 <span style="display:inline-block;margin-top:8px;letter-spacing:1.2px;color:#705843;">RSVP</span><br>
