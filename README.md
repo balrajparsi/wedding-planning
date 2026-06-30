@@ -185,7 +185,7 @@ All data stored in Vercel KV (Redis-compatible):
 - [x] Add/edit guest modals
 - [x] Bulk invite functionality
 - [x] CSV export endpoint
-- [ ] Email integration (Resend for invitations, Gmail for RSVP confirmations)
+- [ ] Email integration (Gmail for invitations and RSVP confirmations)
 - [ ] Mobile responsive testing
 
 ### Phase 3: Tasks & Budget (Complete ✅)
@@ -231,10 +231,13 @@ JWT_SECRET                # Minimum 32 characters
 RSVP_SECRET               # Signs guest-specific RSVP links
 
 # Optional
-RESEND_API_KEY            # Optional: sends formal bulk invitation emails
-INVITE_FROM_EMAIL         # Optional: verified Resend sender address for bulk invitations
 SITE_URL                  # Optional: base URL used in email/token RSVP links
 RSVP_SITE_URL             # Optional: standalone public RSVP URL used in invitations
+GMAIL_SENDER_EMAIL        # Gmail account used for bulk invitations and RSVP confirmations
+GMAIL_SENDER_NAME         # Display name shown on Gmail-sent emails
+GMAIL_OAUTH_CLIENT_ID     # Google OAuth client ID
+GMAIL_OAUTH_CLIENT_SECRET # Google OAuth client secret
+GMAIL_OAUTH_REFRESH_TOKEN # Long-lived Gmail refresh token from a production OAuth app
 TWILIO_ACCOUNT_SID        # Twilio account ID for RSVP confirmation SMS
 TWILIO_AUTH_TOKEN         # Twilio API secret for RSVP confirmation SMS
 TWILIO_FROM_NUMBER        # One US Twilio sender number, in +15551234567 format
@@ -248,11 +251,11 @@ MARRIAGE_ADDRESS          # Marriage venue address
 MARRIAGE_MAP_URL          # Marriage map link
 ```
 
-The standalone public RSVP route is `https://akhila-akshay-rsvp.vercel.app/`; share it directly on WhatsApp. Set `RSVP_SITE_URL` to this value in the private dashboard's Vercel Production environment so formal invitations send guest-specific links to the same site. It works with Vercel KV alone—guests do not need a Resend account or an email invitation. The public form asks for name, phone, and email, updates a uniquely matched guest, or creates a new guest when no match exists.
+The standalone public RSVP route is `https://akhila-akshay-rsvp.vercel.app/`; share it directly on WhatsApp. Set `RSVP_SITE_URL` to this value in the private dashboard's Vercel Production environment so formal invitations send guest-specific links to the same site. It works with Vercel KV alone—guests do not need an email invitation. The public form asks for name, phone, and email, updates a uniquely matched guest, or creates a new guest when no match exists.
 
-`INVITE_FROM_EMAIL` is only needed for formal bulk email invitations from the dashboard. It should be an email sender, not only a display name. For testing without a domain, `onboarding@resend.dev` can only send to the Resend account owner's email address. Real invitation delivery to all guests requires a domain verified in Resend, then a value like `Akhila and Akshay <invites@yourdomain.com>`.
+Dashboard bulk invitations and final RSVP confirmation emails both use Gmail. The code automatically exchanges `GMAIL_OAUTH_REFRESH_TOKEN` for a short-lived access token whenever it sends email; you should not need to replace the refresh token repeatedly after the Google OAuth app is set to production. Add the Gmail variables to the private dashboard project, and add the same Gmail variables to the standalone public RSVP project for final RSVP confirmations. Notification delivery failures are recorded without discarding the RSVP.
 
-After a guest submits a final RSVP, the system sends a detailed email confirmation through Gmail and a concise SMS confirmation through Twilio. Add the same Gmail and Twilio environment variables to both the private dashboard and standalone public RSVP Vercel projects. Notification delivery failures are recorded without discarding the RSVP.
+Before generating the final Gmail refresh token, set the Google OAuth app's publishing status to **In production**. Testing-mode refresh tokens expire after seven days.
 
 ## 🚨 Notes
 

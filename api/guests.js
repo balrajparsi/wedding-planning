@@ -17,6 +17,7 @@ const {
   getInvitedEvents,
   normalizeEvents
 } = require('../lib/rsvp');
+const { buildGmailRawMessage } = require('../lib/rsvp-confirmations');
 
 // Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
@@ -441,59 +442,36 @@ function getPublicRsvpUrl(req) {
   return configured ? `${configured}/` : `${getSiteUrl(req)}/rsvp.html`;
 }
 
-const DEFAULT_INVITE_FROM_EMAIL = 'Akhila and Akshay <onboarding@resend.dev>';
-
-function getInviteFromEmail() {
-  const configured = process.env.INVITE_FROM_EMAIL || DEFAULT_INVITE_FROM_EMAIL;
-  const cleaned = String(configured).trim().replace(/^['"]|['"]$/g, '');
-  const validFromPattern = /^([^<>]+<[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>|[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+)$/;
-
-  if (validFromPattern.test(cleaned)) {
-    return cleaned;
-  }
-
-  const emailMatch = cleaned.match(/[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+/);
-  if (emailMatch) {
-    const email = emailMatch[0];
-    const displayName = cleaned
-      .replace(email, '')
-      .replace(/[<>]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return displayName ? `${displayName} <${email}>` : email;
-  }
-
-  const displayNameOnly = cleaned
-    .replace(/[<>]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (displayNameOnly) {
-    return `${displayNameOnly} <onboarding@resend.dev>`;
-  }
-
-  return DEFAULT_INVITE_FROM_EMAIL;
+function getGmailConfiguration() {
+  return {
+    senderEmail: String(process.env.GMAIL_SENDER_EMAIL || '').trim(),
+    senderName: String(process.env.GMAIL_SENDER_NAME || 'Akhila & Akshay').replace(/\s+/g, ' ').trim(),
+    clientId: String(process.env.GMAIL_OAUTH_CLIENT_ID || '').trim(),
+    clientSecret: String(process.env.GMAIL_OAUTH_CLIENT_SECRET || '').trim(),
+    refreshToken: String(process.env.GMAIL_OAUTH_REFRESH_TOKEN || '').trim()
+  };
 }
 
-function summarizeResendError(errorText) {
+function getMissingGmailConfig(config) {
+  return [
+    ['GMAIL_SENDER_EMAIL', config.senderEmail],
+    ['GMAIL_OAUTH_CLIENT_ID', config.clientId],
+    ['GMAIL_OAUTH_CLIENT_SECRET', config.clientSecret],
+    ['GMAIL_OAUTH_REFRESH_TOKEN', config.refreshToken]
+  ].filter(([, value]) => !value).map(([name]) => name);
+}
+
+function parseEmailProviderError(errorText, fallback = 'Email send failed') {
   let message = errorText;
 
   try {
     const parsed = JSON.parse(errorText);
-    message = parsed.message || parsed.error || errorText;
+    message = parsed.message || parsed.error?.message || parsed.error || errorText;
   } catch (_) {
-    // Resend usually returns JSON, but keep the raw body if it does not.
+    // Email providers can return plain text for some failures.
   }
 
-  if (/only send testing emails|own email address|resend\.dev|verify a domain|domain is not verified/i.test(message)) {
-    return 'Resend test sender can only email your Resend account address. To email other guests, verify a domain in Resend and set INVITE_FROM_EMAIL to Akhila and Akshay <invites@yourdomain.com>.';
-  }
-
-  if (/invalid\s+`?from`?\s+field/i.test(message)) {
-    return 'Resend rejected the sender. INVITE_FROM_EMAIL must be a real email sender, such as Akhila and Akshay <onboarding@resend.dev> for testing or a sender on your verified domain.';
-  }
-
-  return String(message || 'Resend send failed').slice(0, 220);
+  return String(message || fallback).replace(/\s+/g, ' ').trim().slice(0, 220);
 }
 
 function buildInviteError(guest, error) {
@@ -503,6 +481,54 @@ function buildInviteError(guest, error) {
     email: guest.email || '',
     error
   };
+}
+
+async function getGmailAccessToken(config) {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      refresh_token: config.refreshToken,
+      grant_type: 'refresh_token'
+    }).toString()
+  });
+
+  if (!response.ok) {
+    throw new Error(parseEmailProviderError(await response.text(), 'Unable to refresh Gmail authorization.'));
+  }
+
+  const payload = await response.json();
+  if (!payload.access_token) {
+    throw new Error('Gmail did not return an access token.');
+  }
+
+  return payload.access_token;
+}
+
+async function sendGmailInviteEmail({ accessToken, config, guest, subject, html }) {
+  const senderName = config.senderName.replace(/[\r\n<>]/g, '').trim() || 'Akhila & Akshay';
+  const sender = `${senderName} <${config.senderEmail}>`;
+  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      raw: buildGmailRawMessage({
+        from: sender,
+        to: guest.email,
+        subject,
+        html
+      })
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(parseEmailProviderError(await response.text(), 'Gmail invite send failed.'));
+  }
 }
 
 async function handleDeleteGuest(req, res) {
@@ -549,27 +575,10 @@ async function handleBulkInvite(req, res) {
   const withEmail = selectedGuests.filter(g => g.email);
   const now = new Date().toISOString();
 
-  // ── Attempt to actually send via Resend (if API key present) ──
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const SITE_URL       = getSiteUrl(req);
-  let FROM_EMAIL;
-
-  try {
-    FROM_EMAIL = getInviteFromEmail();
-  } catch (error) {
-    return res.json({
-      success: false,
-      sendingEnabled: !!RESEND_API_KEY,
-      configError: 'INVITE_FROM_EMAIL',
-      message: error.message,
-      invitedCount: withEmail.length,
-      totalMatched: selectedGuests.length,
-      sent: 0,
-      failed: withEmail.length,
-      errors: [{ error: error.message }],
-      invitedGuests: withEmail.map(g => ({ id: g.id, name: g.name, email: g.email }))
-    });
-  }
+  const SITE_URL = getSiteUrl(req);
+  const gmailConfig = getGmailConfiguration();
+  const missingGmailConfig = getMissingGmailConfig(gmailConfig);
+  const sendingEnabled = missingGmailConfig.length === 0;
 
   let sent = 0;
   let failed = 0;
@@ -577,39 +586,33 @@ async function handleBulkInvite(req, res) {
   const sentGuests = [];
   const errors = [];
 
-  if (RESEND_API_KEY && withEmail.length > 0) {
-    for (const g of withEmail) {
-      const finalSubject = subject || `RSVP requested - Akhila & Akshay's Wedding`;
-      const rsvpUrl = buildRsvpUrl(SITE_URL, g);
-      const calendarUrl = buildCalendarUrl(SITE_URL, g);
-      const html = buildInviteHtml(g, message, { rsvpUrl, calendarUrl });
-      try {
-        const r = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: [g.email],
+  if (sendingEnabled && withEmail.length > 0) {
+    try {
+      const accessToken = await getGmailAccessToken(gmailConfig);
+      for (const g of withEmail) {
+        const finalSubject = subject || `RSVP requested - Akhila & Akshay's Wedding`;
+        const rsvpUrl = buildRsvpUrl(SITE_URL, g);
+        const calendarUrl = buildCalendarUrl(SITE_URL, g);
+        const html = buildInviteHtml(g, message, { rsvpUrl, calendarUrl });
+        try {
+          await sendGmailInviteEmail({
+            accessToken,
+            config: gmailConfig,
+            guest: g,
             subject: finalSubject,
             html
-          })
-        });
-        if (r.ok) {
+          });
           sent++;
           sentGuestIds.add(g.id);
           sentGuests.push({ id: g.id, name: g.name, email: g.email });
-        } else {
-          const errText = await r.text();
-          failed++;
-          errors.push(buildInviteError(g, summarizeResendError(errText)));
+        } catch (error) {
+          failed += 1;
+          errors.push(buildInviteError(g, error.message));
         }
-      } catch (e) {
-        failed++;
-        errors.push(buildInviteError(g, e.message));
       }
+    } catch (error) {
+      failed = withEmail.length;
+      withEmail.forEach(g => errors.push(buildInviteError(g, error.message)));
     }
   }
 
@@ -621,7 +624,7 @@ async function handleBulkInvite(req, res) {
     const guestError = errors.find(error => error.id === g.id);
     guests[idx].lastInviteAttemptDate = now;
 
-    if (RESEND_API_KEY && sentGuestIds.has(g.id)) {
+    if (sentGuestIds.has(g.id)) {
       guests[idx].invitedDate = now;
       guests[idx].lastInviteError = '';
       guests[idx].updatedAt = now;
@@ -635,18 +638,20 @@ async function handleBulkInvite(req, res) {
   });
   await kv.set(guestsKey, guests);
 
-  const wasSent = !!RESEND_API_KEY;
   const firstError = errors[0];
   const failedWho = firstError ? firstError.name || firstError.email : '';
   const sentMessage = failed
     ? `Sent ${sent} of ${withEmail.length} invites. ${failed} failed${failedWho ? `: ${failedWho}` : ''}${firstError?.error ? ` - ${firstError.error}` : ''}`
     : `Sent ${sent} of ${withEmail.length} invites`;
+  const missingConfigMessage = `Preview only - ${withEmail.length} invites prepared. Add Gmail env vars on Vercel to actually send: ${missingGmailConfig.join(', ')}.`;
   res.json({
-    success: wasSent ? failed === 0 : true,
-    sendingEnabled: wasSent,
-    message: wasSent
+    success: sendingEnabled ? failed === 0 : true,
+    sendingEnabled,
+    provider: 'gmail',
+    configError: missingGmailConfig.length ? 'GMAIL' : '',
+    message: sendingEnabled
       ? sentMessage
-      : `Preview only — ${withEmail.length} invites prepared. Add RESEND_API_KEY env var on Vercel to actually send.`,
+      : missingConfigMessage,
     invitedCount: withEmail.length,
     totalMatched: selectedGuests.length,
     sent, failed,
