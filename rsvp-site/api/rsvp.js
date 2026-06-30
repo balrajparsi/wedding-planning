@@ -104,18 +104,24 @@ function validatePublicSubmission(body) {
 
   const eventResponses = {};
   RSVP_EVENTS.forEach(event => {
-    if (!Object.prototype.hasOwnProperty.call(rawResponses, event.name)) {
-      throw publicError(`Please answer for ${event.name}.`, 400);
+    const responseKey = Object.prototype.hasOwnProperty.call(rawResponses, event.name)
+      ? event.name
+      : event.displayName && Object.prototype.hasOwnProperty.call(rawResponses, event.displayName)
+        ? event.displayName
+        : '';
+    const eventLabel = event.displayName || event.name;
+    if (!responseKey) {
+      throw publicError(`Please answer for ${eventLabel}.`, 400);
     }
-    const response = normalizeEventResponse(rawResponses[event.name]);
-    if (response.response === 'pending') throw publicError(`Choose Yes, Maybe, or No for ${event.name}.`, 400);
+    const response = normalizeEventResponse(rawResponses[responseKey]);
+    if (response.response === 'pending') throw publicError(`Choose Yes, Maybe, or No for ${eventLabel}.`, 400);
     if (response.response === 'attending') {
-      if (response.attendanceCount < 1) throw publicError(`Enter the number attending ${event.name}.`, 400);
+      if (response.attendanceCount < 1) throw publicError(`Enter the number attending ${eventLabel}.`, 400);
       if (event.mealPolicy === 'vegetarian-only') {
         response.vegetarianCount = response.attendanceCount;
         response.nonVegetarianCount = 0;
       } else if (response.vegetarianCount + response.nonVegetarianCount !== response.attendanceCount) {
-        throw publicError(`Vegetarian and non-vegetarian meals must equal the attendees for ${event.name}.`, 400);
+        throw publicError(`Vegetarian and non-vegetarian meals must equal the attendees for ${eventLabel}.`, 400);
       }
     }
     eventResponses[event.name] = response;
