@@ -19,25 +19,30 @@
     .intro p { max-width:30rem; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(1.35rem,2.1vw,1.85rem); line-height:1.3; }
     .date-strip { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:2rem; }
     .date-strip span { border:1px solid rgba(248,214,128,.5); background:rgba(44,16,5,.3); padding:.55rem .7rem; color:#ffe6a7; font-size:.68rem; font-weight:700; letter-spacing:.08em; }
-    .panel { position:relative; overflow:hidden; background:var(--panel); border:1px solid rgba(219,172,77,.7); box-shadow:0 28px 80px rgba(48,20,8,.3); padding:clamp(1rem,3vw,2.5rem); }
-    .invitation-gate { position:absolute; inset:0; z-index:20; min-height:100%; border:0; padding:clamp(2rem,6vw,4rem); display:grid; place-items:center; background:radial-gradient(circle at 50% 22%,rgba(255,245,220,.98),rgba(244,220,168,.97) 58%,rgba(222,177,88,.98)); color:var(--ink); cursor:pointer; transition:opacity .55s ease .55s, visibility .55s ease .55s; }
-    .invitation-gate-inner { display:grid; gap:1.2rem; justify-items:center; text-align:center; transition:transform .7s ease; }
-    .envelope { position:relative; width:min(72vw,360px); aspect-ratio:1.45; filter:drop-shadow(0 24px 34px rgba(80,38,10,.26)); perspective:900px; }
-    .envelope-card { position:absolute; left:10%; right:10%; top:8%; height:62%; background:#fffaf0; border:1px solid rgba(200,148,34,.46); box-shadow:0 10px 18px rgba(80,38,10,.12); transform:translateY(42%); transition:transform .8s cubic-bezier(.2,.75,.2,1); }
-    .envelope-card::before { content:'Akhila & Akshay'; position:absolute; inset:1.1rem; display:grid; place-items:center; border:1px solid rgba(200,148,34,.32); color:var(--gold-deep); font-family:"Cormorant Garamond",Georgia,serif; font-size:1.45rem; }
-    .envelope-pocket { position:absolute; left:0; right:0; bottom:0; height:72%; background:linear-gradient(145deg,#fffdf8,#eee8dc); border:1px solid rgba(80,38,10,.16); clip-path:polygon(0 0,50% 48%,100% 0,100% 100%,0 100%); }
-    .envelope-pocket::before, .envelope-pocket::after { content:''; position:absolute; bottom:0; width:55%; height:100%; background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(220,212,198,.5)); }
-    .envelope-pocket::before { left:0; clip-path:polygon(0 0,100% 68%,0 100%); }
-    .envelope-pocket::after { right:0; clip-path:polygon(100% 0,0 68%,100% 100%); }
-    .envelope-flap { position:absolute; left:0; right:0; top:0; height:52%; background:linear-gradient(160deg,#d7b65d,#f4de94 48%,#9b7625); clip-path:polygon(0 0,100% 0,50% 100%); transform-origin:50% 0; transition:transform .85s cubic-bezier(.2,.75,.2,1); z-index:3; box-shadow:0 8px 14px rgba(80,38,10,.18); }
-    .envelope-seal { position:absolute; left:50%; bottom:27%; width:3rem; height:3rem; transform:translateX(-50%); border-radius:50%; background:linear-gradient(135deg,#8c151a,#c89422); color:#fff8e8; display:grid; place-items:center; font-family:"Cormorant Garamond",Georgia,serif; font-size:1.15rem; z-index:4; box-shadow:0 8px 16px rgba(80,38,10,.24); }
-    .invitation-title { display:block; margin:.2rem 0 0; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(2rem,4vw,3.25rem); line-height:.95; }
-    .invitation-copy { display:block; margin:0; max-width:25rem; color:var(--muted); line-height:1.5; }
+    .panel { position:relative; overflow:hidden; min-height:clamp(680px,78vh,820px); background:var(--panel); border:1px solid rgba(219,172,77,.7); box-shadow:0 28px 80px rgba(48,20,8,.3); padding:clamp(1rem,3vw,2.5rem); }
+    .invitation-gate { position:absolute; inset:0; z-index:20; min-height:100%; border:0; padding:clamp(1.25rem,5vw,3rem); display:grid; place-items:center; overflow:hidden; background:linear-gradient(135deg,rgba(255,250,240,.96),rgba(239,224,197,.92)),linear-gradient(120deg,rgba(255,255,255,.82),rgba(183,137,43,.28)); color:var(--ink); cursor:pointer; transition:opacity .6s ease .72s, visibility .6s ease .72s; }
+    .invitation-gate::before { content:''; position:absolute; inset:-3rem; background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(184,134,11,.2)),repeating-linear-gradient(112deg,rgba(255,255,255,.3) 0 2px,rgba(126,89,37,.08) 2px 8px); filter:blur(16px); opacity:.35; transform:scale(1.05); }
+    .invitation-gate-inner { position:relative; display:grid; gap:.85rem; justify-items:center; text-align:center; width:min(86vw,440px); transition:transform 1.05s cubic-bezier(.2,.82,.22,1), opacity .45s ease .78s; }
+    .envelope { position:relative; width:min(76vw,390px); aspect-ratio:.66; border:1px solid rgba(103,73,31,.14); background:linear-gradient(160deg,#fffdfa,#f4efe5 58%,#ebe1cf); box-shadow:0 34px 48px rgba(49,25,8,.26),0 1px 0 rgba(255,255,255,.9) inset; filter:drop-shadow(0 16px 18px rgba(80,38,10,.16)); perspective:1100px; transition:transform 1.05s cubic-bezier(.2,.82,.22,1); }
+    .envelope::before, .envelope::after { content:''; position:absolute; inset:0; pointer-events:none; }
+    .envelope::before { background:linear-gradient(31deg,transparent 49.75%,rgba(128,95,52,.16) 50%,transparent 50.35%),linear-gradient(-31deg,transparent 49.75%,rgba(128,95,52,.13) 50%,transparent 50.35%); }
+    .envelope::after { inset:7%; border:1px solid rgba(184,134,11,.14); opacity:.55; }
+    .envelope-card { position:absolute; left:8%; right:8%; top:8%; height:72%; background:linear-gradient(180deg,#fffefb,#fff8ec); border:1px solid rgba(200,148,34,.32); box-shadow:0 14px 28px rgba(80,38,10,.14); transform:translateY(20%); transition:transform 1.1s cubic-bezier(.16,.78,.2,1), opacity .42s ease .76s; z-index:1; }
+    .envelope-card::before { content:'Akhila & Akshay'; position:absolute; inset:1rem; display:grid; place-items:center; border:1px solid rgba(200,148,34,.26); color:var(--gold-deep); font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(1.55rem,5vw,2.4rem); letter-spacing:.02em; opacity:0; transition:opacity .36s ease .18s; }
+    .envelope-pocket { position:absolute; left:0; right:0; bottom:0; height:58%; background:linear-gradient(150deg,#fffdfa,#eee4d5); clip-path:polygon(0 0,50% 40%,100% 0,100% 100%,0 100%); z-index:2; box-shadow:0 -1px 0 rgba(103,73,31,.12) inset; }
+    .envelope-pocket::before, .envelope-pocket::after { content:''; position:absolute; bottom:0; width:56%; height:100%; background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(218,207,190,.62)); }
+    .envelope-pocket::before { left:0; clip-path:polygon(0 0,100% 70%,0 100%); }
+    .envelope-pocket::after { right:0; clip-path:polygon(100% 0,0 70%,100% 100%); }
+    .envelope-flap { position:absolute; left:0; right:0; top:0; height:46%; background:linear-gradient(170deg,#fffefb,#efe5d5); clip-path:polygon(0 0,100% 0,50% 100%); transform-origin:50% 0; transition:transform 1.05s cubic-bezier(.18,.78,.2,1), opacity .35s ease .7s; z-index:3; box-shadow:0 12px 18px rgba(80,38,10,.1); }
+    .envelope-seal { position:absolute; left:50%; top:45%; width:4.4rem; height:4.4rem; transform:translate(-50%,-50%); border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff7df,#d8bf83 52%,#b18b48); color:#7d5b23; display:grid; place-items:center; font-family:"Cormorant Garamond",Georgia,serif; font-size:1.45rem; z-index:4; box-shadow:0 10px 18px rgba(80,38,10,.22),inset 0 0 0 7px rgba(255,249,230,.5),inset 0 0 0 10px rgba(126,89,37,.12); transition:opacity .32s ease, transform .32s ease; }
+    .invitation-title, .invitation-copy { display:none; }
     .open-cue { color:var(--gold-deep); font-size:.72rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
-    .panel.invitation-opening .envelope-flap, .panel.invitation-open .envelope-flap { transform:rotateX(-158deg); }
-    .panel.invitation-opening .envelope-card, .panel.invitation-open .envelope-card { transform:translateY(-12%); }
-    .panel.invitation-opening .envelope-seal, .panel.invitation-open .envelope-seal { opacity:0; transform:translateX(-50%) scale(.72); transition:opacity .35s ease, transform .35s ease; }
-    .panel.invitation-opening .invitation-gate-inner { transform:translateY(-10px); }
+    .panel.invitation-opening .envelope, .panel.invitation-open .envelope { transform:translateY(-16px) scale(.985); }
+    .panel.invitation-opening .envelope-flap, .panel.invitation-open .envelope-flap { transform:rotateX(-168deg); opacity:.92; }
+    .panel.invitation-opening .envelope-card, .panel.invitation-open .envelope-card { transform:translateY(-34%); opacity:0; }
+    .panel.invitation-opening .envelope-card::before, .panel.invitation-open .envelope-card::before { opacity:1; }
+    .panel.invitation-opening .envelope-seal, .panel.invitation-open .envelope-seal { opacity:0; transform:translate(-50%,-50%) scale(.58); }
+    .panel.invitation-opening .invitation-gate-inner { transform:translateY(-18px); opacity:.96; }
     .panel.invitation-open .invitation-gate { opacity:0; visibility:hidden; pointer-events:none; }
     .panel-header { padding:.7rem .7rem 1.25rem; border-bottom:1px solid rgba(140,95,17,.24); }
     .panel-header h2 { margin:.2rem 0 .55rem; color:var(--ink); font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(2.3rem,4vw,3.8rem); line-height:.95; }
@@ -73,8 +78,8 @@
     .confirmation h3 { margin:.3rem 0 .8rem;color:var(--leaf);font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(2.2rem,4vw,3.4rem);line-height:.95; }
     .confirmation p { max-width:30rem;margin:0 auto;color:var(--muted);line-height:1.65; }
     .hidden { display:none !important; }
-    @media (prefers-reduced-motion:reduce) { .invitation-gate, .invitation-gate-inner, .envelope-card, .envelope-flap, .envelope-seal { transition:none !important; } }
-    @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .intro{padding-top:0;position:static;} }
+    @media (prefers-reduced-motion:reduce) { .invitation-gate, .invitation-gate-inner, .envelope, .envelope-card, .envelope-flap, .envelope-seal { transition:none !important; } }
+    @media (max-width:900px) { body{background-attachment:scroll;} main{grid-template-columns:1fr;} .panel{order:-1;} .intro{padding-top:0;position:static;} }
     @media (max-width:620px) { main{padding:.75rem;} .form-grid,.meal-grid{grid-template-columns:1fr;} .event-top{display:block;} .choices{margin-top:.8rem;} button,.calendar-link{width:100%;text-align:center;} }
   </style>
 </head>
@@ -152,7 +157,7 @@
     invitationGate.addEventListener('click', () => {
       if (rsvpPanel.classList.contains('invitation-open')) return;
       rsvpPanel.classList.add('invitation-opening');
-      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 900;
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1400;
       window.setTimeout(() => {
         rsvpPanel.classList.add('invitation-open');
         invitationGate.setAttribute('aria-hidden', 'true');
