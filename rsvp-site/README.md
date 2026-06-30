@@ -7,7 +7,6 @@ Required environment variables (copy the existing values from the private dashbo
 ```text
 VERCEL_KV_REST_API_URL
 VERCEL_KV_REST_API_TOKEN
-COMMON_EVENT_ADDRESS
 RSVP_SECRET
 GMAIL_SENDER_EMAIL
 GMAIL_SENDER_NAME
@@ -23,8 +22,15 @@ Optional event-address variables:
 
 ```text
 PELLIKUTHURU_ADDRESS
+PELLIKUTHURU_MAP_URL
+COMMON_EVENT_ADDRESS
+COMMON_EVENT_MAP_URL
+SATYANARAYANA_ADDRESS
+SATYANARAYANA_MAP_URL
 PELLIKODUKU_ADDRESS
 ```
+
+`COMMON_EVENT_ADDRESS` and `COMMON_EVENT_MAP_URL` are optional Haldi overrides. When they are not set, Haldi defaults to the Pellikuthuru / bride-side address and map.
 
 This project intentionally contains only the public RSVP page and API. It uses the same Vercel KV guest data as the private dashboard, and locks a guest record after its first public RSVP submission.
 

@@ -1,3 +1,5 @@
+const { RSVP_EVENTS } = require('./rsvp');
+
 function cleanText(value, maxLength = 220) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
@@ -79,14 +81,53 @@ function eventDisplayName(event) {
   return event.displayName || event.name;
 }
 
+function normalizeEventLookupValue(value) {
+  return cleanText(value, 180).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function isPlaceholderVenue(value) {
+  const normalized = normalizeEventLookupValue(value);
+  return [
+    'bride side address',
+    'shared event address',
+    'venue to be confirmed',
+    'location to be confirmed'
+  ].includes(normalized);
+}
+
+function canonicalEventFor(event) {
+  const candidates = [
+    event.id,
+    event.name,
+    event.displayName
+  ].map(normalizeEventLookupValue).filter(Boolean);
+
+  return RSVP_EVENTS.find(item => {
+    const aliases = [
+      item.id,
+      item.name,
+      item.displayName
+    ].map(normalizeEventLookupValue).filter(Boolean);
+    return aliases.some(alias => candidates.includes(alias));
+  }) || null;
+}
+
 function eventVenueText(event) {
   const venue = cleanText(event.venue || 'Location to be confirmed', 180).replace(/^["']|["']$/g, '');
-  return /^shared event address$/i.test(venue) ? 'Location to be confirmed' : venue;
+  if (!venue || !isPlaceholderVenue(venue)) return venue;
+
+  const canonicalVenue = canonicalEventFor(event)?.venue;
+  return canonicalVenue && !isPlaceholderVenue(canonicalVenue)
+    ? cleanText(canonicalVenue, 180).replace(/^["']|["']$/g, '')
+    : 'Location to be confirmed';
 }
 
 function eventMapUrl(event) {
   const explicit = String(event.mapUrl || '').trim();
   if (explicit) return explicit;
+
+  const canonicalMapUrl = String(canonicalEventFor(event)?.mapUrl || '').trim();
+  if (canonicalMapUrl) return canonicalMapUrl;
 
   const venue = eventVenueText(event);
   if (/location to be confirmed/i.test(venue)) return '';
@@ -278,6 +319,7 @@ async function sendRsvpConfirmations(guest, events) {
 
 module.exports = {
   buildGmailRawMessage,
+  buildConfirmationEmail,
   normalizeUsPhone,
   sendEmailConfirmation,
   sendRsvpConfirmations
