@@ -66,7 +66,7 @@
       <p>A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
       <div class="date-strip">
         <span>28 Aug · Haldi 11 AM</span>
-        <span>28 Aug · Sangeet 6 PM</span>
+        <span>28 Aug · Sangeeth 6 PM</span>
         <span>29 Aug · Pellikuthuru / Pellikoduku · TBD</span>
         <span>30 Aug · Marriage 11 AM</span>
         <span>31 Aug · Satyanarayana Swamy Vratam · TBD</span>
@@ -104,6 +104,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const quickResponse = ['attending', 'not_attending'].includes(params.get('quick')) ? params.get('quick') : '';
     const form = document.getElementById('rsvpForm');
     const loadingBox = document.getElementById('loadingBox');
     const statusBox = document.getElementById('statusBox');
@@ -122,7 +123,16 @@
     }
     function eventInputName(event) { return `event-${event.id}`; }
     function number(value) { return Math.max(0, parseInt(value, 10) || 0); }
-    function eventResponse(event) { return event.response || 'maybe'; }
+    function eventResponse(event) { return quickResponse || event.response || 'maybe'; }
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+    }
+    function eventDisplayName(event) { return event.displayName || event.name; }
+    function eventLocationHtml(event) {
+      const venue = escapeHtml(event.venue || 'To Be Confirmed');
+      const map = event.mapUrl ? `<br><a href="${escapeHtml(event.mapUrl)}" target="_blank" rel="noopener" style="color:var(--gold-deep);">Map location</a>` : '';
+      return `${venue}${map}`;
+    }
 
     function renderEvents(items) {
       events = items;
@@ -138,13 +148,13 @@
             </div>`
           : `<div class="meal-grid ${mealsVisible}" data-meals-for="${event.id}">
               <div><label>Total people coming</label><input data-count="attendanceCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.attendanceCount || 1}"></div>
-              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.vegetarianCount || 0}"></div>
+              <div><label>Of those, vegetarian</label><input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.vegetarianCount || (response === 'attending' ? 1 : 0)}"></div>
               <div><label>Of those, non-vegetarian</label><input data-count="nonVegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${event.nonVegetarianCount || 0}"></div>
               <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
             </div>`;
         return `<article class="event" data-event-id="${event.id}">
-          <div class="event-top"><div><h3>${event.name}</h3><p>${event.displayDate} · ${event.time}<br>${event.subtitle}<br>Venue · ${event.venue || 'To Be Confirmed'}</p></div>
-          <div class="choices" aria-label="${event.name} response">
+          <div class="event-top"><div><h3>${eventDisplayName(event)}</h3><p>${escapeHtml(event.displayDate)} · ${escapeHtml(event.time)}<br>${escapeHtml(event.subtitle)}<br>Venue · ${eventLocationHtml(event)}</p></div>
+          <div class="choices" aria-label="${eventDisplayName(event)} response">
             <label class="choice"><input type="radio" name="${name}" value="attending" ${response === 'attending' ? 'checked' : ''}><span>Yes</span></label>
             <label class="choice"><input type="radio" name="${name}" value="maybe" ${response === 'maybe' || response === 'pending' ? 'checked' : ''}><span>Maybe</span></label>
             <label class="choice"><input type="radio" name="${name}" value="not_attending" ${response === 'not_attending' ? 'checked' : ''}><span>No</span></label>

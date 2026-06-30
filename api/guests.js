@@ -665,15 +665,41 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function eventDisplayName(event) {
+  return event.displayName || event.name;
+}
+
+function eventLocationHtml(event) {
+  const venue = escapeHtml(event.venue || 'Venue to be confirmed');
+  const map = event.mapUrl
+    ? `<br><a href="${escapeHtml(event.mapUrl)}" style="color:#8c5f11;text-decoration:underline;">Map location</a>`
+    : '';
+  return `${venue}${map}`;
+}
+
+function appendUrlParam(url, key, value) {
+  const separator = String(url || '').includes('?') ? '&' : '?';
+  return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+}
+
 function buildInviteHtml(guest, customMessage, links) {
   const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
   const extra = customMessage
     ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
     : '';
+  const yesUrl = appendUrlParam(links.rsvpUrl, 'quick', 'attending');
+  const noUrl = appendUrlParam(links.rsvpUrl, 'quick', 'not_attending');
   const eventRows = getInvitedEvents(guest).map(event => `
             <tr>
-              <td style="padding:12px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Georgia,serif;font-size:19px;color:#281309;">${escapeHtml(event.name)}</td>
-              <td style="padding:12px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;">${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}</td>
+              <td style="padding:14px 0;border-bottom:1px solid rgba(184,134,11,0.18);vertical-align:top;">
+                <strong style="font-family:Georgia,serif;font-size:19px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
+                <span style="font-family:Arial,sans-serif;font-size:12px;line-height:1.55;color:#705843;">${eventLocationHtml(event)}</span>
+              </td>
+              <td style="padding:14px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;">${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}<br>
+                <span style="display:inline-block;margin-top:8px;letter-spacing:1.2px;color:#705843;">RSVP</span><br>
+                <a href="${escapeHtml(yesUrl)}" style="display:inline-block;margin-top:6px;padding:5px 8px;background:#e4f4e8;color:#1f6a35;text-decoration:none;letter-spacing:1px;">Yes</a>
+                <a href="${escapeHtml(noUrl)}" style="display:inline-block;margin-top:6px;margin-left:4px;padding:5px 8px;background:#f8e2df;color:#9f1d22;text-decoration:none;letter-spacing:1px;">No</a>
+              </td>
             </tr>`).join('');
 
   return `<!DOCTYPE html>
