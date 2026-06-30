@@ -246,8 +246,10 @@ COMMON_EVENT_ADDRESS      # Optional Haldi override; defaults to Pellikuthuru / 
 COMMON_EVENT_MAP_URL      # Optional Haldi map override; defaults to Pellikuthuru / bride-side map
 SANGEETH_EVENT_ADDRESS    # Sangeeth venue address
 SANGEETH_MAP_URL          # Sangeeth map link
-PELLIKUTHURU_ADDRESS      # Pellikuthuru / Pellikoduku venue address
-PELLIKUTHURU_MAP_URL      # Pellikuthuru / Pellikoduku map link
+PELLIKUTHURU_ADDRESS      # Pellikuthuru venue address
+PELLIKUTHURU_MAP_URL      # Pellikuthuru map link
+PELLIKODUKU_ADDRESS       # Pellikoduku venue address; shows "Location to be confirmed" if omitted
+PELLIKODUKU_MAP_URL       # Pellikoduku map link
 SATYANARAYANA_ADDRESS     # Satyanarayana Swamy Vratam venue address
 SATYANARAYANA_MAP_URL     # Satyanarayana Swamy Vratam map link
 MARRIAGE_ADDRESS          # Marriage venue address
@@ -266,7 +268,7 @@ Before generating the final Gmail refresh token, set the Google OAuth app's publ
 - **RSVP**: The standalone public RSVP site and `rsvp.html` have the same RSVP form and flow: Yes/Maybe/No responses, per-event attendee and meal counts, guest-specific invited events, and Apple Calendar `.ics` downloads for signed links.
 - **Catering totals**: The Food page calculates confirmed attendees and meal counts per event from the latest RSVP responses; Maybe responses are shown separately and are not included in meal totals.
 - **Guest Events**: Guest rows can select invited events individually. CSV import accepts an `Events`, `Invited Events`, or `Events Invited To` column with values like `All Events`, `Haldi + Sangeet`, or `Marriage|Satyanarayana Swamy Vratam`
-- **Guest Side**: Akhila/Akshay side only changes Pellikuthuru/Pellikoduku details and addresses. Haldi uses `COMMON_EVENT_ADDRESS` when set, otherwise it defaults to the Pellikuthuru / bride-side address. Satyanarayana Swamy Vratam uses `SATYANARAYANA_ADDRESS`. If an old environment still contains `bride-side address` or another placeholder, the RSVP email falls back to the canonical event address.
+- **Guest Side**: Akhila/Akshay side changes Pellikuthuru/Pellikoduku details and addresses. The combined Pellikuthuru / Pellikoduku confirmation card shows separate location subheadings for `PELLIKUTHURU_ADDRESS` and `PELLIKODUKU_ADDRESS`. Haldi uses `COMMON_EVENT_ADDRESS` when set, otherwise it defaults to the Pellikuthuru / bride-side address. Satyanarayana Swamy Vratam uses `SATYANARAYANA_ADDRESS`. If an old environment still contains `bride-side address` or another placeholder, the RSVP email falls back to the canonical event address.
 - **Security**: Never commit `.env.local` or `.env.*.local`
 - **Polling**: 5-second sync interval is suitable for wedding planning
 - **Scaling**: Vercel KV has limits; fine for single wedding (thousands of guests)

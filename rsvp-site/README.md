@@ -23,14 +23,16 @@ Optional event-address variables:
 ```text
 PELLIKUTHURU_ADDRESS
 PELLIKUTHURU_MAP_URL
+PELLIKODUKU_ADDRESS
+PELLIKODUKU_MAP_URL
 COMMON_EVENT_ADDRESS
 COMMON_EVENT_MAP_URL
 SATYANARAYANA_ADDRESS
 SATYANARAYANA_MAP_URL
-PELLIKODUKU_ADDRESS
 ```
 
 `COMMON_EVENT_ADDRESS` and `COMMON_EVENT_MAP_URL` are optional Haldi overrides. When they are not set, Haldi defaults to the Pellikuthuru / bride-side address and map.
+The combined Pellikuthuru / Pellikoduku confirmation card shows separate location subheadings. If `PELLIKODUKU_ADDRESS` is not set, Pellikoduku is shown as "Location to be confirmed."
 
 This project intentionally contains only the public RSVP page and API. It uses the same Vercel KV guest data as the private dashboard, and locks a guest record after its first public RSVP submission.
 

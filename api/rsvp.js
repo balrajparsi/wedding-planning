@@ -153,7 +153,7 @@ function findPublicGuestMatch(guests, submission) {
 }
 
 function publicEvent(event) {
-  const { venue, mapUrl, ...safeEvent } = event;
+  const { venue, mapUrl, locations, ...safeEvent } = event;
   return safeEvent;
 }
 

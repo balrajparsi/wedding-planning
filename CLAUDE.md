@@ -129,6 +129,10 @@ When adding a new feature:
 5. Initialize in app.js: `navigateTo()` function
 6. Update script references: Add to `index.html` `<script>` section
 
+### Git Publishing
+- After making requested changes, run the relevant checks, commit the intended files, and push the branch immediately so Vercel can deploy.
+- Do not leave completed local changes unpushed unless the user explicitly asks to hold them locally.
+
 ## Real-Time Sync
 
 - **Polling Interval**: 5 seconds

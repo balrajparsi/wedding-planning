@@ -112,13 +112,46 @@ function canonicalEventFor(event) {
   }) || null;
 }
 
+function cleanVenue(value) {
+  return cleanText(value || 'Location to be confirmed', 180).replace(/^["']|["']$/g, '');
+}
+
+function eventLocations(event) {
+  const canonical = canonicalEventFor(event);
+  const sourceLocations = Array.isArray(event.locations) && event.locations.length
+    ? event.locations
+    : Array.isArray(canonical?.locations) ? canonical.locations : [];
+
+  if (!sourceLocations.length) return [];
+
+  return sourceLocations.map(location => {
+    const venue = cleanVenue(location.venue);
+    const canonicalLocation = Array.isArray(canonical?.locations)
+      ? canonical.locations.find(item => normalizeEventLookupValue(item.label) === normalizeEventLookupValue(location.label))
+      : null;
+    const canonicalVenue = cleanVenue(canonicalLocation?.venue);
+    const resolvedVenue = !isPlaceholderVenue(venue)
+      ? venue
+      : canonicalVenue && !isPlaceholderVenue(canonicalVenue)
+        ? canonicalVenue
+        : 'Location to be confirmed';
+    const mapUrl = String(location.mapUrl || canonicalLocation?.mapUrl || '').trim();
+    return {
+      label: cleanText(location.label || 'Location', 80),
+      venue: resolvedVenue,
+      mapUrl
+    };
+  });
+}
+
 function eventVenueText(event) {
-  const venue = cleanText(event.venue || 'Location to be confirmed', 180).replace(/^["']|["']$/g, '');
+  const venue = cleanVenue(event.venue);
   if (!venue || !isPlaceholderVenue(venue)) return venue;
 
   const canonicalVenue = canonicalEventFor(event)?.venue;
-  return canonicalVenue && !isPlaceholderVenue(canonicalVenue)
-    ? cleanText(canonicalVenue, 180).replace(/^["']|["']$/g, '')
+  const cleanCanonicalVenue = cleanVenue(canonicalVenue);
+  return cleanCanonicalVenue && !isPlaceholderVenue(cleanCanonicalVenue)
+    ? cleanCanonicalVenue
     : 'Location to be confirmed';
 }
 
@@ -134,13 +167,43 @@ function eventMapUrl(event) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
 }
 
+function locationMapButton(mapUrl) {
+  return mapUrl
+    ? `<a href="${escapeHtml(mapUrl)}" style="display:inline-block;margin-top:7px;padding:7px 10px;background:#ffffff;border:1px solid #d8d1c6;border-radius:6px;color:#1a5fd0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;text-decoration:none;">Open in Maps</a>`
+    : `<span style="display:inline-block;margin-top:7px;padding:7px 10px;background:#f6f1e7;border:1px solid #ded4c4;border-radius:6px;color:#705843;font-family:Arial,sans-serif;font-size:12px;">Map link coming soon</span>`;
+}
+
+function locationDetailsHtml(event) {
+  const locations = eventLocations(event);
+  if (!locations.length) {
+    return `<p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#111820;">${escapeHtml(eventVenueText(event))}</p>`;
+  }
+
+  return locations.map(location => `<div style="margin:0 0 14px;padding:0 0 14px;border-bottom:1px solid #eadfcf;">
+    <p style="margin:0 0 5px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:#1f2a2e;">${escapeHtml(location.label)}</p>
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#111820;">${escapeHtml(location.venue)}</p>
+    ${locationMapButton(location.mapUrl)}
+  </div>`).join('');
+}
+
 function eventCardHtml(event) {
   const status = eventStatus(event);
-  const venue = eventVenueText(event);
+  const locations = eventLocations(event);
   const mapUrl = eventMapUrl(event);
   const mapButton = mapUrl
     ? `<a href="${escapeHtml(mapUrl)}" style="display:inline-block;margin-top:12px;padding:9px 12px;background:#ffffff;border:1px solid #d8d1c6;border-radius:6px;color:#1a5fd0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">Open in Maps</a>`
     : `<span style="display:inline-block;margin-top:12px;padding:9px 12px;background:#f6f1e7;border:1px solid #ded4c4;border-radius:6px;color:#705843;font-family:Arial,sans-serif;font-size:13px;">Map link coming soon</span>`;
+  const mapPreview = locations.length
+    ? ''
+    : `<table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf0ea;border:1px solid #d5ddd5;border-radius:10px;overflow:hidden;">
+              <tr>
+                <td style="height:142px;padding:16px;text-align:center;background:linear-gradient(135deg,#edf3ec 0%,#edf3ec 30%,#f7f0df 30%,#f7f0df 45%,#dcefe4 45%,#dcefe4 100%);">
+                  <div style="display:inline-block;width:34px;height:34px;border-radius:50% 50% 50% 0;background:#d83b2d;transform:rotate(-45deg);box-shadow:0 5px 12px rgba(80,38,10,.22);"></div>
+                  <div style="margin-top:10px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#4c4f53;letter-spacing:1px;text-transform:uppercase;">Location map</div>
+                  ${mapButton}
+                </td>
+              </tr>
+            </table>`;
 
   return `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:#fffdf8;border:1px solid #ead6a8;border-radius:10px;">
     <tr><td style="padding:24px 24px 20px;">
@@ -154,16 +217,8 @@ function eventCardHtml(event) {
           </td>
           <td width="58%" style="padding:0;vertical-align:top;">
             <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4c4f53;">Location</p>
-            <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#111820;">${escapeHtml(venue)}</p>
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#eaf0ea;border:1px solid #d5ddd5;border-radius:10px;overflow:hidden;">
-              <tr>
-                <td style="height:142px;padding:16px;text-align:center;background:linear-gradient(135deg,#edf3ec 0%,#edf3ec 30%,#f7f0df 30%,#f7f0df 45%,#dcefe4 45%,#dcefe4 100%);">
-                  <div style="display:inline-block;width:34px;height:34px;border-radius:50% 50% 50% 0;background:#d83b2d;transform:rotate(-45deg);box-shadow:0 5px 12px rgba(80,38,10,.22);"></div>
-                  <div style="margin-top:10px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#4c4f53;letter-spacing:1px;text-transform:uppercase;">Location map</div>
-                  ${mapButton}
-                </td>
-              </tr>
-            </table>
+            ${locationDetailsHtml(event)}
+            ${mapPreview}
           </td>
         </tr>
       </table>
