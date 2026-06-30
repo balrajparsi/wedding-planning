@@ -1,5 +1,3 @@
-const DEFAULT_FROM_EMAIL = 'Akhila and Akshay <onboarding@resend.dev>';
-
 function cleanText(value, maxLength = 220) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
@@ -13,28 +11,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function getFromEmail() {
-  const configured = String(process.env.INVITE_FROM_EMAIL || DEFAULT_FROM_EMAIL)
-    .trim()
-    .replace(/^['"]|['"]$/g, '');
-  const emailMatch = configured.match(/[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+/);
-
-  if (!emailMatch) {
-    const displayName = configured.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim() || 'Akhila and Akshay';
-    return `${displayName} <onboarding@resend.dev>`;
-  }
-  if (/^[^<>]+<[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>$|^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/.test(configured)) {
-    return configured;
-  }
-
-  const displayName = configured
-    .replace(emailMatch[0], '')
-    .replace(/[<>]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return displayName ? `${displayName} <${emailMatch[0]}>` : emailMatch[0];
-}
-
 function getGmailConfiguration() {
   return {
     senderEmail: String(process.env.GMAIL_SENDER_EMAIL || '').trim(),
@@ -43,11 +19,6 @@ function getGmailConfiguration() {
     clientSecret: String(process.env.GMAIL_OAUTH_CLIENT_SECRET || '').trim(),
     refreshToken: String(process.env.GMAIL_OAUTH_REFRESH_TOKEN || '').trim()
   };
-}
-
-function gmailIsConfigured() {
-  const config = getGmailConfiguration();
-  return Boolean(config.senderEmail || config.clientId || config.clientSecret || config.refreshToken);
 }
 
 function buildGmailRawMessage({ from, to, subject, html }) {
@@ -258,59 +229,9 @@ async function sendGmailConfirmation(guest, events, attemptedAt) {
   }
 }
 
-async function sendResendConfirmation(guest, events, attemptedAt) {
-  if (!process.env.RESEND_API_KEY) {
-    return { status: 'skipped', attemptedAt, error: 'RESEND_API_KEY is not configured.' };
-  }
-  if (!guest.email) {
-    return { status: 'skipped', attemptedAt, error: 'Guest email is unavailable.' };
-  }
-
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: getFromEmail(),
-        to: [guest.email],
-        subject: `RSVP received - Akhila & Akshay's Wedding`,
-        html: buildConfirmationEmail(guest, events)
-      })
-    });
-    if (!response.ok) {
-      return { status: 'failed', attemptedAt, error: parseProviderError(await response.text(), 'Resend confirmation failed.') };
-    }
-    const payload = await response.json().catch(() => ({}));
-    return { status: 'sent', attemptedAt, sentAt: new Date().toISOString(), id: cleanText(payload.id, 120) };
-  } catch (error) {
-    return { status: 'failed', attemptedAt, error: cleanText(error.message || 'Resend confirmation failed.') };
-  }
-}
-
 async function sendEmailConfirmation(guest, events, attemptedAt) {
-  if (!gmailIsConfigured()) {
-    const result = await sendResendConfirmation(guest, events, attemptedAt);
-    return { provider: 'resend', ...result };
-  }
-
   const gmailResult = await sendGmailConfirmation(guest, events, attemptedAt);
-  if (gmailResult.status === 'sent' || !process.env.RESEND_API_KEY || !guest.email) {
-    return { provider: 'gmail', ...gmailResult };
-  }
-
-  const resendResult = await sendResendConfirmation(guest, events, attemptedAt);
-  return {
-    provider: 'resend',
-    ...resendResult,
-    fallbackFrom: {
-      provider: 'gmail',
-      status: gmailResult.status,
-      error: gmailResult.error || ''
-    }
-  };
+  return { provider: 'gmail', ...gmailResult };
 }
 
 async function sendSmsConfirmation(guest, events, attemptedAt) {
