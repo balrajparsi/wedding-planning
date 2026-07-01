@@ -1,5 +1,8 @@
 const { RSVP_EVENTS } = require('./rsvp');
 
+const DEFAULT_PELLIKUTHURU_ADDRESS = '510 Peach Ave, Centerton, AR 72719';
+const DEFAULT_PELLIKUTHURU_MAP_URL = 'https://maps.app.goo.gl/Nx2cUKVUo1EL6Tgx6';
+
 function cleanText(value, maxLength = 220) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
@@ -85,14 +88,34 @@ function normalizeEventLookupValue(value) {
   return cleanText(value, 180).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+function normalizeAddress(value) {
+  return String(value || '').trim().toLowerCase().replace(/[.,]/g, '').replace(/\s+/g, ' ');
+}
+
 function isPlaceholderVenue(value) {
   const normalized = normalizeEventLookupValue(value);
   return [
     'bride side address',
     'shared event address',
     'venue to be confirmed',
-    'location to be confirmed'
+    'location to be confirmed',
+    'to be confirmed',
+    'tbd'
   ].includes(normalized);
+}
+
+function isBrideSideVenue(value) {
+  return normalizeAddress(value) === normalizeAddress(DEFAULT_PELLIKUTHURU_ADDRESS);
+}
+
+function isPellikuthuruLocation(value) {
+  const normalized = normalizeEventLookupValue(value);
+  return normalized === 'pellikuthuru' || normalized === 'pelli kuthuru';
+}
+
+function isPellikodukuLocation(value) {
+  const normalized = normalizeEventLookupValue(value);
+  return normalized === 'pellikoduku' || normalized === 'pelli koduku';
 }
 
 function canonicalEventFor(event) {
@@ -108,7 +131,7 @@ function canonicalEventFor(event) {
       item.name,
       item.displayName
     ].map(normalizeEventLookupValue).filter(Boolean);
-    return aliases.some(alias => candidates.includes(alias));
+    return aliases.some(alias => candidates.some(candidate => candidate === alias || candidate.includes(alias) || alias.includes(candidate)));
   }) || null;
 }
 
@@ -129,18 +152,30 @@ function eventLocations(event) {
     const submittedLocation = eventSourceLocations.find(item => normalizeEventLookupValue(item.label) === normalizeEventLookupValue(location.label)) || location;
     const venue = cleanVenue(submittedLocation.venue);
     const canonicalVenue = cleanVenue(canonicalLocation?.venue);
-    const resolvedVenue = canonicalLocation
+    const label = cleanText(location.label || 'Location', 80);
+    let resolvedVenue = canonicalLocation
       ? canonicalVenue && !isPlaceholderVenue(canonicalVenue)
         ? canonicalVenue
         : 'Location to be confirmed'
       : !isPlaceholderVenue(venue)
           ? venue
           : 'Location to be confirmed';
-    const mapUrl = isPlaceholderVenue(resolvedVenue)
+
+    if (isPellikuthuruLocation(label) && isPlaceholderVenue(resolvedVenue)) {
+      resolvedVenue = DEFAULT_PELLIKUTHURU_ADDRESS;
+    }
+    if (isPellikodukuLocation(label) && isBrideSideVenue(resolvedVenue)) {
+      resolvedVenue = 'Location to be confirmed';
+    }
+
+    let mapUrl = isPlaceholderVenue(resolvedVenue)
       ? ''
       : String(canonicalLocation?.mapUrl || submittedLocation.mapUrl || '').trim();
+    if (isPellikuthuruLocation(label) && !mapUrl) {
+      mapUrl = DEFAULT_PELLIKUTHURU_MAP_URL;
+    }
     return {
-      label: cleanText(location.label || 'Location', 80),
+      label,
       venue: resolvedVenue,
       mapUrl
     };
