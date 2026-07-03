@@ -28,6 +28,28 @@ const budgetPage = {
     return this.categoryLabels[value] || value.replace(/-/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
   },
 
+  escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[character]));
+  },
+
+  renderExpenseNotes(expense) {
+    const notes = String(expense.notes || '').trim();
+    if (!notes) return '';
+
+    return `
+      <div class="expense-notes" style="background:#fffaf0;border:1px solid #ead8b5;border-radius:0.4rem;padding:0.65rem 0.75rem;margin:0 0 0.85rem 0;">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#8c5f11;margin-bottom:0.25rem;">Notes</div>
+        <div style="font-size:0.86rem;color:#3c3328;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;">${this.escapeHtml(notes)}</div>
+      </div>
+    `;
+  },
+
   async init() {
     if (!this.listenersSetup) {
       this.setupEventListeners();
@@ -195,6 +217,8 @@ const budgetPage = {
             <div class="progress-fill" style="width:${pct}%;background:${pct >= 100 ? '#27ae60' : 'var(--gold)'};height:100%;border-radius:3px;transition:width 0.3s;"></div>
           </div>
 
+          ${this.renderExpenseNotes(expense)}
+
           <!-- Payment history -->
           <div class="payment-history" style="margin-bottom:0.75rem;">
             ${(expense.payments||[]).length > 0 ? `
@@ -203,7 +227,7 @@ const budgetPage = {
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.6rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;font-size:0.82rem;">
                   <span style="color:#555;">${formatCentralDate(p.date, 'en-US', {month:'short',day:'numeric',year:'numeric'})}</span>
                   <span style="font-weight:600;color:#27ae60;">+$${(p.amount||0).toFixed(2)}</span>
-                  ${p.notes ? `<span style="color:#888;font-style:italic;">${p.notes}</span>` : ''}
+                  ${p.notes ? `<span style="color:#888;font-style:italic;">${this.escapeHtml(p.notes)}</span>` : ''}
                 </div>
               `).join('')}
             ` : '<div style="font-size:0.8rem;color:#aaa;">No payments logged yet.</div>'}
