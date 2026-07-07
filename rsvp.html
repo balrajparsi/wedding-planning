@@ -96,11 +96,11 @@
       <h1>Akhila <span>&amp;</span><br>Akshay</h1>
       <p>A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
       <div class="date-strip">
-        <span>28 Aug · Haldi 11 AM</span>
-        <span>28 Aug · Sangeeth 6 PM</span>
-        <span>29 Aug · Pellikuthuru / Pellikoduku · TBD</span>
-        <span>30 Aug · Marriage 11 AM</span>
-        <span>31 Aug · Satyanarayana Swamy Vratam · TBD</span>
+        <span>28 Aug · Haldi 11 AM · 510 Peach Ave</span>
+        <span>28 Aug · Sangeeth 6 PM · Metroplex Event Center</span>
+        <span>29 Aug · Pellikuthuru / Pellikoduku · 510 Peach Ave</span>
+        <span>30 Aug · Marriage 11 AM · Osage House</span>
+        <span>31 Aug · Satyanarayana Swamy Vratam · 510 Peach Ave</span>
       </div>
     </section>
     <section class="panel" id="rsvpPanel" aria-live="polite">
@@ -186,6 +186,12 @@
       return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
     }
     function eventDisplayName(event) { return event.displayName || event.name; }
+    function eventDetailHtml(event) {
+      return [event.subtitle, event.locationSummary ? `Venue: ${event.locationSummary}` : '']
+        .filter(Boolean)
+        .map(escapeHtml)
+        .join('<br>');
+    }
     function renderEvents(items) {
       events = items;
       eventsList.innerHTML = items.map(event => {
@@ -205,7 +211,7 @@
               <p class="hint full" style="margin:0;">Example: if 3 people are coming and 2 eat vegetarian, enter 3 total, 2 vegetarian, and 1 non-vegetarian.</p>
             </div>`;
         return `<article class="event" data-event-id="${event.id}">
-          <div class="event-top"><div><h3>${eventDisplayName(event)}</h3><p>${escapeHtml(event.displayDate)} · ${escapeHtml(event.time)}<br>${escapeHtml(event.subtitle)}</p></div>
+          <div class="event-top"><div><h3>${eventDisplayName(event)}</h3><p>${escapeHtml(event.displayDate)} · ${escapeHtml(event.time)}<br>${eventDetailHtml(event)}</p></div>
           <div class="choices" aria-label="${eventDisplayName(event)} response">
             <label class="choice"><input type="radio" name="${name}" value="attending" ${response === 'attending' ? 'checked' : ''}><span>Yes</span></label>
             <label class="choice"><input type="radio" name="${name}" value="not_attending" ${response === 'not_attending' ? 'checked' : ''}><span>No</span></label>

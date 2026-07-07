@@ -12,7 +12,7 @@ const DEFAULT_CONFIG = {
   id: WEDDING_ID,
   coupleName: 'Akhila & Akshay',
   weddingDate: '2026-08-30',
-  location: 'To Be Announced',
+  location: 'Osage House, 243 Pace Ln, Cave Springs, AR 72718',
   currency: 'USD',
   createdAt: new Date().toISOString()
 };

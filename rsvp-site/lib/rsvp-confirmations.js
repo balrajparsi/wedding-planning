@@ -96,6 +96,7 @@ function isPlaceholderVenue(value) {
   const normalized = normalizeEventLookupValue(value);
   return [
     'bride side address',
+    'groom side address',
     'shared event address',
     'venue to be confirmed',
     'location to be confirmed',

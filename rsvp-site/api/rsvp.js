@@ -152,9 +152,19 @@ function findPublicGuestMatch(guests, submission) {
   return ids.size === 1 ? guests.find(guest => guest.id === [...ids][0]) : null;
 }
 
+function venueSummary(event) {
+  const locations = Array.isArray(event.locations) ? event.locations : [];
+  if (locations.length) {
+    return locations
+      .map(location => `${location.label}: ${location.venue || 'Location to be confirmed'}`)
+      .join(' | ');
+  }
+  return event.venue || '';
+}
+
 function publicEvent(event) {
   const { venue, mapUrl, locations, ...safeEvent } = event;
-  return safeEvent;
+  return { ...safeEvent, locationSummary: venueSummary(event) };
 }
 
 function getPublicEvents(guest = null) {

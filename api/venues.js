@@ -10,6 +10,7 @@ function isPlaceholderVenue(value) {
   const normalized = String(value || '').trim().toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
   return [
     'bride side address',
+    'groom side address',
     'shared event address',
     'venue to be confirmed',
     'location to be confirmed',

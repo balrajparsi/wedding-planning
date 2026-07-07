@@ -219,7 +219,7 @@ class WeddingPlanningApp {
     const minutesLeft = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
 
     const weddingDateStr = this.formatWeddingDate(weddingDate);
-    const location = (this.wedding && this.wedding.location) || 'To Be Announced';
+    const location = (this.wedding && this.wedding.location) || 'Osage House, 243 Pace Ln, Cave Springs, AR 72718';
     const coupleName = (this.wedding && this.wedding.coupleName) || 'Akhila & Akshay';
 
     mainContent.innerHTML = `
@@ -343,7 +343,7 @@ class WeddingPlanningApp {
 
     if (coupleName) coupleName.value = wedding.coupleName || 'Akhila & Akshay';
     if (weddingDate) weddingDate.value = wedding.weddingDate || DEFAULT_WEDDING_DATE;
-    if (location) location.value = wedding.location || 'To Be Announced';
+    if (location) location.value = wedding.location || 'Osage House, 243 Pace Ln, Cave Springs, AR 72718';
     if (currency) currency.value = wedding.currency || 'USD';
     if (lastUpdated) {
       lastUpdated.textContent = wedding.updatedAt
@@ -389,7 +389,7 @@ class WeddingPlanningApp {
       const payload = {
         coupleName: document.getElementById('coupleName')?.value?.trim() || 'Akhila & Akshay',
         weddingDate: document.getElementById('weddingDate')?.value || DEFAULT_WEDDING_DATE,
-        location: document.getElementById('location')?.value?.trim() || 'To Be Announced',
+        location: document.getElementById('location')?.value?.trim() || 'Osage House, 243 Pace Ln, Cave Springs, AR 72718',
         currency: document.getElementById('currency')?.value || 'USD'
       };
 
