@@ -74,6 +74,17 @@ const guestModule = {
     }
   },
 
+  // Send bulk reminders
+  async sendBulkReminders(payload = {}) {
+    try {
+      const response = await apiCall('/api/guests?action=bulk-reminder', 'POST', payload);
+      return response;
+    } catch (error) {
+      console.error('Failed to send reminders:', error);
+      throw error;
+    }
+  },
+
   // Send bulk invites
   async sendBulkInvites(payload = {}) {
     // payload: { guestIds?, filterStatus?, subject?, message? }

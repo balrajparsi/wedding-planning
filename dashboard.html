@@ -65,7 +65,7 @@
                     <h2 style="font-size: 2rem; color: var(--blue);">Guest List</h2>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end;">
                         <button class="btn btn-secondary btn-sm guest-copy-rsvp-btn">Copy RSVP Link</button>
-                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">Bulk Invite</button>
+                        <button class="btn btn-secondary btn-sm guest-bulk-invite-btn">Bulk Reminder</button>
                         <button class="btn btn-secondary btn-sm guest-import-btn">Import List</button>
                         <input type="file" class="guest-import-input" accept=".csv,.txt,text/csv,text/plain" style="display:none;">
                         <button class="btn btn-secondary btn-sm guest-export-btn">Export CSV</button>
@@ -589,27 +589,25 @@
         </div>
     </div>
 
-    <!-- Bulk Invite Modal -->
+    <!-- Bulk Reminder Modal -->
     <div data-modal="bulkInvite" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Send Bulk RSVP Invitations</h3>
+                <h3>Send Bulk Event Reminders</h3>
                 <button class="modal-close" onclick="this.closest('.modal').style.display='none'">✕</button>
             </div>
             <form class="modal-form">
-                <label>Filter Guests to Invite</label>
+                <label>Reminder Audience</label>
                 <select name="filterStatus">
-                    <option value="all">All Guests</option>
-                    <option value="pending">Pending RSVP Only</option>
-                    <option value="accepted">Accepted Only</option>
+                    <option value="accepted" selected>Accepted Guests Only</option>
                 </select>
 
                 <p style="color: var(--text-muted); margin-top: 1rem;">
-                    Invitations are sent only for each guest's selected events. Check the Events column before sending; the private RSVP and Apple Calendar links follow that guest's event list.
+                    Reminders are sent only to accepted guests with email addresses. Each email includes the events that guest is attending, plus Google Calendar and Apple / Outlook calendar links.
                 </p>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary">Send Invitations</button>
+                    <button type="submit" class="btn btn-primary">Send Reminders</button>
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
                 </div>
             </form>

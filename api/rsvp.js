@@ -298,7 +298,7 @@ async function handlePublicRsvp(req, res, body) {
 async function handleTokenRsvp(req, res, url, body, token) {
   const { guestsKey, guests, guest, index } = await findGuestFromToken(token);
   if (req.method === 'GET' && url.searchParams.get('action') === 'calendar') {
-    if (!guest.rsvpLockedAt) {
+    if (!guest.rsvpLockedAt && guest.rsvpStatus !== 'accepted') {
       throw publicError('Calendar is available after your RSVP is received.', 403);
     }
     const ics = buildCalendarFile(guest);

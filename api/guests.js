@@ -5,12 +5,14 @@
  * PUT /api/guests/:id - Update guest or RSVP status
  * DELETE /api/guests/:id - Remove guest
  * POST /api/guests/bulk-invite - Send bulk RSVP invitations
+ * POST /api/guests/bulk-reminder - Send accepted guest event reminders
  * GET /api/guests/export - Export guests as CSV
  */
 
 const crypto = require('crypto');
 const kv = require('../lib/kv');
 const {
+  EVENT_TIMEZONE,
   RSVP_EVENTS,
   buildRsvpUrl,
   buildCalendarUrl,
@@ -51,6 +53,10 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'POST' && (req.url.includes('action=bulk-invite') || req.url.includes('/bulk-invite'))) {
       return handleBulkInvite(req, res);
+    }
+
+    if (req.method === 'POST' && (req.url.includes('action=bulk-reminder') || req.url.includes('/bulk-reminder'))) {
+      return handleBulkReminder(req, res);
     }
 
     if (req.method === 'POST' && (req.url.includes('action=import') || req.url.includes('/import'))) {
@@ -222,6 +228,9 @@ async function handleAddGuest(req, res) {
     invitedDate: null,
     lastInviteAttemptDate: null,
     lastInviteError: '',
+    lastReminderAttemptDate: null,
+    lastReminderSentDate: null,
+    lastReminderError: '',
     rsvpDate: rsvpStatus && rsvpStatus !== 'pending' ? new Date().toISOString() : null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -315,6 +324,9 @@ async function handleImportGuests(req, res) {
         invitedDate: current.invitedDate || null,
         lastInviteAttemptDate: current.lastInviteAttemptDate || null,
         lastInviteError: current.lastInviteError || '',
+        lastReminderAttemptDate: current.lastReminderAttemptDate || null,
+        lastReminderSentDate: current.lastReminderSentDate || null,
+        lastReminderError: current.lastReminderError || '',
         createdAt: current.createdAt || now,
         updatedAt: now
       };
@@ -338,6 +350,9 @@ async function handleImportGuests(req, res) {
       invitedDate: null,
       lastInviteAttemptDate: null,
       lastInviteError: '',
+      lastReminderAttemptDate: null,
+      lastReminderSentDate: null,
+      lastReminderError: '',
       rsvpDate: null,
       createdAt: now,
       updatedAt: now
@@ -527,7 +542,7 @@ async function sendGmailInviteEmail({ accessToken, config, guest, subject, html 
   });
 
   if (!response.ok) {
-    throw new Error(parseEmailProviderError(await response.text(), 'Gmail invite send failed.'));
+    throw new Error(parseEmailProviderError(await response.text(), 'Gmail email send failed.'));
   }
 }
 
@@ -547,6 +562,113 @@ async function handleDeleteGuest(req, res) {
   await kv.set(guestsKey, filtered);
 
   res.json({ success: true, message: 'Guest deleted' });
+}
+
+async function handleBulkReminder(req, res) {
+  const body = req.body || {};
+  const { subject = '', message = '' } = body;
+  const guestIds = body.guestIds;
+
+  const guestsKey = `wedding:${WEDDING_ID}:guests`;
+  const guests = (await kv.get(guestsKey)) || [];
+
+  let selectedGuests;
+  if (Array.isArray(guestIds) && guestIds.length > 0) {
+    selectedGuests = guests.filter(g => guestIds.includes(g.id) && g.rsvpStatus === 'accepted');
+  } else {
+    selectedGuests = guests.filter(g => g.rsvpStatus === 'accepted');
+  }
+
+  if (selectedGuests.length === 0) {
+    return res.status(404).json({ error: 'No accepted guests to remind' });
+  }
+
+  const withEmail = selectedGuests.filter(g => String(g.email || '').trim());
+  const now = new Date().toISOString();
+  const SITE_URL = getSiteUrl(req);
+  const gmailConfig = getGmailConfiguration();
+  const missingGmailConfig = getMissingGmailConfig(gmailConfig);
+  const sendingEnabled = missingGmailConfig.length === 0;
+
+  let sent = 0;
+  let failed = 0;
+  const sentGuestIds = new Set();
+  const sentGuests = [];
+  const errors = [];
+
+  if (sendingEnabled && withEmail.length > 0) {
+    try {
+      const accessToken = await getGmailAccessToken(gmailConfig);
+      for (const guest of withEmail) {
+        const finalSubject = subject || `Wedding details reminder - Akhila & Akshay`;
+        const calendarUrl = buildCalendarUrl(SITE_URL, guest);
+        const html = buildReminderHtml(guest, message, { calendarUrl });
+        try {
+          await sendGmailInviteEmail({
+            accessToken,
+            config: gmailConfig,
+            guest,
+            subject: finalSubject,
+            html
+          });
+          sent++;
+          sentGuestIds.add(guest.id);
+          sentGuests.push({ id: guest.id, name: guest.name, email: guest.email });
+        } catch (error) {
+          failed += 1;
+          errors.push(buildInviteError(guest, error.message));
+        }
+      }
+    } catch (error) {
+      failed = withEmail.length;
+      withEmail.forEach(guest => errors.push(buildInviteError(guest, error.message)));
+    }
+  }
+
+  withEmail.forEach(guest => {
+    const index = guests.findIndex(item => item.id === guest.id);
+    if (index === -1) return;
+
+    const guestError = errors.find(error => error.id === guest.id);
+    guests[index].lastReminderAttemptDate = now;
+
+    if (sentGuestIds.has(guest.id)) {
+      guests[index].lastReminderSentDate = now;
+      guests[index].lastReminderError = '';
+      guests[index].updatedAt = now;
+      return;
+    }
+
+    if (guestError) {
+      guests[index].lastReminderError = guestError.error || 'Reminder failed';
+      guests[index].updatedAt = now;
+    }
+  });
+  await kv.set(guestsKey, guests);
+
+  const skippedNoEmail = selectedGuests.length - withEmail.length;
+  const firstError = errors[0];
+  const failedWho = firstError ? firstError.name || firstError.email : '';
+  const sentMessage = failed
+    ? `Sent ${sent} of ${withEmail.length} reminders. ${failed} failed${failedWho ? `: ${failedWho}` : ''}${firstError?.error ? ` - ${firstError.error}` : ''}`
+    : `Sent ${sent} of ${withEmail.length} reminders${skippedNoEmail ? `; skipped ${skippedNoEmail} without email` : ''}`;
+  const missingConfigMessage = `Preview only - ${withEmail.length} reminders prepared${skippedNoEmail ? `; skipped ${skippedNoEmail} without email` : ''}. Add Gmail env vars on Vercel to actually send: ${missingGmailConfig.join(', ')}.`;
+
+  res.json({
+    success: sendingEnabled ? failed === 0 : true,
+    sendingEnabled,
+    provider: 'gmail',
+    configError: missingGmailConfig.length ? 'GMAIL' : '',
+    message: sendingEnabled ? sentMessage : missingConfigMessage,
+    reminderCount: withEmail.length,
+    totalMatched: selectedGuests.length,
+    skippedNoEmail,
+    sent,
+    failed,
+    errors: errors.slice(0, 5),
+    sentGuests,
+    remindedGuests: withEmail.map(g => ({ id: g.id, name: g.name, email: g.email }))
+  });
 }
 
 async function handleBulkInvite(req, res) {
@@ -679,6 +801,137 @@ function appendUrlParam(url, key, value) {
   return `${url}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
 }
 
+function cleanGoogleText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function formatGoogleDate(date) {
+  return String(date || '').replace(/-/g, '');
+}
+
+function addGoogleMinutes(date, time, minutes) {
+  const [year, month, day] = String(date || '').split('-').map(Number);
+  const [hour, minute, second] = String(time || '00:00:00').split(':').map(Number);
+  const local = new Date(Date.UTC(year, month - 1, day, hour, minute, second || 0));
+  local.setUTCMinutes(local.getUTCMinutes() + (minutes || 120));
+  return `${local.getUTCFullYear()}${String(local.getUTCMonth() + 1).padStart(2, '0')}${String(local.getUTCDate()).padStart(2, '0')}T${String(local.getUTCHours()).padStart(2, '0')}${String(local.getUTCMinutes()).padStart(2, '0')}${String(local.getUTCSeconds()).padStart(2, '0')}`;
+}
+
+function nextGoogleDate(date) {
+  const endDate = new Date(`${date}T00:00:00Z`);
+  endDate.setUTCDate(endDate.getUTCDate() + 1);
+  return `${endDate.getUTCFullYear()}${String(endDate.getUTCMonth() + 1).padStart(2, '0')}${String(endDate.getUTCDate()).padStart(2, '0')}`;
+}
+
+function eventVenueText(event) {
+  const locations = Array.isArray(event.locations) ? event.locations : [];
+  if (!locations.length) return event.venue || 'Location to be confirmed';
+  return locations
+    .map(location => `${location.label}: ${location.venue || 'Location to be confirmed'}`)
+    .join(' | ');
+}
+
+function eventMapText(event) {
+  const locations = Array.isArray(event.locations) ? event.locations : [];
+  if (!locations.length) return event.mapUrl ? `\nMap: ${event.mapUrl}` : '';
+  const mapLines = locations
+    .filter(location => location.mapUrl)
+    .map(location => `${location.label} map: ${location.mapUrl}`);
+  return mapLines.length ? `\n${mapLines.join('\n')}` : '';
+}
+
+function getEventResponse(guest, event) {
+  const responses = guest?.eventResponses && typeof guest.eventResponses === 'object' ? guest.eventResponses : {};
+  const raw = responses[event.name] || responses[event.displayName];
+  return raw && typeof raw === 'object' ? raw.response : raw;
+}
+
+function getReminderEvents(guest) {
+  const invitedEvents = getInvitedEvents(guest);
+  const attendingEvents = invitedEvents.filter(event => getEventResponse(guest, event) === 'attending');
+  return attendingEvents.length ? attendingEvents : invitedEvents;
+}
+
+function buildGoogleCalendarUrl(event) {
+  const eventName = eventDisplayName(event);
+  const venue = eventVenueText(event);
+  const dates = event.startTime
+    ? `${formatGoogleDate(event.date)}T${event.startTime.replace(/:/g, '')}/${addGoogleMinutes(event.date, event.startTime, event.durationMinutes || 120)}`
+    : `${formatGoogleDate(event.date)}/${nextGoogleDate(event.date)}`;
+  const details = cleanGoogleText(`${event.displayDate} ${event.time}\n${event.subtitle || ''}\nVenue: ${venue}${eventMapText(event)}`);
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `Akhila & Akshay: ${eventName}`,
+    dates,
+    details,
+    location: venue,
+    ctz: EVENT_TIMEZONE
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function calendarButtonHtml(url, label, variant = 'primary') {
+  const primary = variant === 'primary';
+  return `<a href="${escapeHtml(url)}" style="display:inline-block;margin:10px 6px 0 0;padding:${primary ? '12px 18px' : '11px 16px'};background:${primary ? 'linear-gradient(135deg,#8c151a,#c89422)' : '#fff8e8'};border:1px solid #c89422;color:${primary ? '#fff8e8' : '#8c5f11'};text-decoration:none;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">${escapeHtml(label)}</a>`;
+}
+
+function buildReminderHtml(guest, customMessage, links) {
+  const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
+  const extra = customMessage
+    ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
+    : '';
+  const events = getReminderEvents(guest);
+  const eventRows = events.map(event => {
+    const googleUrl = buildGoogleCalendarUrl(event);
+    return `<tr>
+      <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);vertical-align:top;">
+        <strong style="font-family:Georgia,serif;font-size:22px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
+        <span style="font-family:Arial,sans-serif;font-size:13px;line-height:1.65;color:#705843;">${escapeHtml(event.subtitle || '')}</span><br>
+        <span style="display:block;margin-top:10px;font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#4f3a28;">${escapeHtml(eventVenueText(event))}</span>
+      </td>
+      <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;">
+        ${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}<br>
+        ${calendarButtonHtml(googleUrl, 'Google Calendar', 'secondary')}
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:#f3dfb7;font-family:Georgia,'Cormorant Garamond',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3dfb7;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="620" cellpadding="0" cellspacing="0" style="background:#fff8e8;border:1px solid #c89422;box-shadow:0 18px 46px rgba(70,35,10,0.18);">
+        <tr><td style="padding:8px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
+        <tr><td align="center" style="padding:42px 40px 28px;">
+          <p style="font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#9f1d22;text-transform:none;margin:0 0 14px;">మా పెళ్లి వేడుక</p>
+          <h1 style="font-family:Georgia,serif;font-size:44px;line-height:0.98;color:#281309;margin:0 0 10px;font-weight:400;letter-spacing:0;">
+            Akhila <em style="color:#9f1d22;">&amp;</em> Akshay
+          </h1>
+          <p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.8px;color:#8c5f11;text-transform:uppercase;margin:0 0 24px;">28-31 August 2026</p>
+          <div style="height:1px;background:linear-gradient(90deg,transparent,#c89422,transparent);width:70%;margin:0 auto 26px;"></div>
+          <p style="font-size:17px;line-height:1.7;color:#281309;text-align:left;margin:18px 0;">${greeting}</p>
+          <p style="font-size:17px;line-height:1.7;color:#4f3a28;text-align:left;margin:0 0 18px;">
+            This is a warm reminder for the wedding celebrations you confirmed for Akhila and Akshay.
+          </p>
+          ${extra}
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 24px;border-top:1px solid rgba(184,134,11,0.18);">
+${eventRows}
+          </table>
+          <div style="text-align:left;margin:20px 0 0;">
+            ${calendarButtonHtml(links.calendarUrl, 'Add to Apple / Outlook Calendar')}
+          </div>
+          <p style="font-size:14px;line-height:1.7;color:#705843;text-align:left;margin:24px 0 0;">
+            If anything changes, please contact the Chennaboina and Lenkalapally families so we can update the arrangements.
+          </p>
+          <p style="font-family:Arial,sans-serif;font-size:11px;color:#9d8061;margin:28px 0 0;">With love, Chennaboina &amp; Lenkalapally Families</p>
+        </td></tr>
+        <tr><td style="padding:6px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
 function buildInviteHtml(guest, customMessage, links) {
   const greeting = guest.name ? `Dear ${escapeHtml(guest.name)},` : 'Dear friend,';
   const extra = customMessage
@@ -721,13 +974,13 @@ function buildInviteHtml(guest, customMessage, links) {
 ${eventRows}
           </table>
           <p style="font-size:15px;line-height:1.7;color:#705843;text-align:left;margin:18px 0;">
-            Please confirm your RSVP using your private link. You can also add the invited events to Apple Calendar.
+            Please confirm your RSVP using your private link. You can also add the invited events to Apple / Outlook Calendar.
           </p>
           <a href="${escapeHtml(links.rsvpUrl)}" style="display:inline-block;margin:18px 6px 8px;padding:15px 30px;background:linear-gradient(135deg,#8c151a,#c89422);color:#fff8e8;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;">
             RSVP Now
           </a>
           <a href="${escapeHtml(links.calendarUrl)}" style="display:inline-block;margin:18px 6px 8px;padding:14px 24px;border:1px solid #c89422;color:#8c5f11;text-decoration:none;font-family:Arial,sans-serif;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;">
-            Add To Apple Calendar
+            Add To Apple / Outlook Calendar
           </a>
           <p style="font-family:Arial,sans-serif;font-size:11px;color:#9d8061;margin:28px 0 0;">With love, Chennaboina &amp; Lenkalapally Families</p>
         </td></tr>

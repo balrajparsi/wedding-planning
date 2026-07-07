@@ -72,7 +72,7 @@ const guestListPage = {
     // Export CSV
     view.querySelector('.guest-export-btn')?.addEventListener('click', () => this.exportGuests());
 
-    // Bulk invite
+    // Bulk reminder
     view.querySelector('.guest-bulk-invite-btn')?.addEventListener('click', () => this.openBulkInviteModal());
 
     view.querySelector('.guest-copy-rsvp-btn')?.addEventListener('click', () => this.copyPublicRsvpLink());
@@ -595,6 +595,10 @@ const guestListPage = {
   openBulkInviteModal() {
     const modal = document.querySelector('[data-modal="bulkInvite"]');
     if (!modal) return;
+    const form = modal.querySelector('form');
+    form?.reset();
+    const filter = form?.querySelector('[name="filterStatus"]');
+    if (filter) filter.value = 'accepted';
     modal.style.display = 'flex';
 
     // Use cloneNode to clear any stacked listeners
@@ -604,31 +608,31 @@ const guestListPage = {
       btn.parentNode.replaceChild(newBtn, btn);
       newBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        this.submitBulkInvite(modal);
+        this.submitBulkReminder(modal);
       });
     }
   },
 
-  async submitBulkInvite(modal) {
+  async submitBulkReminder(modal) {
     const form = modal.querySelector('form');
-    const filterStatus = form.querySelector('[name="filterStatus"]')?.value || 'all';
-    const subject = form.querySelector('[name="subject"]')?.value || `RSVP requested - Akhila & Akshay's Wedding`;
+    const filterStatus = form.querySelector('[name="filterStatus"]')?.value || 'accepted';
+    const subject = form.querySelector('[name="subject"]')?.value || `Wedding details reminder - Akhila & Akshay`;
     const message = form.querySelector('[name="message"]')?.value || '';
 
     try {
-      const res = await apiCall('/api/guests?action=bulk-invite', 'POST', { filterStatus, subject, message });
+      const res = await apiCall('/api/guests?action=bulk-reminder', 'POST', { filterStatus, subject, message });
       const hasFailures = !res.success || !res.sendingEnabled || Number(res.failed || 0) > 0;
       const firstErrorItem = res.errors?.[0] || {};
       const failedGuest = [firstErrorItem.name, firstErrorItem.email].filter(Boolean).join(' ');
       const firstErrorText = firstErrorItem.error ? `${failedGuest ? `${failedGuest} - ` : ''}${firstErrorItem.error}` : '';
       const firstError = firstErrorText && firstErrorText !== res.message ? `: ${firstErrorText}` : '';
       const errorAlreadyShown = firstErrorItem.error && res.message?.includes(firstErrorItem.error);
-      showNotification((res.message || `Invites prepared for ${res.invitedCount || 0} guests`) + (hasFailures && !errorAlreadyShown ? firstError : ''), hasFailures ? 'error' : 'success');
+      showNotification((res.message || `Reminders prepared for ${res.reminderCount || 0} guests`) + (hasFailures && !errorAlreadyShown ? firstError : ''), hasFailures ? 'error' : 'success');
       modal.style.display = 'none';
       await this.loadGuests();
       this.render();
     } catch (err) {
-      showNotification('Failed to prepare invites', 'error');
+      showNotification('Failed to prepare reminders', 'error');
     }
   },
 
