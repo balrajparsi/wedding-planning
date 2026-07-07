@@ -114,9 +114,7 @@ const foodPage = {
     container.innerHTML = events.map(event => `
       <article class="card" style="margin:0;border-left:3px solid var(--gold);">
         <h4 style="margin:0 0 .65rem;color:var(--blue);">${this.escapeHtml(event.name)}</h4>
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;font-size:.84rem;">
-          <span><strong>${event.confirmedGuests || 0}</strong> confirmed</span>
-          <span><strong>${event.maybeGuests || 0}</strong> maybe</span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;font-size:.9rem;">
           <span style="color:#278a4b;"><strong>${event.vegetarianMeals || 0}</strong> vegetarian</span>
           <span style="color:#c0392b;"><strong>${event.nonVegetarianMeals || 0}</strong> non-veg</span>
         </div>
