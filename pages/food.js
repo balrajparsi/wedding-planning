@@ -41,6 +41,23 @@ const foodPage = {
       addBtn.addEventListener('click', () => this.openAddDishModal());
     }
 
+    const importBtn = foodView.querySelector('.food-import-btn');
+    const importInput = foodView.querySelector('.food-import-input');
+    if (importBtn && importInput) {
+      importBtn.addEventListener('click', () => importInput.click());
+      importInput.addEventListener('change', (e) => this.handleImportFile(e.target.files?.[0], importInput));
+    }
+
+    const clearFiltersBtn = foodView.querySelector('.food-clear-filters-btn');
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener('click', () => {
+        this.currentFilters = { eventType: '', courseType: '', search: '' };
+        if (eventTypeFilter) eventTypeFilter.value = '';
+        if (courseTypeFilter) courseTypeFilter.value = '';
+        this.applyFilters();
+      });
+    }
+
     const addDishModal = document.querySelector('[data-modal="addDish"]');
     if (addDishModal) {
       const form = addDishModal.querySelector('form');
@@ -96,7 +113,7 @@ const foodPage = {
     }
     container.innerHTML = events.map(event => `
       <article class="card" style="margin:0;border-left:3px solid var(--gold);">
-        <h4 style="margin:0 0 .65rem;color:var(--blue);">${event.name}</h4>
+        <h4 style="margin:0 0 .65rem;color:var(--blue);">${this.escapeHtml(event.name)}</h4>
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;font-size:.84rem;">
           <span><strong>${event.confirmedGuests || 0}</strong> confirmed</span>
           <span><strong>${event.maybeGuests || 0}</strong> maybe</span>
@@ -143,12 +160,12 @@ const foodPage = {
         <div style="display: flex; justify-content: space-between; align-items: start;">
           <div style="flex: 1;">
             <h5 style="color: var(--blue); margin: 0; display: flex; gap: 0.5rem; align-items: center;">
-              ${item.dish}
-              <span style="background: var(--gold); color: white; padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${item.courseType}</span>
+              ${this.escapeHtml(item.dish)}
+              <span style="background: var(--gold); color: white; padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${this.escapeHtml(this.titleCase(item.courseType))}</span>
               <span style="background: rgba(24,34,44,0.08); color: var(--text-muted); padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${vegTypeLabel}</span>
             </h5>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.25rem 0;">
-              ${item.eventType} • ${item.cuisine} • $${(item.cost||0).toLocaleString('en-US',{maximumFractionDigits:2})} • ${item.portionSize}
+              ${this.escapeHtml(item.eventType)} • ${this.escapeHtml(item.cuisine || 'Cuisine TBD')} • $${(item.cost||0).toLocaleString('en-US',{maximumFractionDigits:2})} • ${this.escapeHtml(item.portionSize || '1 plate')}
             </p>
             ${item.guestAccommodations?.length ? `<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0;">${item.guestAccommodations.length} guest accommodation(s)</p>` : ''}
           </div>
@@ -167,6 +184,363 @@ const foodPage = {
 
     menuContainer.innerHTML = '';
     menuContainer.appendChild(list);
+  },
+
+  escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  },
+
+  titleCase(value) {
+    return String(value || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  },
+
+  async handleImportFile(file, input) {
+    if (!file) return;
+    this.showImportStatus(`Reading ${file.name}...`, 'info');
+    try {
+      const rows = await this.readMenuRows(file);
+      const items = this.parseRowsToMenuItems(rows);
+      if (!items.length) {
+        this.showImportStatus('No dishes could be found. Try including dish names separated by rows, commas, tabs, or columns.', 'error');
+        return;
+      }
+
+      this.showImportStatus(`Found ${items.length} dish${items.length === 1 ? '' : 'es'}. Importing...`, 'info');
+      const result = await foodModule.importMenuItems(items);
+      await this.loadFood();
+      this.applyFilters();
+      const skippedText = result.skippedCount ? ` ${result.skippedCount} duplicate or incomplete row${result.skippedCount === 1 ? '' : 's'} skipped.` : '';
+      this.showImportStatus(`Imported ${result.imported || 0} dish${(result.imported || 0) === 1 ? '' : 'es'}.${skippedText}`, 'success');
+      showNotification(`Imported ${result.imported || 0} menu item${(result.imported || 0) === 1 ? '' : 's'}`, 'success');
+    } catch (error) {
+      this.showImportStatus(error.message || 'Failed to import menu file', 'error');
+      showNotification(error.message || 'Failed to import menu file', 'error');
+    } finally {
+      if (input) input.value = '';
+    }
+  },
+
+  showImportStatus(message, type = 'info') {
+    const foodView = document.querySelector('[data-view="food"]');
+    const status = foodView?.querySelector('.food-import-status');
+    if (!status) return;
+    const palette = {
+      success: { bg: 'rgba(39, 174, 96, 0.1)', border: '#27ae60', color: '#1e6f42' },
+      error: { bg: 'rgba(192, 57, 43, 0.1)', border: '#c0392b', color: '#8e2b20' },
+      info: { bg: 'rgba(184, 134, 11, 0.1)', border: 'var(--gold)', color: 'var(--blue)' }
+    }[type] || {};
+    status.style.cssText = `display:block;margin-bottom:1.25rem;padding:0.85rem 1rem;border-left:3px solid ${palette.border};background:${palette.bg};color:${palette.color};border-radius:0.35rem;`;
+    status.textContent = message;
+  },
+
+  async readMenuRows(file) {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (['xlsx', 'xls'].includes(extension)) {
+      if (!window.XLSX) throw new Error('Excel parser is still loading. Please try again in a moment.');
+      const workbook = window.XLSX.read(await file.arrayBuffer(), { type: 'array' });
+      return workbook.SheetNames.flatMap(sheetName => {
+        const rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, raw: false, defval: '' });
+        return rows.map(cells => ({ sheetName, cells }));
+      });
+    }
+
+    const text = await file.text();
+    return this.rowsFromText(text, file.name);
+  },
+
+  rowsFromText(text, fileName = '') {
+    const lines = String(text || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const delimiter = this.detectDelimiter(lines);
+    return lines.map(line => ({
+      sheetName: fileName,
+      cells: delimiter ? this.parseDelimitedLine(line, delimiter) : [line]
+    }));
+  },
+
+  detectDelimiter(lines) {
+    const candidates = ['\t', ',', '|', ';'];
+    let best = '';
+    let bestScore = 0;
+    candidates.forEach(delimiter => {
+      const counts = lines.slice(0, 20).map(line => this.parseDelimitedLine(line, delimiter).length);
+      const multi = counts.filter(count => count > 1);
+      const score = multi.length ? multi.reduce((sum, count) => sum + count, 0) / multi.length + multi.length : 0;
+      if (score > bestScore) {
+        best = delimiter;
+        bestScore = score;
+      }
+    });
+    return bestScore >= 3 ? best : '';
+  },
+
+  parseDelimitedLine(line, delimiter) {
+    const cells = [];
+    let current = '';
+    let quoted = false;
+    for (let index = 0; index < line.length; index += 1) {
+      const char = line[index];
+      const next = line[index + 1];
+      if (char === '"' && next === '"') {
+        current += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = !quoted;
+      } else if (char === delimiter && !quoted) {
+        cells.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    cells.push(current.trim());
+    return cells;
+  },
+
+  parseRowsToMenuItems(rows) {
+    const context = {
+      eventType: this.currentFilters.eventType || 'Marriage',
+      courseType: this.currentFilters.courseType || 'mains'
+    };
+    let headerMap = null;
+    let activeSheet = '';
+    const seen = new Set();
+    const items = [];
+
+    rows.forEach(row => {
+      const sheetName = row.sheetName || '';
+      if (sheetName !== activeSheet) {
+        activeSheet = sheetName;
+        headerMap = null;
+      }
+      const cells = (row.cells || []).map(cell => this.cleanCell(cell)).filter(Boolean);
+      if (!cells.length) return;
+
+      const sheetEvent = this.findEvent(sheetName);
+      const sheetCourse = this.findCourse(sheetName);
+      const rowContext = {
+        eventType: sheetEvent || context.eventType,
+        courseType: sheetCourse || context.courseType
+      };
+
+      if (this.isHeaderRow(cells)) {
+        headerMap = this.buildHeaderMap(cells);
+        return;
+      }
+
+      if (cells.length === 1) {
+        const eventOnly = this.findEvent(cells[0]);
+        const courseOnly = this.findCourse(cells[0]);
+        const normalized = cells[0].toLowerCase().replace(/[^a-z]/g, '');
+        if (eventOnly && normalized === eventOnly.toLowerCase().replace(/[^a-z]/g, '')) {
+          context.eventType = eventOnly;
+          return;
+        }
+        if (courseOnly && normalized === courseOnly.toLowerCase().replace(/[^a-z]/g, '')) {
+          context.courseType = courseOnly;
+          return;
+        }
+      }
+
+      const parsed = headerMap
+        ? this.itemFromHeader(cells, headerMap, rowContext)
+        : this.itemsFromInferredRow(cells, rowContext);
+
+      (Array.isArray(parsed) ? parsed : [parsed]).filter(Boolean).forEach(item => {
+        const key = [item.eventType, item.courseType, item.dish].map(value => String(value || '').toLowerCase()).join('|');
+        if (!seen.has(key)) {
+          seen.add(key);
+          items.push(item);
+        }
+      });
+    });
+
+    return items.slice(0, 500);
+  },
+
+  isHeaderRow(cells) {
+    const headerWords = ['dish', 'item', 'menu', 'event', 'course', 'veg', 'vegetarian', 'cost', 'price', 'portion', 'vendor', 'cuisine', 'notes'];
+    return cells.filter(cell => headerWords.some(word => cell.toLowerCase().includes(word))).length >= 2;
+  },
+
+  buildHeaderMap(cells) {
+    const aliases = {
+      dish: ['dish', 'item', 'menu', 'food', 'name'],
+      eventType: ['event', 'function', 'ceremony'],
+      courseType: ['course', 'category', 'type'],
+      vegNonVeg: ['veg', 'vegetarian', 'non veg', 'non-veg', 'diet'],
+      cost: ['cost', 'price', 'rate', 'amount'],
+      portionSize: ['portion', 'serving', 'size', 'qty', 'quantity'],
+      preparedBy: ['prepared', 'vendor', 'caterer', 'by'],
+      cuisine: ['cuisine', 'style'],
+      notes: ['note', 'notes', 'comment', 'comments']
+    };
+    return Object.fromEntries(Object.entries(aliases).map(([field, options]) => [
+      field,
+      cells.findIndex(cell => options.some(option => cell.toLowerCase().includes(option)))
+    ]));
+  },
+
+  itemFromHeader(cells, headerMap, context) {
+    const get = field => headerMap[field] >= 0 ? cells[headerMap[field]] : '';
+    return this.toMenuItem({
+      dish: get('dish') || cells.find(cell => !this.findEvent(cell) && !this.findCourse(cell)),
+      eventType: this.findEvent(get('eventType')) || context.eventType,
+      courseType: this.findCourse(get('courseType')) || context.courseType,
+      vegNonVeg: this.findVegType(get('vegNonVeg')),
+      cost: this.findCost(get('cost')),
+      portionSize: get('portionSize') || '1 plate',
+      preparedBy: get('preparedBy'),
+      cuisine: this.findCuisine(get('cuisine')) || get('cuisine') || 'Indian',
+      notes: get('notes')
+    });
+  },
+
+  itemsFromInferredRow(cells, context) {
+    if (cells.length === 1) return this.itemsFromFreeformLine(cells[0], context);
+
+    const looseCells = cells.flatMap(cell => cell.split(/\s+(?:-|–|—|•)\s+/).map(part => part.trim()).filter(Boolean));
+    if (looseCells.length > cells.length) return this.itemsFromInferredRow(looseCells, context);
+
+    const classified = new Set();
+    const eventType = cells.map(cell => this.findEvent(cell)).find(Boolean) || context.eventType;
+    const courseType = cells.map(cell => this.findCourse(cell)).find(Boolean) || context.courseType;
+    const vegNonVeg = cells.map(cell => this.findVegType(cell)).find(Boolean) || 'both';
+    const cuisine = cells.map(cell => this.findCuisine(cell)).find(Boolean) || 'Indian';
+    const costCell = cells.find(cell => this.looksLikeCost(cell) && !this.looksLikePortion(cell));
+    const portionCell = cells.find(cell => this.looksLikePortion(cell));
+
+    cells.forEach((cell, index) => {
+      if (this.findEvent(cell) || this.findCourse(cell) || this.isVegTypeCell(cell) || this.findCuisine(cell) || cell === costCell || cell === portionCell) classified.add(index);
+    });
+
+    const unknown = cells.filter((_, index) => !classified.has(index));
+    if (!classified.size && cells.length > 1) {
+      return cells.map(dish => this.toMenuItem({ dish, eventType, courseType, vegNonVeg, cuisine }));
+    }
+
+    const dish = unknown[0] || cells.find(cell => !this.looksLikeCost(cell)) || '';
+    const notes = unknown.slice(1).join(' | ');
+    return this.toMenuItem({
+      dish,
+      eventType,
+      courseType,
+      vegNonVeg,
+      cost: this.findCost(costCell),
+      portionSize: portionCell || '1 plate',
+      cuisine,
+      notes
+    });
+  },
+
+  itemsFromFreeformLine(line, context) {
+    const split = line.split(/\s+(?:-|–|—|•)\s+|[|;]/).map(part => part.trim()).filter(Boolean);
+    if (split.length > 1) return this.itemsFromInferredRow(split, context);
+
+    const eventType = this.findEvent(line) || context.eventType;
+    const courseType = this.findCourse(line) || context.courseType;
+    const vegNonVeg = this.findVegType(line) || 'both';
+    const cuisine = this.findCuisine(line) || 'Indian';
+    const cost = this.findCost(line);
+    const afterColon = line.includes(':') ? line.split(':').slice(1).join(':') : line;
+    const cleaned = afterColon
+      .replace(/\$?\s*\d+(?:\.\d+)?/g, ' ')
+      .replace(/\b(haldi|sangeeth?|pellikuthuru|pellikoduku|nalugu|marriage|wedding|muhurtham|satyanarayana|vratam|pooja|puja)\b/ig, ' ')
+      .replace(/\b(appetizers?|starters?|mains?|entrees?|curr(?:y|ies)|sides?|desserts?|sweets?|beverages?|drinks?|snacks?|breakfast|lunch|dinner)\b/ig, ' ')
+      .replace(/\b(veg|vegetarian|non[-\s]?veg|non[-\s]?vegetarian|both|shared)\b/ig, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const dishes = this.splitDishList(cleaned);
+    return dishes.map(dish => this.toMenuItem({ dish, eventType, courseType, vegNonVeg, cost, cuisine }));
+  },
+
+  splitDishList(value) {
+    const parts = String(value || '').split(/[,/]+/).map(part => part.trim()).filter(Boolean);
+    return parts.length > 1 && parts.every(part => part.length <= 60) ? parts : [String(value || '').trim()].filter(Boolean);
+  },
+
+  toMenuItem(data) {
+    const dish = this.cleanDishName(data.dish);
+    if (!dish) return null;
+    return {
+      dish,
+      eventType: data.eventType || this.currentFilters.eventType || 'Marriage',
+      courseType: data.courseType || this.currentFilters.courseType || 'mains',
+      vegNonVeg: data.vegNonVeg || 'both',
+      cost: Number.isFinite(data.cost) ? data.cost : 0,
+      portionSize: data.portionSize || '1 plate',
+      preparedBy: data.preparedBy || '',
+      cuisine: data.cuisine || 'Indian',
+      notes: data.notes || ''
+    };
+  },
+
+  cleanCell(value) {
+    return String(value ?? '').replace(/\s+/g, ' ').trim();
+  },
+
+  cleanDishName(value) {
+    return this.cleanCell(value)
+      .replace(/^(dish|item|menu item)\s*[:=-]\s*/i, '')
+      .replace(/\s+\$?\d+(?:\.\d+)?$/g, '')
+      .trim();
+  },
+
+  findEvent(value) {
+    const text = this.cleanCell(value).toLowerCase();
+    if (!text) return '';
+    if (/\bhaldi\b/.test(text)) return 'Haldi';
+    if (/\bsangeeth?\b/.test(text)) return 'Sangeet';
+    if (/\b(pellikuthuru|pelli kuthuru|pellikoduku|pelli koduku|nalugu)\b/.test(text)) return 'Pellikuthuru';
+    if (/\b(satyanarayana|vratam|pooja|puja)\b/.test(text)) return 'Satyanarayana Swamy Vratam';
+    if (/\b(marriage|wedding|muhurtham|ceremony)\b/.test(text)) return 'Marriage';
+    return '';
+  },
+
+  findCourse(value) {
+    const text = this.cleanCell(value).toLowerCase();
+    if (/\b(appetizers?|starters?)\b/.test(text)) return 'appetizers';
+    if (/\b(mains?|entrees?|curr(?:y|ies)|lunch|dinner)\b/.test(text)) return 'mains';
+    if (/\b(sides?)\b/.test(text)) return 'sides';
+    if (/\b(desserts?|sweets?)\b/.test(text)) return 'desserts';
+    if (/\b(beverages?|drinks?)\b/.test(text)) return 'beverages';
+    if (/\b(snacks?|breakfast)\b/.test(text)) return 'snacks';
+    return '';
+  },
+
+  findVegType(value) {
+    const text = this.cleanCell(value).toLowerCase();
+    if (/\b(non[-\s]?veg|non[-\s]?vegetarian|chicken|fish|meat|egg|nv)\b/.test(text)) return 'non-veg';
+    if (/\b(veg|vegetarian|pure veg|v)\b/.test(text)) return 'veg';
+    if (/\b(both|shared|all)\b/.test(text)) return 'both';
+    return '';
+  },
+
+  isVegTypeCell(value) {
+    const text = this.cleanCell(value).toLowerCase().replace(/[^a-z]/g, '');
+    return ['veg', 'vegetarian', 'pureveg', 'v', 'nonveg', 'nonvegetarian', 'nv', 'both', 'shared', 'all'].includes(text);
+  },
+
+  findCuisine(value) {
+    const text = this.cleanCell(value).toLowerCase();
+    if (/\b(indian|telugu|south indian|north indian)\b/.test(text)) return 'Indian';
+    if (/\b(fusion)\b/.test(text)) return 'Fusion';
+    if (/\b(continental|american|western)\b/.test(text)) return 'Continental';
+    if (/\b(chinese|indo chinese)\b/.test(text)) return 'Chinese';
+    if (/\b(italian)\b/.test(text)) return 'Italian';
+    return '';
+  },
+
+  looksLikeCost(value) {
+    return /(?:^|[^\w])[$₹]?\s*\d+(?:\.\d+)?\s*(?:usd|rs|inr|\/|per)?/i.test(this.cleanCell(value));
+  },
+
+  findCost(value) {
+    const match = this.cleanCell(value).match(/[$₹]?\s*(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) || 0 : 0;
+  },
+
+  looksLikePortion(value) {
+    return /\b(plate|serving|person|people|pax|piece|pcs|qty|quantity|portion|bowl|glass|cup)\b/i.test(this.cleanCell(value));
   },
 
   openAddDishModal() {

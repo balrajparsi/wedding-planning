@@ -92,6 +92,20 @@ const foodModule = {
     }
   },
 
+  async importMenuItems(items) {
+    try {
+      const response = await apiCall('/api/food?action=import', 'POST', { items });
+      if (Array.isArray(response.created) && response.created.length) {
+        this.menuItems.push(...response.created);
+        this.filteredItems = [...this.menuItems];
+      }
+      return response;
+    } catch (error) {
+      console.error('Failed to import menu items:', error);
+      throw error;
+    }
+  },
+
   async updateMenuItem(itemId, data) {
     try {
       const response = await apiCall(`/api/food?id=${itemId}`, 'PUT', data);

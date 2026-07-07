@@ -5,6 +5,103 @@
 const kv = require('../lib/kv');
 const WEDDING_ID = 'akhila-akshay-2026';
 
+const EVENT_TYPES = [
+  'Haldi',
+  'Sangeet',
+  'Pellikuthuru',
+  'Marriage',
+  'Satyanarayana Swamy Vratam'
+];
+
+const COURSE_TYPES = ['appetizers', 'mains', 'sides', 'desserts', 'beverages', 'snacks'];
+const VEG_TYPES = ['veg', 'non-veg', 'both'];
+
+function cleanText(value, maxLength = 500) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
+}
+
+function normalizeEventType(value) {
+  const text = cleanText(value).toLowerCase();
+  return EVENT_TYPES.find(event => event.toLowerCase() === text) || '';
+}
+
+function normalizeCourseType(value) {
+  const text = cleanText(value).toLowerCase().replace(/[^a-z]/g, '');
+  const aliases = {
+    appetizer: 'appetizers',
+    appetizers: 'appetizers',
+    starter: 'appetizers',
+    starters: 'appetizers',
+    snack: 'snacks',
+    snacks: 'snacks',
+    breakfast: 'snacks',
+    lunch: 'mains',
+    dinner: 'mains',
+    main: 'mains',
+    mains: 'mains',
+    entree: 'mains',
+    entrees: 'mains',
+    curry: 'mains',
+    curries: 'mains',
+    side: 'sides',
+    sides: 'sides',
+    dessert: 'desserts',
+    desserts: 'desserts',
+    sweet: 'desserts',
+    sweets: 'desserts',
+    beverage: 'beverages',
+    beverages: 'beverages',
+    drink: 'beverages',
+    drinks: 'beverages'
+  };
+  return aliases[text] || (COURSE_TYPES.includes(text) ? text : '');
+}
+
+function normalizeVegType(value) {
+  const text = cleanText(value).toLowerCase().replace(/[\s_]+/g, '-');
+  if (['veg', 'vegetarian', 'pure-veg', 'v'].includes(text)) return 'veg';
+  if (['non-veg', 'nonveg', 'non-vegetarian', 'nv', 'meat', 'chicken', 'fish', 'egg'].includes(text)) return 'non-veg';
+  if (['both', 'shared', 'veg-and-non-veg', 'veg/non-veg'].includes(text)) return 'both';
+  return VEG_TYPES.includes(text) ? text : 'both';
+}
+
+function normalizeCost(value) {
+  const parsed = parseFloat(String(value || '').replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function normalizeMenuPayload(data = {}) {
+  return {
+    eventType: normalizeEventType(data.eventType) || cleanText(data.eventType, 80),
+    courseType: normalizeCourseType(data.courseType) || cleanText(data.courseType, 80).toLowerCase() || 'mains',
+    dish: cleanText(data.dish, 160),
+    vegNonVeg: normalizeVegType(data.vegNonVeg),
+    cost: normalizeCost(data.cost),
+    portionSize: cleanText(data.portionSize, 80) || '1 plate',
+    preparedBy: cleanText(data.preparedBy, 160),
+    cuisine: cleanText(data.cuisine, 80),
+    notes: cleanText(data.notes, 1000)
+  };
+}
+
+function makeMenuItem(data) {
+  return {
+    id: `food_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
+    weddingId: WEDDING_ID,
+    eventDate: '',
+    guestAccommodations: [],
+    ...data,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function itemKey(item) {
+  return [item.eventType, item.courseType, item.dish]
+    .map(value => cleanText(value).toLowerCase())
+    .join('|');
+}
+
 module.exports = async (req, res) => {
   const method = req.method;
   const url    = new URL(req.url, 'http://localhost');
@@ -38,17 +135,41 @@ module.exports = async (req, res) => {
       return res.status(200).json(item);
     }
 
+    if (method === 'POST' && action === 'import') {
+      const incoming = Array.isArray(req.body?.items) ? req.body.items : [];
+      if (!incoming.length) return res.status(400).json({ error: 'No menu items to import' });
+      if (incoming.length > 500) return res.status(400).json({ error: 'Import up to 500 menu items at a time' });
+
+      let items = await kv.get(key) || [];
+      const seen = new Set(items.map(itemKey));
+      const created = [];
+      const skipped = [];
+
+      incoming.forEach((raw, index) => {
+        const normalized = normalizeMenuPayload(raw);
+        if (!normalized.dish || !normalized.eventType || !normalized.courseType) {
+          skipped.push({ index, reason: 'Missing dish, event, or course', item: raw });
+          return;
+        }
+        const key = itemKey(normalized);
+        if (seen.has(key)) {
+          skipped.push({ index, reason: 'Duplicate dish for event/course', item: raw });
+          return;
+        }
+        seen.add(key);
+        const item = makeMenuItem(normalized);
+        items.push(item);
+        created.push(item);
+      });
+
+      if (created.length) await kv.set(key, items);
+      return res.status(200).json({ success: true, created, skipped, imported: created.length, skippedCount: skipped.length });
+    }
+
     if (method === 'POST') {
-      const { eventType, courseType, dish, vegNonVeg, cost, portionSize, preparedBy, cuisine, notes } = req.body || {};
-      if (!dish || !eventType || !courseType) return res.status(400).json({ error: 'Dish, event type, and course type required' });
-      const item = {
-        id: `food_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
-        weddingId: WEDDING_ID, eventType, eventDate: '', courseType, dish,
-        vegNonVeg: vegNonVeg||'both', cost: cost||0,
-        portionSize: portionSize||'1 plate', preparedBy: preparedBy||'',
-        cuisine: cuisine||'', guestAccommodations: [], notes: notes||'',
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-      };
+      const data = normalizeMenuPayload(req.body || {});
+      if (!data.dish || !data.eventType || !data.courseType) return res.status(400).json({ error: 'Dish, event type, and course type required' });
+      const item = makeMenuItem(data);
       let items = await kv.get(key) || [];
       items.push(item);
       await kv.set(key, items);

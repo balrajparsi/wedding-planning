@@ -308,7 +308,11 @@
             <div data-view="food">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; color: var(--blue);">Food & Menu Planning</h2>
-                    <button class="btn btn-primary btn-sm food-add-btn">+ Add Dish</button>
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:flex-end;">
+                        <button class="btn btn-secondary btn-sm food-import-btn" type="button">Import File</button>
+                        <button class="btn btn-primary btn-sm food-add-btn" type="button">+ Add Dish</button>
+                        <input class="food-import-input" type="file" accept=".xlsx,.xls,.csv,.tsv,.txt,text/plain,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+                    </div>
                 </div>
 
                 <!-- Stats -->
@@ -319,6 +323,8 @@
                 <div class="food-catering-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-bottom:2rem;">
                     <!-- RSVP catering totals will be rendered here -->
                 </div>
+
+                <div class="food-import-status" style="display:none;margin-bottom:1.25rem;"></div>
 
                 <!-- Filters -->
                 <div class="card" style="margin-bottom: 2rem;">
@@ -340,7 +346,7 @@
                             <option value="beverages">Beverages</option>
                             <option value="snacks">Snacks</option>
                         </select>
-                        <button class="btn btn-secondary" style="cursor: pointer;">Clear Filters</button>
+                        <button class="btn btn-secondary food-clear-filters-btn" type="button" style="cursor: pointer;">Clear Filters</button>
                     </div>
                 </div>
 
@@ -1374,6 +1380,7 @@
     <script src="pages/venues.js"></script>
 
     <!-- Food & Menu -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script src="modules/food.js"></script>
     <script src="pages/food.js"></script>
 
