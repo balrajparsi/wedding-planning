@@ -132,6 +132,17 @@ const foodModule = {
     }
   },
 
+  async resetMenuItems() {
+    try {
+      await apiCall('/api/food?action=reset', 'DELETE');
+      this.menuItems = [];
+      this.filteredItems = [];
+    } catch (error) {
+      console.error('Failed to reset menu items:', error);
+      throw error;
+    }
+  },
+
   async addGuestAccommodation(itemId, guestId, modification) {
     try {
       const response = await apiCall(`/api/food/${itemId}/accommodation`, 'POST', {

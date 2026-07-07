@@ -722,6 +722,12 @@ tr:hover {
   font-size: 1.55rem;
 }
 
+.food-event-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
 .food-event-counts {
   display: flex;
   flex-wrap: wrap;

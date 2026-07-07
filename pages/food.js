@@ -48,6 +48,11 @@ const foodPage = {
       importInput.addEventListener('change', (e) => this.handleImportFile(e.target.files?.[0], importInput));
     }
 
+    const resetBtn = foodView.querySelector('.food-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => this.resetMenuItems());
+    }
+
     const clearFiltersBtn = foodView.querySelector('.food-clear-filters-btn');
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener('click', () => {
@@ -161,8 +166,9 @@ const foodPage = {
       section.innerHTML = `
         <div class="food-event-heading">
           <div>
-            <span class="food-event-kicker">Event Menu</span>
-            <h3>${this.escapeHtml(eventName)}</h3>
+            <span class="food-event-kicker">Event-wise menu</span>
+            <h3>${this.escapeHtml(eventName)} Menu</h3>
+            <p class="food-event-subtitle">${items.length} dish${items.length === 1 ? '' : 'es'} listed below for this event</p>
           </div>
           <div class="food-event-counts">
             <span>${items.length} dish${items.length === 1 ? '' : 'es'}</span>
@@ -714,6 +720,30 @@ const foodPage = {
       this.render();
     } catch (error) {
       showNotification('Failed to delete dish', 'error');
+    }
+  },
+
+  async resetMenuItems() {
+    const total = foodModule.menuItems.length;
+    const message = total
+      ? `Reset the full food menu and delete all ${total} dish${total === 1 ? '' : 'es'}?`
+      : 'Reset the food menu?';
+    if (!confirm(message)) return;
+
+    try {
+      await foodModule.resetMenuItems();
+      this.currentFilters = { eventType: '', courseType: '', search: '' };
+      const foodView = document.querySelector('[data-view="food"]');
+      const eventTypeFilter = foodView?.querySelector('.food-event-type-filter');
+      const courseTypeFilter = foodView?.querySelector('.food-course-type-filter');
+      if (eventTypeFilter) eventTypeFilter.value = '';
+      if (courseTypeFilter) courseTypeFilter.value = '';
+      this.showImportStatus('Menu reset. You can import a fresh file or add dishes manually.', 'success');
+      showNotification('Menu reset', 'success');
+      await this.loadFood();
+      this.render();
+    } catch (error) {
+      showNotification('Failed to reset menu', 'error');
     }
   }
 };

@@ -858,6 +858,10 @@ label {
   overflow: hidden;
 }
 
+.food-menu-table-wrap {
+  overflow-x: auto;
+}
+
 table {
   background: rgba(255, 253, 248, 0.96);
 }

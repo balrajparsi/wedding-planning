@@ -185,6 +185,11 @@ module.exports = async (req, res) => {
       return res.status(200).json(items[idx]);
     }
 
+    if (method === 'DELETE' && action === 'reset') {
+      await kv.set(key, []);
+      return res.status(200).json({ success: true, cleared: true });
+    }
+
     if (method === 'DELETE' && id) {
       let items = await kv.get(key) || [];
       items = items.filter(m => m.id !== id);
