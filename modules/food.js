@@ -17,12 +17,9 @@ const foodModule = {
   ],
 
   courseTypes: [
-    'Appetizers',
-    'Mains',
-    'Sides',
-    'Desserts',
-    'Beverages',
-    'Snacks'
+    'Breakfast',
+    'Lunch',
+    'Dinner'
   ],
 
   cuisines: [
@@ -180,7 +177,7 @@ const foodModule = {
       }
       summary.byEventType[m.eventType]++;
 
-      // By course type
+      // By meal type
       if (!summary.byCourseType[m.courseType]) {
         summary.byCourseType[m.courseType] = 0;
       }

@@ -1,6 +1,6 @@
 /**
  * Food & Menu Page Logic
- * Renders menu items by event and course type
+ * Renders menu items by event and meal type
  */
 
 const foodPage = {
@@ -182,7 +182,7 @@ const foodPage = {
             <thead>
               <tr>
                 <th>Dish</th>
-                <th>Course</th>
+                <th>Meal</th>
                 <th>Type</th>
                 <th>Cuisine</th>
                 <th>Cost</th>
@@ -242,7 +242,7 @@ const foodPage = {
 
   groupMenuItemsByEvent(items) {
     const eventOrder = ['Haldi', 'Sangeet', 'Pellikuthuru', 'Marriage', 'Satyanarayana Swamy Vratam'];
-    const courseOrder = ['appetizers', 'snacks', 'mains', 'sides', 'desserts', 'beverages'];
+    const courseOrder = ['breakfast', 'lunch', 'dinner', 'snacks', 'mains', 'appetizers', 'sides', 'desserts', 'beverages'];
     const groups = new Map();
 
     items.forEach(item => {
@@ -386,7 +386,7 @@ const foodPage = {
   parseRowsToMenuItems(rows) {
     const context = {
       eventType: this.currentFilters.eventType || 'Marriage',
-      courseType: this.currentFilters.courseType || 'mains'
+      courseType: this.currentFilters.courseType || 'lunch'
     };
     let headerMap = null;
     let activeSheet = '';
@@ -453,7 +453,7 @@ const foodPage = {
     const aliases = {
       dish: ['dish', 'item', 'menu', 'food', 'name'],
       eventType: ['event', 'function', 'ceremony'],
-      courseType: ['course', 'category', 'type'],
+      courseType: ['meal', 'course', 'category', 'type'],
       vegNonVeg: ['veg', 'vegetarian', 'non veg', 'non-veg', 'diet'],
       cost: ['cost', 'price', 'rate', 'amount'],
       portionSize: ['portion', 'serving', 'size', 'qty', 'quantity'],
@@ -532,7 +532,7 @@ const foodPage = {
     const cleaned = afterColon
       .replace(/\$?\s*\d+(?:\.\d+)?/g, ' ')
       .replace(/\b(haldi|sangeeth?|pellikuthuru|pellikoduku|nalugu|marriage|wedding|muhurtham|satyanarayana|vratam|pooja|puja)\b/ig, ' ')
-      .replace(/\b(appetizers?|starters?|mains?|entrees?|curr(?:y|ies)|sides?|desserts?|sweets?|beverages?|drinks?|snacks?|breakfast|lunch|dinner)\b/ig, ' ')
+      .replace(/\b(appetizers?|starters?|mains?|entrees?|curr(?:y|ies)|sides?|desserts?|sweets?|beverages?|drinks?|snacks?|breakfast|lunch|dinner|brunch|supper)\b/ig, ' ')
       .replace(/\b(veg|vegetarian|non[-\s]?veg|non[-\s]?vegetarian|both|shared)\b/ig, ' ')
       .replace(/\s+/g, ' ')
       .trim();
@@ -551,7 +551,7 @@ const foodPage = {
     return {
       dish,
       eventType: data.eventType || this.currentFilters.eventType || 'Marriage',
-      courseType: data.courseType || this.currentFilters.courseType || 'mains',
+      courseType: data.courseType || this.currentFilters.courseType || 'lunch',
       vegNonVeg: data.vegNonVeg || 'both',
       cost: Number.isFinite(data.cost) ? data.cost : 0,
       portionSize: data.portionSize || '1 plate',
@@ -585,12 +585,9 @@ const foodPage = {
 
   findCourse(value) {
     const text = this.cleanCell(value).toLowerCase();
-    if (/\b(appetizers?|starters?)\b/.test(text)) return 'appetizers';
-    if (/\b(mains?|entrees?|curr(?:y|ies)|lunch|dinner)\b/.test(text)) return 'mains';
-    if (/\b(sides?)\b/.test(text)) return 'sides';
-    if (/\b(desserts?|sweets?)\b/.test(text)) return 'desserts';
-    if (/\b(beverages?|drinks?)\b/.test(text)) return 'beverages';
-    if (/\b(snacks?|breakfast)\b/.test(text)) return 'snacks';
+    if (/\b(breakfast|brunch|morning|snacks?)\b/.test(text)) return 'breakfast';
+    if (/\b(dinner|supper|evening)\b/.test(text)) return 'dinner';
+    if (/\b(lunch|noon|afternoon|mains?|entrees?|curr(?:y|ies)|appetizers?|starters?|sides?|desserts?|sweets?|beverages?|drinks?)\b/.test(text)) return 'lunch';
     return '';
   },
 
@@ -653,7 +650,7 @@ const foodPage = {
       notes: form.querySelector('[name="notes"]')?.value
     };
 
-    if (!data.dish || !data.eventType || !data.courseType) { showNotification('Dish, event, and course type required', 'error'); return; }
+    if (!data.dish || !data.eventType || !data.courseType) { showNotification('Dish, event, and meal type required', 'error'); return; }
 
     try {
       await foodModule.addMenuItem(data);

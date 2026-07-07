@@ -13,7 +13,7 @@ const EVENT_TYPES = [
   'Satyanarayana Swamy Vratam'
 ];
 
-const COURSE_TYPES = ['appetizers', 'mains', 'sides', 'desserts', 'beverages', 'snacks'];
+const COURSE_TYPES = ['breakfast', 'lunch', 'dinner'];
 const VEG_TYPES = ['veg', 'non-veg', 'both'];
 
 function cleanText(value, maxLength = 500) {
@@ -26,33 +26,43 @@ function normalizeEventType(value) {
 }
 
 function normalizeCourseType(value) {
-  const text = cleanText(value).toLowerCase().replace(/[^a-z]/g, '');
+  const rawText = cleanText(value).toLowerCase();
+  if (/\b(breakfast|brunch|morning|snacks?)\b/.test(rawText)) return 'breakfast';
+  if (/\b(dinner|supper|evening)\b/.test(rawText)) return 'dinner';
+  if (/\b(lunch|noon|afternoon)\b/.test(rawText)) return 'lunch';
+  const text = rawText.replace(/[^a-z]/g, '');
   const aliases = {
-    appetizer: 'appetizers',
-    appetizers: 'appetizers',
-    starter: 'appetizers',
-    starters: 'appetizers',
-    snack: 'snacks',
-    snacks: 'snacks',
-    breakfast: 'snacks',
-    lunch: 'mains',
-    dinner: 'mains',
-    main: 'mains',
-    mains: 'mains',
-    entree: 'mains',
-    entrees: 'mains',
-    curry: 'mains',
-    curries: 'mains',
-    side: 'sides',
-    sides: 'sides',
-    dessert: 'desserts',
-    desserts: 'desserts',
-    sweet: 'desserts',
-    sweets: 'desserts',
-    beverage: 'beverages',
-    beverages: 'beverages',
-    drink: 'beverages',
-    drinks: 'beverages'
+    breakfast: 'breakfast',
+    brunch: 'breakfast',
+    morning: 'breakfast',
+    snack: 'breakfast',
+    snacks: 'breakfast',
+    lunch: 'lunch',
+    noon: 'lunch',
+    afternoon: 'lunch',
+    appetizer: 'lunch',
+    appetizers: 'lunch',
+    starter: 'lunch',
+    starters: 'lunch',
+    main: 'lunch',
+    mains: 'lunch',
+    entree: 'lunch',
+    entrees: 'lunch',
+    curry: 'lunch',
+    curries: 'lunch',
+    side: 'lunch',
+    sides: 'lunch',
+    dessert: 'lunch',
+    desserts: 'lunch',
+    sweet: 'lunch',
+    sweets: 'lunch',
+    beverage: 'lunch',
+    beverages: 'lunch',
+    drink: 'lunch',
+    drinks: 'lunch',
+    dinner: 'dinner',
+    supper: 'dinner',
+    evening: 'dinner'
   };
   return aliases[text] || (COURSE_TYPES.includes(text) ? text : '');
 }
@@ -73,7 +83,7 @@ function normalizeCost(value) {
 function normalizeMenuPayload(data = {}) {
   return {
     eventType: normalizeEventType(data.eventType) || cleanText(data.eventType, 80),
-    courseType: normalizeCourseType(data.courseType) || cleanText(data.courseType, 80).toLowerCase() || 'mains',
+    courseType: normalizeCourseType(data.courseType) || cleanText(data.courseType, 80).toLowerCase() || 'lunch',
     dish: cleanText(data.dish, 160),
     vegNonVeg: normalizeVegType(data.vegNonVeg),
     cost: normalizeCost(data.cost),
@@ -97,9 +107,22 @@ function makeMenuItem(data) {
 }
 
 function itemKey(item) {
-  return [item.eventType, item.courseType, item.dish]
+  return [item.eventType, normalizeCourseType(item.courseType) || item.courseType, item.dish]
     .map(value => cleanText(value).toLowerCase())
     .join('|');
+}
+
+function normalizeStoredItems(items) {
+  let changed = false;
+  const normalizedItems = items.map(item => {
+    const normalizedCourseType = normalizeCourseType(item.courseType);
+    if (normalizedCourseType && normalizedCourseType !== item.courseType) {
+      changed = true;
+      return { ...item, courseType: normalizedCourseType };
+    }
+    return item;
+  });
+  return { items: normalizedItems, changed };
 }
 
 module.exports = async (req, res) => {
@@ -113,6 +136,9 @@ module.exports = async (req, res) => {
   try {
     if (method === 'GET') {
       let items = await kv.get(key) || [];
+      const normalized = normalizeStoredItems(items);
+      items = normalized.items;
+      if (normalized.changed) await kv.set(key, items);
       const evt  = sp.get('eventType');
       const crs  = sp.get('courseType');
       if (evt) items = items.filter(m => m.eventType  === evt);
@@ -148,7 +174,7 @@ module.exports = async (req, res) => {
       incoming.forEach((raw, index) => {
         const normalized = normalizeMenuPayload(raw);
         if (!normalized.dish || !normalized.eventType || !normalized.courseType) {
-          skipped.push({ index, reason: 'Missing dish, event, or course', item: raw });
+          skipped.push({ index, reason: 'Missing dish, event, or meal', item: raw });
           return;
         }
         const key = itemKey(normalized);
@@ -168,7 +194,7 @@ module.exports = async (req, res) => {
 
     if (method === 'POST') {
       const data = normalizeMenuPayload(req.body || {});
-      if (!data.dish || !data.eventType || !data.courseType) return res.status(400).json({ error: 'Dish, event type, and course type required' });
+      if (!data.dish || !data.eventType || !data.courseType) return res.status(400).json({ error: 'Dish, event type, and meal type required' });
       const item = makeMenuItem(data);
       let items = await kv.get(key) || [];
       items.push(item);
@@ -180,7 +206,8 @@ module.exports = async (req, res) => {
       let items = await kv.get(key) || [];
       const idx  = items.findIndex(m => m.id === id);
       if (idx === -1) return res.status(404).json({ error: 'Menu item not found' });
-      items[idx] = { ...items[idx], ...(req.body||{}), updatedAt: new Date().toISOString() };
+      const data = normalizeMenuPayload({ ...items[idx], ...(req.body || {}) });
+      items[idx] = { ...items[idx], ...data, updatedAt: new Date().toISOString() };
       await kv.set(key, items);
       return res.status(200).json(items[idx]);
     }
