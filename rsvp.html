@@ -96,11 +96,11 @@
       <h1>Akhila <span>&amp;</span><br>Akshay</h1>
       <p>A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
       <div class="date-strip">
-        <span>28 Aug · Haldi 11 AM · 510 Peach Ave</span>
-        <span>28 Aug · Sangeeth 6 PM · Metroplex Event Center</span>
-        <span>29 Aug · Pellikuthuru / Pellikoduku · 510 Peach Ave</span>
-        <span>30 Aug · Marriage 11 AM · Osage House</span>
-        <span>31 Aug · Satyanarayana Swamy Vratam · 510 Peach Ave</span>
+        <span>28 Aug · Haldi 11 AM</span>
+        <span>28 Aug · Sangeeth 6 PM</span>
+        <span>29 Aug · Pellikuthuru / Pellikoduku · Time TBD</span>
+        <span>30 Aug · Marriage 11 AM</span>
+        <span>31 Aug · Satyanarayana Swamy Vratam · Time TBD</span>
       </div>
     </section>
     <section class="panel" id="rsvpPanel" aria-live="polite">
@@ -187,10 +187,7 @@
     }
     function eventDisplayName(event) { return event.displayName || event.name; }
     function eventDetailHtml(event) {
-      return [event.subtitle, event.locationSummary ? `Venue: ${event.locationSummary}` : '']
-        .filter(Boolean)
-        .map(escapeHtml)
-        .join('<br>');
+      return escapeHtml(event.subtitle);
     }
     function renderEvents(items) {
       events = items;
