@@ -802,19 +802,17 @@ function appendUrlParam(url, key, value) {
 }
 
 function cleanGoogleText(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map(line => line.replace(/[ \t]+/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function formatGoogleDate(date) {
   return String(date || '').replace(/-/g, '');
-}
-
-function addGoogleMinutes(date, time, minutes) {
-  const [year, month, day] = String(date || '').split('-').map(Number);
-  const [hour, minute, second] = String(time || '00:00:00').split(':').map(Number);
-  const local = new Date(Date.UTC(year, month - 1, day, hour, minute, second || 0));
-  local.setUTCMinutes(local.getUTCMinutes() + (minutes || 120));
-  return `${local.getUTCFullYear()}${String(local.getUTCMonth() + 1).padStart(2, '0')}${String(local.getUTCDate()).padStart(2, '0')}T${String(local.getUTCHours()).padStart(2, '0')}${String(local.getUTCMinutes()).padStart(2, '0')}${String(local.getUTCSeconds()).padStart(2, '0')}`;
 }
 
 function nextGoogleDate(date) {
@@ -852,19 +850,20 @@ function getReminderEvents(guest) {
   return attendingEvents.length ? attendingEvents : invitedEvents;
 }
 
-function buildGoogleCalendarUrl(event) {
-  const eventName = eventDisplayName(event);
-  const venue = eventVenueText(event);
-  const dates = event.startTime
-    ? `${formatGoogleDate(event.date)}T${event.startTime.replace(/:/g, '')}/${addGoogleMinutes(event.date, event.startTime, event.durationMinutes || 120)}`
-    : `${formatGoogleDate(event.date)}/${nextGoogleDate(event.date)}`;
-  const details = cleanGoogleText(`${event.displayDate} ${event.time}\n${event.subtitle || ''}\nVenue: ${venue}${eventMapText(event)}`);
+function buildGoogleCalendarUrl(events) {
+  const firstDate = events[0]?.date || RSVP_EVENTS[0].date;
+  const lastDate = events[events.length - 1]?.date || firstDate;
+  const details = events.map(event => {
+    const eventName = eventDisplayName(event);
+    const venue = eventVenueText(event);
+    return `${eventName}\n${event.displayDate} ${event.time}\n${event.subtitle || ''}\nLocation: ${venue}${eventMapText(event)}`;
+  }).join('\n\n');
   const params = new URLSearchParams({
     action: 'TEMPLATE',
-    text: `Akhila & Akshay: ${eventName}`,
-    dates,
-    details,
-    location: venue,
+    text: `Akhila & Akshay Wedding Celebrations`,
+    dates: `${formatGoogleDate(firstDate)}/${nextGoogleDate(lastDate)}`,
+    details: cleanGoogleText(details),
+    location: 'Wedding events - see details',
     ctz: EVENT_TIMEZONE
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -881,17 +880,16 @@ function buildReminderHtml(guest, customMessage, links) {
     ? `<p style="font-size:15px;line-height:1.7;color:#4f3a28;margin:18px 0;">${escapeHtml(customMessage).replace(/\n/g,'<br>')}</p>`
     : '';
   const events = getReminderEvents(guest);
+  const googleCalendarUrl = buildGoogleCalendarUrl(events);
   const eventRows = events.map(event => {
-    const googleUrl = buildGoogleCalendarUrl(event);
     return `<tr>
       <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);vertical-align:top;">
         <strong style="font-family:Georgia,serif;font-size:22px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
         <span style="font-family:Arial,sans-serif;font-size:13px;line-height:1.65;color:#705843;">${escapeHtml(event.subtitle || '')}</span><br>
         <span style="display:block;margin-top:10px;font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#4f3a28;">${escapeHtml(eventVenueText(event))}</span>
       </td>
-      <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;">
-        ${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}<br>
-        ${calendarButtonHtml(googleUrl, 'Google Calendar', 'secondary')}
+      <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;white-space:nowrap;">
+        ${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}
       </td>
     </tr>`;
   }).join('');
@@ -918,6 +916,7 @@ function buildReminderHtml(guest, customMessage, links) {
 ${eventRows}
           </table>
           <div style="text-align:left;margin:20px 0 0;">
+            ${calendarButtonHtml(googleCalendarUrl, 'Add to Google Calendar')}
             ${calendarButtonHtml(links.calendarUrl, 'Add to Apple / Outlook Calendar')}
           </div>
           <p style="font-size:14px;line-height:1.7;color:#705843;text-align:left;margin:24px 0 0;">
