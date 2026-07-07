@@ -146,42 +146,125 @@ const foodPage = {
     }
 
     const list = document.createElement('div');
-    list.style.cssText = `display: flex; flex-direction: column; gap: 1rem;`;
+    list.className = 'food-event-list';
 
-    foodModule.filteredItems.forEach(item => {
-      const card = document.createElement('div');
-      card.style.cssText = `background: white; padding: 1rem; border-radius: 0.5rem; border-left: 3px solid var(--gold); box-shadow: var(--shadow-sm);`;
+    const itemMap = new Map(foodModule.filteredItems.map(item => [String(item.id), item]));
+    const groupedItems = this.groupMenuItemsByEvent(foodModule.filteredItems);
 
-      const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
+    groupedItems.forEach(([eventName, items]) => {
+      const section = document.createElement('section');
+      section.className = 'food-event-section';
+      const vegetarianCount = items.filter(item => item.vegNonVeg === 'veg').length;
+      const nonVegetarianCount = items.filter(item => item.vegNonVeg === 'non-veg').length;
+      const sharedCount = items.filter(item => !['veg', 'non-veg'].includes(item.vegNonVeg)).length;
 
-      card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-          <div style="flex: 1;">
-            <h5 style="color: var(--blue); margin: 0; display: flex; gap: 0.5rem; align-items: center;">
-              ${this.escapeHtml(item.dish)}
-              <span style="background: var(--gold); color: white; padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${this.escapeHtml(this.titleCase(item.courseType))}</span>
-              <span style="background: rgba(24,34,44,0.08); color: var(--text-muted); padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.7rem;">${vegTypeLabel}</span>
-            </h5>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.25rem 0;">
-              ${this.escapeHtml(item.eventType)} • ${this.escapeHtml(item.cuisine || 'Cuisine TBD')} • $${(item.cost||0).toLocaleString('en-US',{maximumFractionDigits:2})} • ${this.escapeHtml(item.portionSize || '1 plate')}
-            </p>
-            ${item.guestAccommodations?.length ? `<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0;">${item.guestAccommodations.length} guest accommodation(s)</p>` : ''}
+      section.innerHTML = `
+        <div class="food-event-heading">
+          <div>
+            <span class="food-event-kicker">Event Menu</span>
+            <h3>${this.escapeHtml(eventName)}</h3>
           </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn-icon edit-dish" data-id="${item.id}" title="Edit">✎</button>
-            <button class="btn-icon delete-dish" data-id="${item.id}" title="Delete">✕</button>
+          <div class="food-event-counts">
+            <span>${items.length} dish${items.length === 1 ? '' : 'es'}</span>
+            <span>${vegetarianCount} veg</span>
+            <span>${nonVegetarianCount} non-veg</span>
+            ${sharedCount ? `<span>${sharedCount} shared</span>` : ''}
           </div>
+        </div>
+        <div class="table-container food-menu-table-wrap">
+          <table class="food-menu-table">
+            <thead>
+              <tr>
+                <th>Dish</th>
+                <th>Course</th>
+                <th>Type</th>
+                <th>Cuisine</th>
+                <th>Cost</th>
+                <th>Portion</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(item => {
+                const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
+                const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
+                return `
+                  <tr>
+                    <td>
+                      <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
+                      ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
+                    </td>
+                    <td><span class="food-course-pill">${this.escapeHtml(this.titleCase(item.courseType))}</span></td>
+                    <td><span class="food-type-pill ${vegTypeClass}">${vegTypeLabel}</span></td>
+                    <td>${this.escapeHtml(item.cuisine || 'Cuisine TBD')}</td>
+                    <td>$${(item.cost || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                    <td>${this.escapeHtml(item.portionSize || '1 plate')}</td>
+                    <td>
+                      <div class="food-row-actions">
+                        <button class="btn-icon edit-dish" data-id="${this.escapeHtml(item.id)}" title="Edit">✎</button>
+                        <button class="btn-icon delete-dish" data-id="${this.escapeHtml(item.id)}" title="Delete">✕</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
       `;
 
-      card.querySelector('.edit-dish').addEventListener('click', () => this.openEditDishModal(item));
-      card.querySelector('.delete-dish').addEventListener('click', () => { if (confirm(`Delete "${item.dish}"?`)) { this.deleteDish(item.id); } });
+      section.querySelectorAll('.edit-dish').forEach(button => {
+        button.addEventListener('click', () => {
+          const item = itemMap.get(String(button.dataset.id));
+          if (item) this.openEditDishModal(item);
+        });
+      });
 
-      list.appendChild(card);
+      section.querySelectorAll('.delete-dish').forEach(button => {
+        button.addEventListener('click', () => {
+          const item = itemMap.get(String(button.dataset.id));
+          if (item && confirm(`Delete "${item.dish}"?`)) this.deleteDish(item.id);
+        });
+      });
+
+      list.appendChild(section);
     });
 
     menuContainer.innerHTML = '';
     menuContainer.appendChild(list);
+  },
+
+  groupMenuItemsByEvent(items) {
+    const eventOrder = ['Haldi', 'Sangeet', 'Pellikuthuru', 'Marriage', 'Satyanarayana Swamy Vratam'];
+    const courseOrder = ['appetizers', 'snacks', 'mains', 'sides', 'desserts', 'beverages'];
+    const groups = new Map();
+
+    items.forEach(item => {
+      const eventName = item.eventType || 'Unassigned Event';
+      if (!groups.has(eventName)) groups.set(eventName, []);
+      groups.get(eventName).push(item);
+    });
+
+    return Array.from(groups.entries())
+      .sort(([eventA], [eventB]) => {
+        const indexA = eventOrder.indexOf(eventA);
+        const indexB = eventOrder.indexOf(eventB);
+        if (indexA !== -1 || indexB !== -1) {
+          return (indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA) - (indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB);
+        }
+        return eventA.localeCompare(eventB);
+      })
+      .map(([eventName, eventItems]) => [
+        eventName,
+        eventItems.slice().sort((itemA, itemB) => {
+          const courseA = courseOrder.indexOf(itemA.courseType);
+          const courseB = courseOrder.indexOf(itemB.courseType);
+          if (courseA !== courseB) {
+            return (courseA === -1 ? Number.MAX_SAFE_INTEGER : courseA) - (courseB === -1 ? Number.MAX_SAFE_INTEGER : courseB);
+          }
+          return String(itemA.dish || '').localeCompare(String(itemB.dish || ''));
+        })
+      ]);
   },
 
   escapeHtml(value) {

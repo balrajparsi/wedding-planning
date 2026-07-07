@@ -678,6 +678,150 @@ tr:hover {
 }
 
 /* ========================================
+   FOOD MENU
+   ======================================== */
+
+.food-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.food-event-section {
+  background: white;
+  border: 1px solid rgba(184, 134, 11, 0.16);
+  border-left: 4px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.food-event-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.1), rgba(245, 241, 232, 0.2));
+  border-bottom: 1px solid rgba(184, 134, 11, 0.12);
+}
+
+.food-event-kicker {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.food-event-heading h3 {
+  margin: 0;
+  color: var(--blue);
+  font-size: 1.55rem;
+}
+
+.food-event-counts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  max-width: 32rem;
+}
+
+.food-event-counts span,
+.food-course-pill,
+.food-type-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.food-event-counts span {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--blue);
+  border: 1px solid rgba(184, 134, 11, 0.14);
+}
+
+.food-menu-table-wrap {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.food-menu-table th {
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.food-menu-table td {
+  vertical-align: middle;
+}
+
+.food-dish-name {
+  display: block;
+  color: var(--text-dark);
+}
+
+.food-accommodation-note {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.food-course-pill {
+  background: var(--gold);
+  color: white;
+}
+
+.food-type-pill {
+  background: rgba(24, 34, 44, 0.08);
+  color: var(--text-muted);
+}
+
+.food-type-veg {
+  background: rgba(39, 174, 96, 0.12);
+  color: #1f6a35;
+}
+
+.food-type-non-veg {
+  background: rgba(192, 57, 43, 0.12);
+  color: #9f1d22;
+}
+
+.food-row-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .food-event-heading {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .food-event-counts {
+    justify-content: flex-start;
+  }
+
+  .food-menu-table th,
+  .food-menu-table td {
+    min-width: 8.5rem;
+  }
+
+  .food-menu-table th:first-child,
+  .food-menu-table td:first-child {
+    min-width: 13rem;
+  }
+}
+
+/* ========================================
    GRID LAYOUTS
    ======================================== */
 
