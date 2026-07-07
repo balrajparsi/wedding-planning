@@ -280,7 +280,7 @@ function buildConfirmationEmail(guest, events) {
     <table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;background:#fff8e8;border:1px solid #c89422;">
       <tr><td style="height:8px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
       <tr><td style="padding:42px 36px 36px;">
-        <p style="margin:0 0 12px;color:#9f1d22;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">Mana Pelli Veduka</p>
+        <p style="margin:0 0 12px;color:#9f1d22;font-family:Georgia,serif;font-size:15px;font-weight:700;letter-spacing:0;text-transform:none;">మా పెళ్లి వేడుక</p>
         <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:42px;font-weight:400;line-height:1;color:#281309;">RSVP received</h1>
         <p style="margin:0 0 24px;font-family:Georgia,serif;font-size:19px;line-height:1.55;color:#4f3a28;">Thank you, ${guestName}. We are so happy to celebrate with you.</p>
         ${acceptedBlock}

@@ -15,6 +15,7 @@
     main { min-height:100vh; max-width:1260px; margin:auto; padding:clamp(1rem,4vw,4rem); display:grid; grid-template-columns:minmax(240px,.75fr) minmax(350px,1.25fr); gap:clamp(2rem,5vw,5rem); align-items:start; }
     .intro { color:var(--ivory); padding-top:clamp(1rem,8vh,6rem); text-shadow:0 2px 18px rgba(0,0,0,.45); position:sticky; top:1rem; }
     .eyebrow { margin:0 0 .8rem; color:#f8d680; font-size:.72rem; font-weight:800; letter-spacing:.26em; text-transform:uppercase; }
+    .telugu-label { font-family:Georgia,serif; font-size:.95rem; letter-spacing:0; text-transform:none; }
     h1 { margin:0; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(4rem,8vw,7rem); line-height:.82; }
     h1 span { color:#f8c647; font-style:italic; }
     .intro p { max-width:30rem; font-family:"Cormorant Garamond",Georgia,serif; font-size:clamp(1.35rem,2.1vw,1.85rem); line-height:1.3; }
@@ -92,7 +93,7 @@
 <body>
   <main>
     <section class="intro" aria-label="Wedding invitation">
-      <p class="eyebrow">Mana Pelli Veduka</p>
+      <p class="eyebrow telugu-label">మా పెళ్లి వేడుక</p>
       <h1>Akhila <span>&amp;</span><br>Akshay</h1>
       <p>A Telugu wedding celebration wrapped in haldi, jasmine, pattu silk, family blessings, music, and sacred vows.</p>
       <div class="date-strip">
@@ -139,7 +140,7 @@
         <div class="status hidden" id="statusBox"></div>
       </form>
       <section class="confirmation hidden" id="confirmationBox">
-        <p class="eyebrow">Mana Pelli Veduka</p>
+        <p class="eyebrow telugu-label">మా పెళ్లి వేడుక</p>
         <h3>Your RSVP is received</h3>
         <p id="confirmationMessage">Thank you for celebrating with Akhila and Akshay. Please contact the family for any changes.</p>
       </section>

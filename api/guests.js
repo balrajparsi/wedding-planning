@@ -706,7 +706,7 @@ function buildInviteHtml(guest, customMessage, links) {
       <table width="620" cellpadding="0" cellspacing="0" style="background:#fff8e8;border:1px solid #c89422;box-shadow:0 18px 46px rgba(70,35,10,0.18);">
         <tr><td style="padding:8px;background:linear-gradient(90deg,#8c151a,#c89422,#315a31);"></td></tr>
         <tr><td align="center" style="padding:42px 40px 28px;">
-          <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:4px;color:#9f1d22;text-transform:uppercase;margin:0 0 14px;">Mana Pelli Veduka</p>
+          <p style="font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#9f1d22;text-transform:none;margin:0 0 14px;">మా పెళ్లి వేడుక</p>
           <h1 style="font-family:Georgia,serif;font-size:48px;line-height:0.95;color:#281309;margin:0 0 10px;font-weight:400;letter-spacing:0;">
             Akhila <em style="color:#9f1d22;">&amp;</em> Akshay
           </h1>
