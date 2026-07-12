@@ -721,6 +721,14 @@ const foodPage = {
   },
 
   async resetMenuItems() {
+    const passcode = prompt('Enter the passcode to reset the entire food menu:');
+    if (passcode === null) return;
+
+    if (passcode.trim() !== '291097') {
+      showNotification('Incorrect passcode. Food menu was not reset.', 'error');
+      return;
+    }
+
     const total = foodModule.menuItems.length;
     const message = total
       ? `Reset the full food menu and delete all ${total} dish${total === 1 ? '' : 'es'}?`
@@ -728,7 +736,7 @@ const foodPage = {
     if (!confirm(message)) return;
 
     try {
-      await foodModule.resetMenuItems();
+      await foodModule.resetMenuItems(passcode.trim());
       this.currentFilters = { eventType: '', courseType: '', search: '' };
       const foodView = document.querySelector('[data-view="food"]');
       const eventTypeFilter = foodView?.querySelector('.food-event-type-filter');

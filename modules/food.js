@@ -129,9 +129,9 @@ const foodModule = {
     }
   },
 
-  async resetMenuItems() {
+  async resetMenuItems(passcode) {
     try {
-      await apiCall('/api/food?action=reset', 'DELETE');
+      await apiCall('/api/food?action=reset', 'DELETE', { passcode });
       this.menuItems = [];
       this.filteredItems = [];
     } catch (error) {

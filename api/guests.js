@@ -566,6 +566,11 @@ async function handleDeleteGuest(req, res) {
 
 async function handleBulkReminder(req, res) {
   const body = req.body || {};
+  const reminderPasscode = String(body.passcode || '').trim();
+  if (reminderPasscode !== '291097') {
+    return res.status(403).json({ error: 'Invalid bulk reminder passcode' });
+  }
+
   const { subject = '', message = '' } = body;
   const guestIds = body.guestIds;
 

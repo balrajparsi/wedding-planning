@@ -626,9 +626,16 @@ const guestListPage = {
     const filterStatus = form.querySelector('[name="filterStatus"]')?.value || 'accepted';
     const subject = form.querySelector('[name="subject"]')?.value || `Wedding details reminder - Akhila & Akshay`;
     const message = form.querySelector('[name="message"]')?.value || '';
+    const passcode = prompt('Enter the passcode to send bulk reminders:');
+    if (passcode === null) return;
+
+    if (passcode.trim() !== '291097') {
+      showNotification('Incorrect passcode. Bulk reminders were not sent.', 'error');
+      return;
+    }
 
     try {
-      const res = await apiCall('/api/guests?action=bulk-reminder', 'POST', { filterStatus, subject, message });
+      const res = await apiCall('/api/guests?action=bulk-reminder', 'POST', { filterStatus, subject, message, passcode: passcode.trim() });
       const hasFailures = !res.success || !res.sendingEnabled || Number(res.failed || 0) > 0;
       const firstErrorItem = res.errors?.[0] || {};
       const failedGuest = [firstErrorItem.name, firstErrorItem.email].filter(Boolean).join(' ');

@@ -213,6 +213,11 @@ module.exports = async (req, res) => {
     }
 
     if (method === 'DELETE' && action === 'reset') {
+      const resetPasscode = String(req.body?.passcode || '').trim();
+      if (resetPasscode !== '291097') {
+        return res.status(403).json({ error: 'Invalid reset passcode' });
+      }
+
       await kv.set(key, []);
       return res.status(200).json({ success: true, cleared: true });
     }
