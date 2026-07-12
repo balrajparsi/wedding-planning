@@ -991,6 +991,11 @@ ${eventRows}
 }
 
 async function handleResetGuests(req, res) {
+  const resetPasscode = String(req.body?.passcode || '').trim();
+  if (resetPasscode !== '291097') {
+    return res.status(403).json({ error: 'Invalid reset passcode' });
+  }
+
   const guestsKey = `wedding:${WEDDING_ID}:guests`;
   await kv.set(guestsKey, []);
   res.json({ success: true, message: 'All guests cleared' });

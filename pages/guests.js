@@ -580,9 +580,17 @@ const guestListPage = {
   },
 
   async resetAllGuests() {
+    const passcode = prompt('Enter the passcode to reset the entire guest list:');
+    if (passcode === null) return;
+
+    if (passcode.trim() !== '291097') {
+      showNotification('Incorrect passcode. Guest list was not reset.', 'error');
+      return;
+    }
+
     if (!confirm('⚠️ Reset ALL guests? This will permanently delete all guest data.')) return;
     try {
-      await apiCall('/api/guests?action=reset', 'DELETE');
+      await apiCall('/api/guests?action=reset', 'DELETE', { passcode: passcode.trim() });
       guestModule.guests = [];
       guestModule.filteredGuests = [];
       showNotification('All guests cleared', 'success');
