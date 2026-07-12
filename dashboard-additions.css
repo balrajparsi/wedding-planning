@@ -461,6 +461,13 @@ header::before {
 
 .main-content {
   animation: none;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.main-content > [data-view] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .main-content h2,
@@ -855,7 +862,16 @@ label {
 
 .table-container,
 .guest-table-container {
-  overflow: hidden;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
+}
+
+.guest-table {
+  min-width: 980px;
 }
 
 .food-menu-table-wrap {
