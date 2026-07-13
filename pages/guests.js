@@ -169,7 +169,7 @@ const guestListPage = {
               <span><strong>${event.confirmedGuests || 0}</strong> confirmed attending</span>
               <span style="color:#278a4b;"><strong>${event.vegetarianMeals || 0}</strong> ${vegetarianOnly ? 'vegetarian meals' : 'vegetarian'}</span>
               ${vegetarianOnly ? '' : `<span style="color:#c0392b;"><strong>${event.nonVegetarianMeals || 0}</strong> non-vegetarian</span>`}
-              <span style="color:#8e44ad;"><strong>${event.maybeGuests || 0}</strong> maybe replies</span>
+              ${(event.maybeGuests || 0) > 0 ? `<span style="color:#8e44ad;"><strong>${event.maybeGuests}</strong> maybe replies</span>` : ''}
             </div>
           </article>`;
         }).join('')}
