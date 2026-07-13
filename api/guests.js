@@ -138,7 +138,8 @@ async function handleListGuests(req, res) {
     declined: guests.filter(g => g.rsvpStatus === 'declined').length,
     pending: guests.filter(g => g.rsvpStatus === 'pending').length,
     maybe: guests.filter(g => g.rsvpStatus === 'maybe').length,
-    totalPartySize: guests.reduce((sum, g) => sum + (parseInt(g.partySize) || 1), 0)
+    totalPartySize: guests.reduce((sum, guest) => sum + (parseInt(guest.partySize, 10) || 1), 0),
+    actualGuests: guests.reduce((sum, guest) => sum + getGuestActualCount(guest), 0)
   };
 
   res.json({
@@ -164,6 +165,14 @@ function normalizeStoredEventResponse(value, fallbackStatus = 'pending') {
     vegetarianCount: response === 'attending' ? Math.max(0, parseInt(raw.vegetarianCount ?? raw.vegetarian, 10) || 0) : 0,
     nonVegetarianCount: response === 'attending' ? Math.max(0, parseInt(raw.nonVegetarianCount ?? raw.nonVegetarian, 10) || 0) : 0
   };
+}
+
+function getGuestActualCount(guest) {
+  const eventAttendanceCounts = Object.values(guest.eventResponses || {})
+    .map(response => normalizeStoredEventResponse(response, guest.rsvpStatus).attendanceCount);
+  const recordedAttendance = Math.max(0, ...eventAttendanceCounts);
+  if (recordedAttendance > 0) return recordedAttendance;
+  return guest.rsvpStatus === 'accepted' ? Math.max(1, parseInt(guest.partySize, 10) || 1) : 0;
 }
 
 async function handleRsvpSummary(req, res) {

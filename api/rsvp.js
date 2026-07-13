@@ -329,9 +329,15 @@ async function handleTokenRsvp(req, res, url, body, token) {
   }
   const rsvpStatus = body.eventResponses ? deriveRsvpStatus(eventResponses) : fallbackStatus;
   const now = new Date().toISOString();
+  const submittedPartySize = Math.max(
+    1,
+    ...Object.values(eventResponses).map(response => response.attendanceCount || 0)
+  );
   let updatedGuest = {
     ...guest,
-    partySize: Math.max(1, parseInt(body.partySize, 10) || parseInt(guest.partySize, 10) || 1),
+    partySize: body.eventResponses
+      ? submittedPartySize
+      : Math.max(1, parseInt(body.partySize, 10) || parseInt(guest.partySize, 10) || 1),
     dietaryRestrictions: cleanText(body.dietaryRestrictions || guest.dietaryRestrictions || 'none', 80),
     rsvpStatus,
     rsvpDate: rsvpStatus === 'pending' ? guest.rsvpDate || null : now,

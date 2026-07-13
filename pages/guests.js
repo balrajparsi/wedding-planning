@@ -131,18 +131,25 @@ const guestListPage = {
     if (!container) return;
 
     const g = guestModule.guests;
-    const total       = g.length;
+    const invitations = guestModule.stats.total ?? g.length;
+    const actualGuests = guestModule.stats.actualGuests ?? g.reduce((sum, guest) => {
+      const eventCounts = Object.values(guest.eventResponses || {})
+        .map(response => parseInt(response?.attendanceCount, 10) || 0);
+      const recordedAttendance = Math.max(0, ...eventCounts);
+      return sum + (recordedAttendance || (guest.rsvpStatus === 'accepted' ? Math.max(1, parseInt(guest.partySize, 10) || 1) : 0));
+    }, 0);
     const accepted    = g.filter(x => x.rsvpStatus === 'accepted').length;
     const pending     = g.filter(x => x.rsvpStatus === 'pending').length;
     const declined    = g.filter(x => x.rsvpStatus === 'declined').length;
     const maybe       = g.filter(x => x.rsvpStatus === 'maybe').length;
 
     container.innerHTML = `
-      <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total Guests</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#27ae60">${accepted}</div><div class="stat-label">Accepted</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${maybe}</div><div class="stat-label">Maybe</div></div>
+      <div class="stat-card"><div class="stat-value">${invitations}</div><div class="stat-label">Total Invitations</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${actualGuests}</div><div class="stat-label">Actual Guests</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#27ae60">${accepted}</div><div class="stat-label">Accepted Invitations</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending Invitations</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined Invitations</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${maybe}</div><div class="stat-label">Maybe Invitations</div></div>
     `;
   },
 
