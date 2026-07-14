@@ -405,10 +405,7 @@ const guestListPage = {
       const detail = result?.error
         || (result?.sentAt ? `Sent ${result.sentAt}` : result?.attemptedAt ? `Attempted ${result.attemptedAt}` : 'No confirmation attempt recorded.');
       const neutralStyle = display.className ? '' : 'background:#eef0f2;color:#697078;border:1px solid #d3d7db;';
-      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:.45rem;white-space:nowrap;" title="${this.escapeHtml(detail)}">
-        <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);">${label}</span>
-        <span class="badge ${display.className}" style="min-width:auto;padding:.3rem .55rem;${neutralStyle}">${display.label}</span>
-      </div>`;
+      return `<span class="badge ${display.className}" style="min-width:auto;padding:.3rem .55rem;white-space:nowrap;${neutralStyle}" title="${this.escapeHtml(detail)}">${label} ${display.label}</span>`;
     };
 
     return `<div style="display:grid;gap:.35rem;min-width:9.5rem;">
