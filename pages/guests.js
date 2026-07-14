@@ -249,6 +249,7 @@ const guestListPage = {
     const tbody = guests.map(g => {
       const eventTags = this.renderEventTags(g);
       const rsvpDetails = this.renderRsvpDetails(g);
+      const confirmationStatus = this.renderConfirmationStatus(g);
       return `
       <tr>
         <td><strong>${g.name || '—'}</strong></td>
@@ -258,6 +259,7 @@ const guestListPage = {
         <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
         <td>${rsvpDetails}</td>
+        <td>${confirmationStatus}</td>
         <td><span style="font-size:0.75rem;color:var(--text-muted);">${g.lastRsvpSource === 'public_rsvp' || g.source === 'public_rsvp' ? 'Public RSVP' : 'Dashboard'}</span></td>
         <td>
           <button class="btn-icon" onclick="guestListPage.openEditGuestModal(${JSON.stringify(g).replace(/"/g, '&quot;')})" title="Edit">✎</button>
@@ -277,6 +279,7 @@ const guestListPage = {
             <th>Attending Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
             <th>Event RSVP & Meals</th>
+            <th>Confirmation Status</th>
             <th>Source</th>
             <th>Actions</th>
           </tr>
@@ -388,6 +391,30 @@ const guestListPage = {
       return '';
     }).filter(Boolean);
     return details.join('') || '<span style="color:#aaa;font-size:0.8rem;">No event response</span>';
+  },
+
+  renderConfirmationStatus(guest) {
+    const confirmations = guest?.rsvpConfirmations || {};
+    const renderChannel = (label, result) => {
+      const status = String(result?.status || '').trim().toLowerCase();
+      const display = {
+        sent: { label: 'Sent', className: 'badge-success' },
+        failed: { label: 'Failed', className: 'badge-danger' },
+        skipped: { label: 'Skipped', className: 'badge-warning' }
+      }[status] || { label: 'Not attempted', className: '' };
+      const detail = result?.error
+        || (result?.sentAt ? `Sent ${result.sentAt}` : result?.attemptedAt ? `Attempted ${result.attemptedAt}` : 'No confirmation attempt recorded.');
+      const neutralStyle = display.className ? '' : 'background:#eef0f2;color:#697078;border:1px solid #d3d7db;';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:.45rem;white-space:nowrap;" title="${this.escapeHtml(detail)}">
+        <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);">${label}</span>
+        <span class="badge ${display.className}" style="min-width:auto;padding:.3rem .55rem;${neutralStyle}">${display.label}</span>
+      </div>`;
+    };
+
+    return `<div style="display:grid;gap:.35rem;min-width:9.5rem;">
+      ${renderChannel('Email', confirmations.email)}
+      ${renderChannel('SMS', confirmations.sms)}
+    </div>`;
   },
 
   async copyPublicRsvpLink() {
