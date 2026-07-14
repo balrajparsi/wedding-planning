@@ -413,7 +413,6 @@ const guestListPage = {
 
     return `<div style="display:grid;gap:.35rem;min-width:9.5rem;">
       ${renderChannel('Email', confirmations.email)}
-      ${renderChannel('SMS', confirmations.sms)}
     </div>`;
   },
 
