@@ -139,17 +139,11 @@ const guestListPage = {
       return sum + (recordedAttendance || (guest.rsvpStatus === 'accepted' ? Math.max(1, parseInt(guest.partySize, 10) || 1) : 0));
     }, 0);
     const accepted    = g.filter(x => x.rsvpStatus === 'accepted').length;
-    const pending     = g.filter(x => x.rsvpStatus === 'pending').length;
-    const declined    = g.filter(x => x.rsvpStatus === 'declined').length;
-    const maybe       = g.filter(x => x.rsvpStatus === 'maybe').length;
 
     container.innerHTML = `
       <div class="stat-card"><div class="stat-value">${invitations}</div><div class="stat-label">Total Invitations</div></div>
       <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${actualGuests}</div><div class="stat-label">Actual Guests</div></div>
       <div class="stat-card"><div class="stat-value" style="color:#27ae60">${accepted}</div><div class="stat-label">Accepted Invitations</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#f39c12">${pending}</div><div class="stat-label">Pending Invitations</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#c0392b">${declined}</div><div class="stat-label">Declined Invitations</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:#8e44ad">${maybe}</div><div class="stat-label">Maybe Invitations</div></div>
     `;
   },
 
@@ -280,7 +274,7 @@ const guestListPage = {
             <th>Email</th>
             <th>Phone</th>
             <th>Party Size</th>
-            <th>Events</th>
+            <th>Attending Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
             <th>Event RSVP & Meals</th>
             <th>Source</th>
@@ -351,12 +345,24 @@ const guestListPage = {
     return events.length ? events : [...this.guestEventNames];
   },
 
+  getAttendingGuestEvents(guest) {
+    const responses = guest?.eventResponses || {};
+    return this.guestEventNames.filter(eventName => {
+      const raw = responses[eventName];
+      const response = typeof raw === 'object' && raw !== null ? raw.response : raw;
+      return ['attending', 'yes', 'accepted'].includes(String(response || '').trim().toLowerCase());
+    });
+  },
+
   isAllGuestEvents(events) {
     return this.guestEventNames.every(eventName => events.includes(eventName));
   },
 
   renderEventTags(guest) {
-    const events = this.getGuestEvents(guest);
+    const events = this.getAttendingGuestEvents(guest);
+    if (!events.length) {
+      return '<span style="color:#aaa;font-size:0.8rem;">No accepted events</span>';
+    }
     if (this.isAllGuestEvents(events)) {
       return '<span style="display:inline-block;background:#f8f0d8;color:#8c5f11;padding:0.15rem 0.45rem;border-radius:0.25rem;font-size:0.72rem;margin:0.1rem;font-weight:600;">All Events</span>';
     }
