@@ -15,8 +15,8 @@ const guestModule = {
       const params = new URLSearchParams({
         rsvpStatus: filters.rsvpStatus || '',
         search: filters.search || '',
-        sortBy: filters.sortBy || 'name',
-        sortDir: filters.sortDir || 'asc'
+        sortBy: filters.sortBy || 'rsvpDate',
+        sortDir: filters.sortDir || 'desc'
       });
 
       // Remove empty params
@@ -139,10 +139,30 @@ const guestModule = {
     }
 
     // Sort
-    const sortBy = filters.sortBy || 'name';
-    const sortDir = filters.sortDir || 'asc';
+    const sortBy = filters.sortBy || 'rsvpDate';
+    const sortDir = filters.sortDir || 'desc';
 
     filtered.sort((a, b) => {
+      if (sortBy === 'rsvpDate') {
+        const getResponseRank = guest => {
+          const status = String(guest?.rsvpStatus || 'pending').toLowerCase();
+          if (status === 'pending') return 2;
+
+          const timestamp = Date.parse(guest?.rsvpDate);
+          return Number.isNaN(timestamp) ? 1 : 0;
+        };
+        const aRank = getResponseRank(a);
+        const bRank = getResponseRank(b);
+
+        if (aRank !== bRank) return aRank - bRank;
+        if (aRank === 0) {
+          const difference = Date.parse(a.rsvpDate) - Date.parse(b.rsvpDate);
+          if (difference !== 0) return sortDir === 'asc' ? difference : -difference;
+        }
+
+        return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+      }
+
       let aVal = a[sortBy];
       let bVal = b[sortBy];
 
@@ -153,7 +173,7 @@ const guestModule = {
 
       if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-      return 0;
+      return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
     });
 
     this.filteredGuests = filtered;

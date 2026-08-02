@@ -115,20 +115,40 @@ async function handleListGuests(req, res) {
 
   // Sort
   filtered.sort((a, b) => {
+    if (sortBy === 'rsvpDate') {
+      const getResponseRank = guest => {
+        const status = String(guest?.rsvpStatus || 'pending').toLowerCase();
+        if (status === 'pending') return 2;
+
+        const timestamp = Date.parse(guest?.rsvpDate);
+        return Number.isNaN(timestamp) ? 1 : 0;
+      };
+      const aRank = getResponseRank(a);
+      const bRank = getResponseRank(b);
+
+      if (aRank !== bRank) return aRank - bRank;
+      if (aRank === 0) {
+        const difference = Date.parse(a.rsvpDate) - Date.parse(b.rsvpDate);
+        if (difference !== 0) return sortDir === 'asc' ? difference : -difference;
+      }
+
+      return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+    }
+
     let aVal = a[sortBy];
     let bVal = b[sortBy];
 
     if (sortBy === 'partySize') {
       aVal = parseInt(aVal) || 1;
       bVal = parseInt(bVal) || 1;
-    } else if (sortBy === 'rsvpDate' || sortBy === 'invitedDate') {
-      aVal = new Date(aVal) || new Date(0);
-      bVal = new Date(bVal) || new Date(0);
+    } else if (sortBy === 'invitedDate') {
+      aVal = Date.parse(aVal) || 0;
+      bVal = Date.parse(bVal) || 0;
     }
 
     if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-    return 0;
+    return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
   });
 
   // Attach summary stats

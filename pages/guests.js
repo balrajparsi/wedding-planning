@@ -8,8 +8,8 @@ const guestListPage = {
   currentFilters: {
     rsvpStatus: '',
     search: '',
-    sortBy: 'name',
-    sortDir: 'asc'
+    sortBy: 'rsvpDate',
+    sortDir: 'desc'
   },
 
   rsvpSummary: [],
@@ -59,11 +59,10 @@ const guestListPage = {
 
     // Clear filters
     view.querySelector('.guest-clear-btn')?.addEventListener('click', () => {
-      this.currentFilters = { rsvpStatus: '', search: '', sortBy: 'name', sortDir: 'asc' };
+      this.currentFilters = { rsvpStatus: '', search: '', sortBy: 'rsvpDate', sortDir: 'desc' };
       view.querySelector('.guest-search').value = '';
       view.querySelector('.guest-rsvp-filter').value = '';
-      guestModule.filteredGuests = [...guestModule.guests];
-      this.render();
+      this.applyFilters();
     });
 
     // Add guest
@@ -103,8 +102,8 @@ const guestListPage = {
       } catch (_) {
         this.rsvpSummary = [];
       }
-      // Always sync filteredGuests after a fresh fetch
-      guestModule.filteredGuests = [...guestModule.guests];
+      // Reapply the active filters and ordering after every fresh fetch.
+      guestModule.filter(this.currentFilters);
     } catch (error) {
       showNotification('Failed to load guests', 'error');
       guestModule.guests = [];
@@ -231,6 +230,28 @@ const guestListPage = {
     }[char]));
   },
 
+  formatRsvpTimestamp(guest) {
+    const status = String(guest?.rsvpStatus || 'pending').toLowerCase();
+    if (status === 'pending') {
+      return '<span style="color:var(--text-muted);font-size:0.8rem;">Awaiting</span>';
+    }
+
+    const date = new Date(guest?.rsvpDate);
+    if (!guest?.rsvpDate || Number.isNaN(date.getTime())) {
+      return '<span style="color:var(--text-muted);font-size:0.8rem;">Date unavailable</span>';
+    }
+
+    const timestamp = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: WEDDING_TIME_ZONE
+    }).format(date);
+
+    return `<span style="white-space:nowrap;font-size:0.8rem;">${timestamp}</span>`;
+  },
+
   renderTable() {
     const view = document.querySelector('[data-view="guests"]');
     const container = view?.querySelector('.guest-table-container');
@@ -258,6 +279,7 @@ const guestListPage = {
         <td style="text-align:center">${g.partySize || 1}</td>
         <td>${eventTags || '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
         <td><span class="badge badge-${g.rsvpStatus}">${g.rsvpStatus}</span></td>
+        <td>${this.formatRsvpTimestamp(g)}</td>
         <td>${rsvpDetails}</td>
         <td>${confirmationStatus}</td>
         <td><span style="font-size:0.75rem;color:var(--text-muted);">${g.lastRsvpSource === 'public_rsvp' || g.source === 'public_rsvp' ? 'Public RSVP' : 'Dashboard'}</span></td>
@@ -278,6 +300,7 @@ const guestListPage = {
             <th>Party Size</th>
             <th>Attending Events</th>
             <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpStatus')">RSVP ↕</th>
+            <th style="cursor:pointer" onclick="guestListPage.sortBy('rsvpDate')">Responded ↕</th>
             <th>Event RSVP & Meals</th>
             <th>Confirmation Status</th>
             <th>Source</th>
@@ -293,7 +316,7 @@ const guestListPage = {
       this.currentFilters.sortDir = this.currentFilters.sortDir === 'asc' ? 'desc' : 'asc';
     } else {
       this.currentFilters.sortBy = field;
-      this.currentFilters.sortDir = 'asc';
+      this.currentFilters.sortDir = field === 'rsvpDate' ? 'desc' : 'asc';
     }
     this.applyFilters();
   },
