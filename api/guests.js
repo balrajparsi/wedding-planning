@@ -33,6 +33,30 @@ function ensureGuestEvents(events) {
   return normalized.length > 0 ? normalized : allGuestEventNames();
 }
 
+function enforceEventMealPolicies(eventResponses) {
+  if (!eventResponses || typeof eventResponses !== 'object') return {};
+
+  const normalized = { ...eventResponses };
+  RSVP_EVENTS.forEach(event => {
+    if (event.mealPolicy !== 'vegetarian-only') return;
+
+    const raw = normalized[event.name];
+    if (!raw || typeof raw !== 'object') return;
+    const response = String(raw.response || raw.status || '').trim().toLowerCase();
+    if (!['attending', 'yes', 'accepted'].includes(response)) return;
+
+    const attendanceCount = Math.max(0, parseInt(raw.attendanceCount ?? raw.attendees, 10) || 0);
+    normalized[event.name] = {
+      ...raw,
+      attendanceCount,
+      vegetarianCount: attendanceCount,
+      nonVegetarianCount: 0
+    };
+  });
+
+  return normalized;
+}
+
 module.exports = async function handler(req, res) {
   try {
     if (req.method === 'GET' && (req.url.includes('action=export') || req.url.includes('/export'))) {
@@ -218,8 +242,12 @@ async function handleRsvpSummary(req, res) {
       if (response.response === 'attending') {
         const attendanceCount = response.attendanceCount || Math.max(1, parseInt(guest.partySize, 10) || 1);
         summary.confirmedGuests += attendanceCount;
-        summary.vegetarianMeals += response.vegetarianCount;
-        summary.nonVegetarianMeals += response.nonVegetarianCount;
+        if (summary.mealPolicy === 'vegetarian-only') {
+          summary.vegetarianMeals += attendanceCount;
+        } else {
+          summary.vegetarianMeals += response.vegetarianCount;
+          summary.nonVegetarianMeals += response.nonVegetarianCount;
+        }
         summary.respondedGuests++;
       } else if (response.response === 'maybe') {
         summary.maybeGuests++;
@@ -252,7 +280,7 @@ async function handleAddGuest(req, res) {
     dietaryRestrictions: dietaryRestrictions || 'none',
     notes: notes || '',
     events: ensureGuestEvents(events),
-    eventResponses: eventResponses && typeof eventResponses === 'object' ? eventResponses : {},
+    eventResponses: enforceEventMealPolicies(eventResponses),
     rsvpStatus: rsvpStatus || 'pending',
     invitedDate: null,
     lastInviteAttemptDate: null,
@@ -300,7 +328,9 @@ async function handleUpdateGuest(req, res) {
   if (dietaryRestrictions !== undefined) guest.dietaryRestrictions = dietaryRestrictions;
   if (notes !== undefined) guest.notes = notes;
   if (events !== undefined) guest.events = ensureGuestEvents(events);
-  if (eventResponses !== undefined && eventResponses && typeof eventResponses === 'object') guest.eventResponses = eventResponses;
+  if (eventResponses !== undefined && eventResponses && typeof eventResponses === 'object') {
+    guest.eventResponses = enforceEventMealPolicies(eventResponses);
+  }
 
   if (rsvpStatus !== undefined) {
     guest.rsvpStatus = rsvpStatus;

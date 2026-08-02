@@ -380,6 +380,11 @@ const guestListPage = {
     });
   },
 
+  isVegetarianOnlyEvent(name) {
+    return (this.rsvpSummary || []).some(event => event.name === name && event.mealPolicy === 'vegetarian-only')
+      || ['Pellikuthuru', 'Marriage', 'Satyanarayana Swamy Vratam'].includes(name);
+  },
+
   isAllGuestEvents(events) {
     return this.guestEventNames.every(eventName => events.includes(eventName));
   },
@@ -405,6 +410,9 @@ const guestListPage = {
       const response = typeof raw === 'object' ? raw.response : raw;
       if (response === 'attending') {
         const attending = parseInt(raw.attendanceCount, 10) || parseInt(guest.partySize, 10) || 1;
+        if (this.isVegetarianOnlyEvent(name)) {
+          return `<div style="font-size:0.72rem;line-height:1.45;"><strong>${name}</strong>: Yes · ${attending} (${attending} V)</div>`;
+        }
         const veg = parseInt(raw.vegetarianCount, 10) || 0;
         const nonVeg = parseInt(raw.nonVegetarianCount, 10) || 0;
         return `<div style="font-size:0.72rem;line-height:1.45;"><strong>${name}</strong>: Yes · ${attending} (${veg} V / ${nonVeg} NV)</div>`;
@@ -449,6 +457,7 @@ const guestListPage = {
   renderManualEventResponses(form, guest = {}) {
     const existing = guest.eventResponses || {};
     const html = this.guestEventNames.map(name => {
+      const vegetarianOnly = this.isVegetarianOnlyEvent(name);
       const raw = existing[name] || {};
       const response = typeof raw === 'object' ? raw.response : raw || 'pending';
       const attending = parseInt(raw.attendanceCount, 10) || parseInt(guest.partySize, 10) || 1;
@@ -458,8 +467,10 @@ const guestListPage = {
         <strong style="font-size:.8rem;">${name}</strong>
         <label style="font-size:.68rem;">Response<select data-response><option value="pending" ${response === 'pending' ? 'selected' : ''}>No response</option><option value="attending" ${response === 'attending' ? 'selected' : ''}>Yes</option><option value="maybe" ${response === 'maybe' ? 'selected' : ''}>Maybe</option><option value="not_attending" ${response === 'not_attending' ? 'selected' : ''}>No</option></select></label>
         <label style="font-size:.68rem;">Guests<input data-count="attendanceCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? attending : 0}"></label>
-        <label style="font-size:.68rem;">Veg<input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? veg : 0}"></label>
-        <label style="font-size:.68rem;">Non-veg<input data-count="nonVegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? nonVeg : 0}"></label>
+        ${vegetarianOnly
+          ? '<span style="grid-column:span 2;color:#278a4b;font-size:.72rem;font-weight:600;align-self:center;">Vegetarian only</span>'
+          : `<label style="font-size:.68rem;">Veg<input data-count="vegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? veg : 0}"></label>
+             <label style="font-size:.68rem;">Non-veg<input data-count="nonVegetarianCount" type="text" inputmode="numeric" pattern="[0-9]*" value="${response === 'attending' ? nonVeg : 0}"></label>`}
       </div>`;
     }).join('');
     let container = form.querySelector('[data-manual-rsvp-events]');
@@ -480,8 +491,9 @@ const guestListPage = {
       const response = row.querySelector('[data-response]').value;
       const value = key => Math.max(0, parseInt(row.querySelector(`[data-count="${key}"]`)?.value, 10) || 0);
       const attendanceCount = value('attendanceCount');
-      const vegetarianCount = value('vegetarianCount');
-      const nonVegetarianCount = value('nonVegetarianCount');
+      const vegetarianOnly = this.isVegetarianOnlyEvent(name);
+      const vegetarianCount = vegetarianOnly && response === 'attending' ? attendanceCount : value('vegetarianCount');
+      const nonVegetarianCount = vegetarianOnly ? 0 : value('nonVegetarianCount');
       if (response === 'attending' && (!attendanceCount || vegetarianCount + nonVegetarianCount !== attendanceCount)) {
         throw new Error(`${name}: vegetarian and non-vegetarian meals must equal guests.`);
       }
