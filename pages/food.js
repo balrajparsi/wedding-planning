@@ -179,53 +179,53 @@ const foodPage = {
             ${sharedCount ? `<span>${sharedCount} shared</span>` : ''}
           </div>
         </div>
-        <div class="table-container food-menu-table-wrap">
-          <table class="food-menu-table">
-            <thead>
-              <tr>
-                <th>Dish</th>
-                <th>Type</th>
-                <th>Cuisine</th>
-                <th>Cost</th>
-                <th>Portion</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.groupMenuItemsByCourse(items).map(([courseType, courseItems]) => `
-                <tr class="food-meal-heading-row">
-                  <td colspan="6">
-                    <div class="food-meal-heading">
-                      <span>${this.escapeHtml(this.titleCase(courseType))}:</span>
-                      <small>${courseItems.length} dish${courseItems.length === 1 ? '' : 'es'}</small>
-                    </div>
-                  </td>
-                </tr>
-                ${courseItems.map(item => {
-                  const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
-                  const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
-                  return `
-                    <tr class="food-dish-row">
-                      <td>
-                        <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
-                        ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
-                      </td>
-                      <td><span class="food-type-pill ${vegTypeClass}">${vegTypeLabel}</span></td>
-                      <td>${this.escapeHtml(item.cuisine || 'Cuisine TBD')}</td>
-                      <td>$${(item.cost || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
-                      <td>${this.escapeHtml(item.portionSize || '1 plate')}</td>
-                      <td>
-                        <div class="food-row-actions">
-                          <button class="btn-icon edit-dish" data-id="${this.escapeHtml(item.id)}" title="Edit">✎</button>
-                          <button class="btn-icon delete-dish" data-id="${this.escapeHtml(item.id)}" title="Delete">✕</button>
-                        </div>
-                      </td>
+        <div class="food-meal-card-list">
+          ${this.groupMenuItemsByCourse(items).map(([courseType, courseItems]) => `
+            <section class="food-meal-card">
+              <div class="food-meal-heading">
+                <span>${this.escapeHtml(this.titleCase(courseType))}:</span>
+                <small>${courseItems.length} dish${courseItems.length === 1 ? '' : 'es'}</small>
+              </div>
+              <div class="table-container food-menu-table-wrap">
+                <table class="food-menu-table">
+                  <thead>
+                    <tr>
+                      <th>Dish</th>
+                      <th>Type</th>
+                      <th>Cuisine</th>
+                      <th>Cost</th>
+                      <th>Portion</th>
+                      <th>Actions</th>
                     </tr>
-                  `;
-                }).join('')}
-              `).join('')}
-            </tbody>
-          </table>
+                  </thead>
+                  <tbody>
+                    ${courseItems.map(item => {
+                      const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
+                      const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
+                      return `
+                        <tr class="food-dish-row">
+                          <td>
+                            <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
+                            ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
+                          </td>
+                          <td><span class="food-type-pill ${vegTypeClass}">${vegTypeLabel}</span></td>
+                          <td>${this.escapeHtml(item.cuisine || 'Cuisine TBD')}</td>
+                          <td>$${(item.cost || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                          <td>${this.escapeHtml(item.portionSize || '1 plate')}</td>
+                          <td>
+                            <div class="food-row-actions">
+                              <button class="btn-icon edit-dish" data-id="${this.escapeHtml(item.id)}" title="Edit">✎</button>
+                              <button class="btn-icon delete-dish" data-id="${this.escapeHtml(item.id)}" title="Delete">✕</button>
+                            </div>
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          `).join('')}
         </div>
       `;
 
