@@ -472,15 +472,15 @@
                             </div>
                         </section>
 
-                        <section class="settings-panel">
-                            <p class="settings-kicker">What belongs here</p>
-                            <h3>Useful Additions</h3>
-                            <ul class="settings-idea-list">
-                                <li>Role-based access for parents, planners, and guests.</li>
-                                <li>Notification rules for overdue tasks and pending RSVPs.</li>
-                                <li>Export controls for guest lists, budget, and vendor sheets.</li>
-                                <li>Wedding branding: colors, logo, invitation copy, and RSVP text.</li>
-                            </ul>
+                        <section class="settings-panel backup-panel">
+                            <p class="settings-kicker">Data protection</p>
+                            <h3>Complete Dashboard Backup</h3>
+                            <p class="backup-description">Protects guests, tasks, budget, vendors, venues, food, timeline, settings, users, and RSVP data. Previous values are also archived automatically whenever data changes.</p>
+                            <p id="backupStatus" class="backup-status">Checking backup status…</p>
+                            <div class="settings-action-list">
+                                <button class="btn btn-secondary" type="button" onclick="app?.createDashboardBackup?.('manual-settings-backup', true)">Back Up Everything Now</button>
+                                <button class="btn btn-danger" type="button" onclick="app?.restoreDashboardBackup?.()">Restore Earlier Backup</button>
+                            </div>
                         </section>
                     </div>
                 </div>

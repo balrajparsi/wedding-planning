@@ -1238,6 +1238,27 @@ tr:hover {
   width: 100%;
 }
 
+.backup-panel {
+  border-top: 3px solid var(--gold);
+}
+
+.backup-description {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.backup-status {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  color: var(--blue);
+  background: rgba(39, 174, 96, 0.08);
+  border: 1px solid rgba(39, 174, 96, 0.18);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .settings-idea-list {
   padding-left: 1.1rem;
   color: var(--text-muted);

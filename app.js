@@ -49,7 +49,9 @@ class WeddingPlanningApp {
 
   // Initialize app
   async init() {
-    this.loadDashboard();
+    this.loadDashboard()
+      .then(() => this.createDashboardBackup('automatic-dashboard-load', false))
+      .catch(error => console.error('Automatic dashboard backup failed:', error));
     this.setupRouting();
     this.startPollingSync();
   }
@@ -353,6 +355,52 @@ class WeddingPlanningApp {
 
     this.renderRoleList();
     this.bindSettingsForm();
+    this.loadBackupStatus();
+  }
+
+  async createDashboardBackup(reason = 'manual', notify = true) {
+    try {
+      const response = await this.apiCall('/api/backups?action=create', 'POST', { reason });
+      await this.loadBackupStatus();
+      if (notify) {
+        this.showSuccess(response.created ? 'Full dashboard backup created' : 'All data is already backed up');
+      }
+      return response;
+    } catch (error) {
+      console.error('Dashboard backup failed:', error);
+      if (notify) this.showError('Failed to back up dashboard data');
+      throw error;
+    }
+  }
+
+  async loadBackupStatus() {
+    const status = document.getElementById('backupStatus');
+    if (!status) return;
+    try {
+      const response = await this.apiCall('/api/backups', 'GET');
+      const latest = response.backups?.[0];
+      status.textContent = latest
+        ? `Protected ${new Date(latest.createdAt).toLocaleString('en-US', { timeZone: WEDDING_TIME_ZONE })} · ${response.backups.length}/${response.retention} snapshots retained`
+        : 'No full dashboard snapshot exists yet';
+    } catch (error) {
+      status.textContent = 'Backup status unavailable';
+    }
+  }
+
+  async restoreDashboardBackup() {
+    const passcode = window.prompt('Enter the restore passcode:');
+    if (passcode === null) return;
+    if (!window.confirm('Restore the most recent earlier version of ALL wedding data? The current version will also be backed up first.')) return;
+
+    try {
+      const response = await this.apiCall('/api/backups?action=restore', 'POST', { passcode });
+      await this.loadDashboard();
+      await this.loadBackupStatus();
+      this.showSuccess(`All dashboard data restored (${response.restoredKeys} data groups)`);
+    } catch (error) {
+      console.error('Dashboard restore failed:', error);
+      this.showError('Could not restore an earlier dashboard backup');
+    }
   }
 
   renderRoleList() {
