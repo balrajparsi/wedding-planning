@@ -292,13 +292,13 @@ const foodPage = {
         return;
       }
 
-      this.showImportStatus(`Found ${items.length} dish${items.length === 1 ? '' : 'es'}. Importing...`, 'info');
+      this.showImportStatus(`Found ${items.length} dish${items.length === 1 ? '' : 'es'}. Replacing the previous menu...`, 'info');
       const result = await foodModule.importMenuItems(items);
       await this.loadFood();
       this.applyFilters();
       const skippedText = result.skippedCount ? ` ${result.skippedCount} duplicate or incomplete row${result.skippedCount === 1 ? '' : 's'} skipped.` : '';
-      this.showImportStatus(`Imported ${result.imported || 0} dish${(result.imported || 0) === 1 ? '' : 'es'}.${skippedText}`, 'success');
-      showNotification(`Imported ${result.imported || 0} menu item${(result.imported || 0) === 1 ? '' : 's'}`, 'success');
+      this.showImportStatus(`Menu replaced with ${result.imported || 0} dish${(result.imported || 0) === 1 ? '' : 'es'}.${skippedText}`, 'success');
+      showNotification(`Menu replaced with ${result.imported || 0} item${(result.imported || 0) === 1 ? '' : 's'}`, 'success');
     } catch (error) {
       this.showImportStatus(error.message || 'Failed to import menu file', 'error');
       showNotification(error.message || 'Failed to import menu file', 'error');

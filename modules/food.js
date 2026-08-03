@@ -92,8 +92,8 @@ const foodModule = {
   async importMenuItems(items) {
     try {
       const response = await apiCall('/api/food?action=import', 'POST', { items });
-      if (Array.isArray(response.created) && response.created.length) {
-        this.menuItems.push(...response.created);
+      if (Array.isArray(response.created)) {
+        this.menuItems = [...response.created];
         this.filteredItems = [...this.menuItems];
       }
       return response;

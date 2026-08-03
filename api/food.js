@@ -166,8 +166,8 @@ module.exports = async (req, res) => {
       if (!incoming.length) return res.status(400).json({ error: 'No menu items to import' });
       if (incoming.length > 500) return res.status(400).json({ error: 'Import up to 500 menu items at a time' });
 
-      let items = await kv.get(key) || [];
-      const seen = new Set(items.map(itemKey));
+      const existingItems = await kv.get(key) || [];
+      const seen = new Set();
       const created = [];
       const skipped = [];
 
@@ -177,19 +177,31 @@ module.exports = async (req, res) => {
           skipped.push({ index, reason: 'Missing dish, event, or meal', item: raw });
           return;
         }
-        const key = itemKey(normalized);
-        if (seen.has(key)) {
+        const normalizedKey = itemKey(normalized);
+        if (seen.has(normalizedKey)) {
           skipped.push({ index, reason: 'Duplicate dish for event/course', item: raw });
           return;
         }
-        seen.add(key);
+        seen.add(normalizedKey);
         const item = makeMenuItem(normalized);
-        items.push(item);
         created.push(item);
       });
 
-      if (created.length) await kv.set(key, items);
-      return res.status(200).json({ success: true, created, skipped, imported: created.length, skippedCount: skipped.length });
+      if (!created.length) {
+        return res.status(400).json({ error: 'No valid menu items found; the existing menu was not changed' });
+      }
+
+      // A file import represents the latest complete menu revision. Replace the
+      // previous list in one write so an incomplete import cannot partially clear it.
+      await kv.set(key, created);
+      return res.status(200).json({
+        success: true,
+        created,
+        skipped,
+        imported: created.length,
+        replaced: existingItems.length,
+        skippedCount: skipped.length
+      });
     }
 
     if (method === 'POST') {
