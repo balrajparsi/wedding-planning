@@ -162,13 +162,15 @@ const foodPage = {
       const vegetarianCount = items.filter(item => item.vegNonVeg === 'veg').length;
       const nonVegetarianCount = items.filter(item => item.vegNonVeg === 'non-veg').length;
       const sharedCount = items.filter(item => !['veg', 'non-veg'].includes(item.vegNonVeg)).length;
+      const eventDate = items.find(item => item.eventDate)?.eventDate || this.eventDateForEvent(eventName);
+      const eventDateLabel = this.formatMenuDate(eventDate);
 
       section.innerHTML = `
         <div class="food-event-heading">
           <div>
             <span class="food-event-kicker">Event-wise menu</span>
             <h3>${this.escapeHtml(eventName)} Menu</h3>
-            <p class="food-event-subtitle">${items.length} dish${items.length === 1 ? '' : 'es'} listed below for this event</p>
+            <p class="food-event-subtitle">${eventDateLabel ? `${this.escapeHtml(eventDateLabel)} · ` : ''}${items.length} dish${items.length === 1 ? '' : 'es'} listed below for this event</p>
           </div>
           <div class="food-event-counts">
             <span>${items.length} dish${items.length === 1 ? '' : 'es'}</span>
@@ -349,15 +351,22 @@ const foodPage = {
     let best = '';
     let bestScore = 0;
     candidates.forEach(delimiter => {
-      const counts = lines.slice(0, 20).map(line => this.parseDelimitedLine(line, delimiter).length);
+      const sample = lines.slice(0, 50);
+      const counts = sample.map(line => this.parseDelimitedLine(line, delimiter).length);
       const multi = counts.filter(count => count > 1);
-      const score = multi.length ? multi.reduce((sum, count) => sum + count, 0) / multi.length + multi.length : 0;
+      const frequency = multi.length / Math.max(sample.length, 1);
+      const columnCounts = new Map();
+      multi.forEach(count => columnCounts.set(count, (columnCounts.get(count) || 0) + 1));
+      const consistentRows = Math.max(0, ...columnCounts.values());
+      const consistency = consistentRows / Math.max(multi.length, 1);
+      const isTabular = multi.length >= 2 && frequency >= 0.5 && consistency >= 0.6;
+      const score = isTabular ? frequency + consistency : 0;
       if (score > bestScore) {
         best = delimiter;
         bestScore = score;
       }
     });
-    return bestScore >= 3 ? best : '';
+    return bestScore > 0 ? best : '';
   },
 
   parseDelimitedLine(line, delimiter) {
@@ -386,7 +395,7 @@ const foodPage = {
   parseRowsToMenuItems(rows) {
     const context = {
       eventType: this.currentFilters.eventType || 'Marriage',
-      courseType: this.currentFilters.courseType || 'lunch'
+      courseTypes: [this.currentFilters.courseType || 'lunch']
     };
     let headerMap = null;
     let activeSheet = '';
@@ -399,15 +408,12 @@ const foodPage = {
         activeSheet = sheetName;
         headerMap = null;
       }
-      const cells = (row.cells || []).map(cell => this.cleanCell(cell)).filter(Boolean);
+      let cells = (row.cells || []).map(cell => this.cleanCell(cell)).filter(Boolean);
       if (!cells.length) return;
 
       const sheetEvent = this.findEvent(sheetName);
       const sheetCourse = this.findCourse(sheetName);
-      const rowContext = {
-        eventType: sheetEvent || context.eventType,
-        courseType: sheetCourse || context.courseType
-      };
+      const sheetContext = this.parseContextHeading(sheetName);
 
       if (this.isHeaderRow(cells)) {
         headerMap = this.buildHeaderMap(cells);
@@ -415,29 +421,33 @@ const foodPage = {
       }
 
       if (cells.length === 1) {
-        const eventOnly = this.findEvent(cells[0]);
-        const courseOnly = this.findCourse(cells[0]);
-        const normalized = cells[0].toLowerCase().replace(/[^a-z]/g, '');
-        if (eventOnly && normalized === eventOnly.toLowerCase().replace(/[^a-z]/g, '')) {
-          context.eventType = eventOnly;
-          return;
-        }
-        if (courseOnly && normalized === courseOnly.toLowerCase().replace(/[^a-z]/g, '')) {
-          context.courseType = courseOnly;
-          return;
+        const heading = this.parseContextHeading(cells[0]);
+        if (heading.isHeading) {
+          if (heading.eventType) context.eventType = heading.eventType;
+          if (heading.courseTypes.length) context.courseTypes = heading.courseTypes;
+          if (!heading.content) return;
+          cells = [heading.content];
         }
       }
 
-      const parsed = headerMap
-        ? this.itemFromHeader(cells, headerMap, rowContext)
-        : this.itemsFromInferredRow(cells, rowContext);
+      const eventType = sheetEvent || sheetContext.eventType || context.eventType;
+      const courseTypes = sheetCourse
+        ? [sheetCourse]
+        : (sheetContext.courseTypes.length ? sheetContext.courseTypes : context.courseTypes);
 
-      (Array.isArray(parsed) ? parsed : [parsed]).filter(Boolean).forEach(item => {
-        const key = [item.eventType, item.courseType, item.dish].map(value => String(value || '').toLowerCase()).join('|');
-        if (!seen.has(key)) {
-          seen.add(key);
-          items.push(item);
-        }
+      courseTypes.forEach(courseType => {
+        const rowContext = { eventType, courseType };
+        const parsed = headerMap
+          ? this.itemFromHeader(cells, headerMap, rowContext)
+          : this.itemsFromInferredRow(cells, rowContext);
+
+        (Array.isArray(parsed) ? parsed : [parsed]).filter(Boolean).forEach(item => {
+          const key = [item.eventType, item.courseType, item.dish].map(value => String(value || '').toLowerCase()).join('|');
+          if (!seen.has(key)) {
+            seen.add(key);
+            items.push(item);
+          }
+        });
       });
     });
 
@@ -469,11 +479,12 @@ const foodPage = {
 
   itemFromHeader(cells, headerMap, context) {
     const get = field => headerMap[field] >= 0 ? cells[headerMap[field]] : '';
+    const dish = get('dish') || cells.find(cell => !this.findEvent(cell) && !this.findCourse(cell));
     return this.toMenuItem({
-      dish: get('dish') || cells.find(cell => !this.findEvent(cell) && !this.findCourse(cell)),
+      dish,
       eventType: this.findEvent(get('eventType')) || context.eventType,
       courseType: this.findCourse(get('courseType')) || context.courseType,
-      vegNonVeg: this.findVegType(get('vegNonVeg')),
+      vegNonVeg: this.findVegType(get('vegNonVeg')) || this.inferVegType(dish),
       cost: this.findCost(get('cost')),
       portionSize: get('portionSize') || '1 plate',
       preparedBy: get('preparedBy'),
@@ -491,7 +502,7 @@ const foodPage = {
     const classified = new Set();
     const eventType = cells.map(cell => this.findEvent(cell)).find(Boolean) || context.eventType;
     const courseType = cells.map(cell => this.findCourse(cell)).find(Boolean) || context.courseType;
-    const vegNonVeg = cells.map(cell => this.findVegType(cell)).find(Boolean) || 'both';
+    const explicitVegType = cells.map(cell => this.findVegType(cell)).find(Boolean);
     const cuisine = cells.map(cell => this.findCuisine(cell)).find(Boolean) || 'Indian';
     const costCell = cells.find(cell => this.looksLikeCost(cell) && !this.looksLikePortion(cell));
     const portionCell = cells.find(cell => this.looksLikePortion(cell));
@@ -502,7 +513,13 @@ const foodPage = {
 
     const unknown = cells.filter((_, index) => !classified.has(index));
     if (!classified.size && cells.length > 1) {
-      return cells.map(dish => this.toMenuItem({ dish, eventType, courseType, vegNonVeg, cuisine }));
+      return cells.map(dish => this.toMenuItem({
+        dish,
+        eventType,
+        courseType,
+        vegNonVeg: explicitVegType || this.inferVegType(dish),
+        cuisine
+      }));
     }
 
     const dish = unknown[0] || cells.find(cell => !this.looksLikeCost(cell)) || '';
@@ -511,7 +528,7 @@ const foodPage = {
       dish,
       eventType,
       courseType,
-      vegNonVeg,
+      vegNonVeg: explicitVegType || this.inferVegType(dish),
       cost: this.findCost(costCell),
       portionSize: portionCell || '1 plate',
       cuisine,
@@ -520,28 +537,46 @@ const foodPage = {
   },
 
   itemsFromFreeformLine(line, context) {
-    const split = line.split(/\s+(?:-|–|—|•)\s+|[|;]/).map(part => part.trim()).filter(Boolean);
+    const split = line.split(/[|;]/).map(part => part.trim()).filter(Boolean);
     if (split.length > 1) return this.itemsFromInferredRow(split, context);
 
-    const eventType = this.findEvent(line) || context.eventType;
-    const courseType = this.findCourse(line) || context.courseType;
-    const vegNonVeg = this.findVegType(line) || 'both';
+    const eventType = context.eventType;
+    const courseType = context.courseType;
+    const explicitDietLabel = line.match(/^\s*(veg(?:etarian)?|non[-\s]?veg(?:etarian)?|both|shared)\s*:/i)?.[1] || '';
     const cuisine = this.findCuisine(line) || 'Indian';
-    const cost = this.findCost(line);
+    const cost = this.hasExplicitCost(line) ? this.findCost(line) : 0;
     const afterColon = line.includes(':') ? line.split(':').slice(1).join(':') : line;
     const cleaned = afterColon
-      .replace(/\$?\s*\d+(?:\.\d+)?/g, ' ')
-      .replace(/\b(haldi|sangeeth?|pellikuthuru|pellikoduku|nalugu|marriage|wedding|muhurtham|satyanarayana|vratam|pooja|puja)\b/ig, ' ')
-      .replace(/\b(appetizers?|starters?|mains?|entrees?|curr(?:y|ies)|sides?|desserts?|sweets?|beverages?|drinks?|snacks?|breakfast|lunch|dinner|brunch|supper)\b/ig, ' ')
-      .replace(/\b(veg|vegetarian|non[-\s]?veg|non[-\s]?vegetarian|both|shared)\b/ig, ' ')
+      .replace(/^\s*(?:[-*•]+|\d+[.)])\s*/, '')
+      .replace(/(?:[$₹]\s*\d+(?:\.\d+)?|\b\d+(?:\.\d+)?\s*(?:usd|rs|inr|per\s+(?:plate|person|pax))\b)/ig, ' ')
       .replace(/\s+/g, ' ')
       .trim();
     const dishes = this.splitDishList(cleaned);
-    return dishes.map(dish => this.toMenuItem({ dish, eventType, courseType, vegNonVeg, cost, cuisine }));
+    return dishes.map(dish => this.toMenuItem({
+      dish,
+      eventType,
+      courseType,
+      vegNonVeg: this.findVegType(explicitDietLabel) || this.inferVegType(dish),
+      cost,
+      cuisine
+    }));
   },
 
   splitDishList(value) {
-    const parts = String(value || '').split(/[,/]+/).map(part => part.trim()).filter(Boolean);
+    const parts = [];
+    let current = '';
+    let depth = 0;
+    for (const char of String(value || '')) {
+      if (char === '(' || char === '[') depth += 1;
+      if (char === ')' || char === ']') depth = Math.max(0, depth - 1);
+      if (char === ',' && depth === 0) {
+        if (current.trim()) parts.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current.trim()) parts.push(current.trim());
     return parts.length > 1 && parts.every(part => part.length <= 60) ? parts : [String(value || '').trim()].filter(Boolean);
   },
 
@@ -551,8 +586,9 @@ const foodPage = {
     return {
       dish,
       eventType: data.eventType || this.currentFilters.eventType || 'Marriage',
+      eventDate: data.eventDate || this.eventDateForEvent(data.eventType || this.currentFilters.eventType || 'Marriage'),
       courseType: data.courseType || this.currentFilters.courseType || 'lunch',
-      vegNonVeg: data.vegNonVeg || 'both',
+      vegNonVeg: data.vegNonVeg || this.inferVegType(dish),
       cost: Number.isFinite(data.cost) ? data.cost : 0,
       portionSize: data.portionSize || '1 plate',
       preparedBy: data.preparedBy || '',
@@ -567,8 +603,9 @@ const foodPage = {
 
   cleanDishName(value) {
     return this.cleanCell(value)
+      .replace(/^\s*(?:[-*•]+|\d+[.)])\s*/, '')
       .replace(/^(dish|item|menu item)\s*[:=-]\s*/i, '')
-      .replace(/\s+\$?\d+(?:\.\d+)?$/g, '')
+      .replace(/\s+(?:[$₹]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*(?:usd|rs|inr))$/i, '')
       .trim();
   },
 
@@ -583,20 +620,76 @@ const foodPage = {
     return '';
   },
 
-  findCourse(value) {
+  findEventByDate(value) {
     const text = this.cleanCell(value).toLowerCase();
-    if (/\b(breakfast|brunch|morning|snacks?)\b/.test(text)) return 'breakfast';
-    if (/\b(dinner|supper|evening)\b/.test(text)) return 'dinner';
-    if (/\b(lunch|noon|afternoon|mains?|entrees?|curr(?:y|ies)|appetizers?|starters?|sides?|desserts?|sweets?|beverages?|drinks?)\b/.test(text)) return 'lunch';
+    const namedDate = text.match(/(?:aug(?:ust)?\s*(28|29|30|31)|\b(28|29|30|31)(?:st|nd|rd|th)?\s*(?:of\s+)?aug(?:ust)?)/i);
+    const numericDate = text.match(/\b(?:0?8[\/-](28|29|30|31)|(28|29|30|31)[\/-]0?8)(?:[\/-]20?26)?\b/i);
+    const day = Number(namedDate?.[1] || namedDate?.[2] || numericDate?.[1] || numericDate?.[2] || 0);
+    if (day === 28) return /\b(evening|dinner|night|sangeeth?)\b/i.test(text) ? 'Sangeet' : 'Haldi';
+    if (day === 29) return 'Pellikuthuru';
+    if (day === 30) return 'Marriage';
+    if (day === 31) return 'Satyanarayana Swamy Vratam';
     return '';
+  },
+
+  parseContextHeading(value) {
+    const original = this.cleanCell(value);
+    const text = original.replace(/^[\s=*_#~\-]+|[\s=*_#~\-]+$/g, '').trim();
+    if (!text) return { isHeading: false, eventType: '', courseTypes: [] };
+
+    const colonIndex = text.indexOf(':');
+    const label = colonIndex >= 0 ? text.slice(0, colonIndex).trim() : text;
+    const content = colonIndex >= 0 ? text.slice(colonIndex + 1).trim() : '';
+    const eventType = this.findEvent(label) || this.findEventByDate(label);
+    const courseTypes = this.findCourses(label);
+    const hasDate = /\b(?:aug(?:ust)?\s*\d{1,2}|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?aug(?:ust)?|(?:0?8[\/-]\d{1,2}|\d{1,2}[\/-]0?8)(?:[\/-]20?26)?|20\d{2})\b/i.test(text);
+    const normalized = label.toLowerCase().replace(/[^a-z&]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const mealOnly = /^(?:breakfast|brunch|morning(?: snacks?)?|lunch|dinner|supper|evening|lunch\s*(?:&|and|\+)\s*dinner|welcome drinks?|beverages?|mocktails?)$/i.test(normalized);
+    const decorated = /^[\s=*_#~\-]|[\s=*_#~\-]$/.test(original);
+    const isHeading = mealOnly || Boolean(eventType && (hasDate || decorated || label.split(/\s+/).length <= 8));
+    return { isHeading, eventType, courseTypes, content: isHeading ? content : '' };
+  },
+
+  eventDateForEvent(eventType) {
+    return {
+      Haldi: '2026-08-28',
+      Sangeet: '2026-08-28',
+      Pellikuthuru: '2026-08-29',
+      Marriage: '2026-08-30',
+      'Satyanarayana Swamy Vratam': '2026-08-31'
+    }[eventType] || '';
+  },
+
+  formatMenuDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return '';
+    const [year, month, day] = value.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      .format(new Date(year, month - 1, day));
+  },
+
+  findCourses(value) {
+    const text = this.cleanCell(value).toLowerCase();
+    const courses = [];
+    if (/\b(breakfast|brunch|morning|snacks?)\b/.test(text)) courses.push('breakfast');
+    if (/\b(lunch|noon|afternoon|welcome drinks?|beverages?|mocktails?)\b/.test(text)) courses.push('lunch');
+    if (/\b(dinner|supper|evening|night)\b/.test(text)) courses.push('dinner');
+    return [...new Set(courses)];
+  },
+
+  findCourse(value) {
+    return this.findCourses(value)[0] || '';
   },
 
   findVegType(value) {
     const text = this.cleanCell(value).toLowerCase();
-    if (/\b(non[-\s]?veg|non[-\s]?vegetarian|chicken|fish|meat|egg|nv)\b/.test(text)) return 'non-veg';
+    if (/\b(non[-\s]?veg|non[-\s]?vegetarian|chicken|goat|mutton|lamb|fish|prawn|shrimp|meat|egg|nv)\b/.test(text)) return 'non-veg';
     if (/\b(veg|vegetarian|pure veg|v)\b/.test(text)) return 'veg';
     if (/\b(both|shared|all)\b/.test(text)) return 'both';
     return '';
+  },
+
+  inferVegType(value) {
+    return this.findVegType(value) || 'veg';
   },
 
   isVegTypeCell(value) {
@@ -621,6 +714,10 @@ const foodPage = {
   findCost(value) {
     const match = this.cleanCell(value).match(/[$₹]?\s*(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) || 0 : 0;
+  },
+
+  hasExplicitCost(value) {
+    return /(?:[$₹]\s*\d|\b\d+(?:\.\d+)?\s*(?:usd|rs|inr|per\s+(?:plate|person|pax))\b)/i.test(this.cleanCell(value));
   },
 
   looksLikePortion(value) {

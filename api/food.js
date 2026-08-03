@@ -83,6 +83,7 @@ function normalizeCost(value) {
 function normalizeMenuPayload(data = {}) {
   return {
     eventType: normalizeEventType(data.eventType) || cleanText(data.eventType, 80),
+    eventDate: cleanText(data.eventDate, 10),
     courseType: normalizeCourseType(data.courseType) || cleanText(data.courseType, 80).toLowerCase() || 'lunch',
     dish: cleanText(data.dish, 160),
     vegNonVeg: normalizeVegType(data.vegNonVeg),
