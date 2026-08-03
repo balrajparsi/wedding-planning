@@ -758,22 +758,63 @@ tr:hover {
 .food-menu-table-wrap {
   border-radius: 0;
   box-shadow: none;
+  background: rgba(245, 241, 232, 0.42);
+}
+
+.food-menu-table {
+  border-collapse: separate;
+  border-spacing: 0 0.7rem;
+  padding: 0 0.8rem 0.8rem;
+  background: transparent;
+}
+
+.food-menu-table thead {
+  background: transparent;
+  border-bottom: 0;
 }
 
 .food-menu-table th {
   color: var(--blue);
   white-space: nowrap;
+  padding-top: 0.85rem;
+  padding-bottom: 0.25rem;
 }
 
 .food-menu-table td {
   vertical-align: middle;
 }
 
+.food-dish-row {
+  filter: drop-shadow(0 3px 8px rgba(26, 58, 82, 0.09));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.food-dish-row:hover {
+  background: transparent;
+  filter: drop-shadow(0 7px 14px rgba(26, 58, 82, 0.15));
+  transform: translateY(-2px);
+}
+
+.food-dish-row td {
+  background: #fff;
+  border-top: 1px solid rgba(184, 134, 11, 0.16);
+  border-bottom: 1px solid rgba(184, 134, 11, 0.16);
+}
+
+.food-dish-row td:first-child {
+  border-left: 3px solid var(--gold);
+  border-radius: 8px 0 0 8px;
+}
+
+.food-dish-row td:last-child {
+  border-right: 1px solid rgba(184, 134, 11, 0.16);
+  border-radius: 0 8px 8px 0;
+}
+
 .food-meal-heading-row td {
-  padding: 0;
-  background: linear-gradient(90deg, rgba(184, 134, 11, 0.14), rgba(245, 241, 232, 0.42));
-  border-top: 1px solid rgba(184, 134, 11, 0.2);
-  border-bottom: 1px solid rgba(184, 134, 11, 0.18);
+  padding: 0.2rem 0 0;
+  background: transparent;
+  border: 0;
 }
 
 .food-meal-heading {
@@ -781,6 +822,11 @@ tr:hover {
   align-items: baseline;
   gap: 0.65rem;
   padding: 0.8rem 1rem;
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.16), rgba(255, 255, 255, 0.84));
+  border: 1px solid rgba(184, 134, 11, 0.18);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: 0 2px 7px rgba(26, 58, 82, 0.06);
 }
 
 .food-meal-heading span {

@@ -205,7 +205,7 @@ const foodPage = {
                   const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
                   const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
                   return `
-                    <tr>
+                    <tr class="food-dish-row">
                       <td>
                         <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
                         ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
