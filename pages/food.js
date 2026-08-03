@@ -184,7 +184,6 @@ const foodPage = {
             <thead>
               <tr>
                 <th>Dish</th>
-                <th>Meal</th>
                 <th>Type</th>
                 <th>Cuisine</th>
                 <th>Cost</th>
@@ -193,29 +192,38 @@ const foodPage = {
               </tr>
             </thead>
             <tbody>
-              ${items.map(item => {
-                const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
-                const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
-                return `
-                  <tr>
-                    <td>
-                      <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
-                      ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
-                    </td>
-                    <td><span class="food-course-pill">${this.escapeHtml(this.titleCase(item.courseType))}</span></td>
-                    <td><span class="food-type-pill ${vegTypeClass}">${vegTypeLabel}</span></td>
-                    <td>${this.escapeHtml(item.cuisine || 'Cuisine TBD')}</td>
-                    <td>$${(item.cost || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
-                    <td>${this.escapeHtml(item.portionSize || '1 plate')}</td>
-                    <td>
-                      <div class="food-row-actions">
-                        <button class="btn-icon edit-dish" data-id="${this.escapeHtml(item.id)}" title="Edit">✎</button>
-                        <button class="btn-icon delete-dish" data-id="${this.escapeHtml(item.id)}" title="Delete">✕</button>
-                      </div>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
+              ${this.groupMenuItemsByCourse(items).map(([courseType, courseItems]) => `
+                <tr class="food-meal-heading-row">
+                  <td colspan="6">
+                    <div class="food-meal-heading">
+                      <span>${this.escapeHtml(this.titleCase(courseType))}:</span>
+                      <small>${courseItems.length} dish${courseItems.length === 1 ? '' : 'es'}</small>
+                    </div>
+                  </td>
+                </tr>
+                ${courseItems.map(item => {
+                  const vegTypeLabel = item.vegNonVeg === 'veg' ? 'Vegetarian' : item.vegNonVeg === 'non-veg' ? 'Non-Vegetarian' : 'Shared';
+                  const vegTypeClass = item.vegNonVeg === 'veg' ? 'food-type-veg' : item.vegNonVeg === 'non-veg' ? 'food-type-non-veg' : 'food-type-shared';
+                  return `
+                    <tr>
+                      <td>
+                        <strong class="food-dish-name">${this.escapeHtml(item.dish)}</strong>
+                        ${item.guestAccommodations?.length ? `<span class="food-accommodation-note">${item.guestAccommodations.length} guest accommodation(s)</span>` : ''}
+                      </td>
+                      <td><span class="food-type-pill ${vegTypeClass}">${vegTypeLabel}</span></td>
+                      <td>${this.escapeHtml(item.cuisine || 'Cuisine TBD')}</td>
+                      <td>$${(item.cost || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                      <td>${this.escapeHtml(item.portionSize || '1 plate')}</td>
+                      <td>
+                        <div class="food-row-actions">
+                          <button class="btn-icon edit-dish" data-id="${this.escapeHtml(item.id)}" title="Edit">✎</button>
+                          <button class="btn-icon delete-dish" data-id="${this.escapeHtml(item.id)}" title="Delete">✕</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              `).join('')}
             </tbody>
           </table>
         </div>
@@ -273,6 +281,24 @@ const foodPage = {
           return String(itemA.dish || '').localeCompare(String(itemB.dish || ''));
         })
       ]);
+  },
+
+  groupMenuItemsByCourse(items) {
+    const courseOrder = ['breakfast', 'lunch', 'dinner', 'snacks', 'appetizers', 'mains', 'sides', 'desserts', 'beverages'];
+    const groups = new Map();
+    items.forEach(item => {
+      const courseType = item.courseType || 'other';
+      if (!groups.has(courseType)) groups.set(courseType, []);
+      groups.get(courseType).push(item);
+    });
+    return Array.from(groups.entries()).sort(([courseA], [courseB]) => {
+      const indexA = courseOrder.indexOf(courseA);
+      const indexB = courseOrder.indexOf(courseB);
+      if (indexA !== -1 || indexB !== -1) {
+        return (indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA) - (indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB);
+      }
+      return courseA.localeCompare(courseB);
+    });
   },
 
   escapeHtml(value) {

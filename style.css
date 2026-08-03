@@ -769,6 +769,33 @@ tr:hover {
   vertical-align: middle;
 }
 
+.food-meal-heading-row td {
+  padding: 0;
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.14), rgba(245, 241, 232, 0.42));
+  border-top: 1px solid rgba(184, 134, 11, 0.2);
+  border-bottom: 1px solid rgba(184, 134, 11, 0.18);
+}
+
+.food-meal-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  padding: 0.8rem 1rem;
+}
+
+.food-meal-heading span {
+  color: var(--blue);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.food-meal-heading small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .food-dish-name {
   display: block;
   color: var(--text-dark);
