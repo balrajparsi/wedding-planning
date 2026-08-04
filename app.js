@@ -128,6 +128,10 @@ class WeddingPlanningApp {
     this.currentPage = page;
     window.location.hash = page;
 
+    document.querySelectorAll('.nav-links [data-page]').forEach(link => {
+      link.classList.toggle('active', link.dataset.page === page);
+    });
+
     // Hide all pages
     document.querySelectorAll('[data-view]').forEach(el => {
       el.style.display = 'none';
@@ -144,6 +148,8 @@ class WeddingPlanningApp {
         window.guestListPage?.init?.();
       } else if (page === 'tasks') {
         window.taskListPage?.init?.();
+      } else if (page === 'assigned-tasks') {
+        window.assignedTasksPage?.init?.();
       } else if (page === 'budget') {
         window.budgetPage?.init?.();
       } else if (page === 'vendors') {

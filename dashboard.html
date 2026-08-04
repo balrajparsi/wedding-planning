@@ -34,6 +34,7 @@
                     <li><a href="#dashboard" data-page="dashboard" class="active">Dashboard</a></li>
                     <li><a href="#guests" data-page="guests">Guest List</a></li>
                     <li><a href="#tasks" data-page="tasks">Tasks</a></li>
+                    <li><a href="#assigned-tasks" data-page="assigned-tasks">Assigned Tasks</a></li>
                     <li><a href="#budget" data-page="budget">Budget</a></li>
                     <li><a href="#vendors" data-page="vendors">Vendors</a></li>
                 </ul>
@@ -150,6 +151,21 @@
                 <!-- Board -->
                 <div class="task-board-container">
                     <!-- Kanban or list view will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Assigned Tasks View -->
+            <div data-view="assigned-tasks">
+                <div class="assigned-task-header">
+                    <div>
+                        <p class="assigned-task-kicker">Wedding team</p>
+                        <h2>Assigned Tasks</h2>
+                        <p class="assigned-task-intro">A clear view of who is taking care of each wedding responsibility.</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm assigned-task-add-btn" type="button">+ Add Assignment</button>
+                </div>
+                <div class="assigned-task-list" aria-live="polite">
+                    <p class="empty-state">Loading assignments…</p>
                 </div>
             </div>
 
@@ -489,6 +505,29 @@
     </div>
 
     <!-- Modals -->
+
+    <!-- Add Assigned Task Modal -->
+    <div data-modal="addAssignedTask" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Assignment</h3>
+                <button class="modal-close" type="button" aria-label="Close">✕</button>
+            </div>
+            <form class="modal-form">
+                <label for="assignedTaskName">Name *</label>
+                <input id="assignedTaskName" type="text" name="name" maxlength="100" placeholder="e.g. Pranav Mara" required>
+
+                <label for="assignedTaskResponsibilities">Tasks *</label>
+                <input id="assignedTaskResponsibilities" type="text" name="tasks" maxlength="300" placeholder="e.g. Alcohol, Transportation" required>
+                <p class="assigned-task-form-hint">Separate multiple tasks with commas.</p>
+
+                <div class="assigned-task-form-actions">
+                    <button type="submit" class="btn btn-primary">Add Assignment</button>
+                    <button type="button" class="btn btn-secondary assigned-task-cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Add Guest Modal -->
     <div data-modal="addGuest" class="modal">
@@ -1356,6 +1395,10 @@
     <!-- Task Management -->
     <script src="modules/tasks.js"></script>
     <script src="pages/tasks.js"></script>
+
+    <!-- Assigned Tasks -->
+    <script src="modules/assigned-tasks.js"></script>
+    <script src="pages/assigned-tasks.js"></script>
 
     <!-- Budget Tracking -->
     <script src="modules/budget.js"></script>
