@@ -9,6 +9,27 @@ const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 
 const WEDDING_ID = 'akhila-akshay-2026';
 const TASKS_KEY  = `wedding:${WEDDING_ID}:tasks`;
+const ASSIGNED_TASKS_MIGRATION_KEY = `wedding:${WEDDING_ID}:migration:assigned-task-todos-v1`;
+const ASSIGNED_RESPONSIBILITY_TASKS = [
+  {
+    id: 'assigned_todo_pranav_alcohol',
+    title: 'Alcohol',
+    category: 'food',
+    assignees: ['Pranav Mara']
+  },
+  {
+    id: 'assigned_todo_alekhya_choreographer',
+    title: 'Choreographer',
+    category: 'vendors',
+    assignees: ['Alekhya Chennaboina']
+  },
+  {
+    id: 'assigned_todo_alekhya_cakes',
+    title: 'Cakes',
+    category: 'food',
+    assignees: ['Alekhya Chennaboina']
+  }
+];
 
 module.exports = async function handler(req, res) {
   try {
@@ -35,7 +56,7 @@ module.exports = async function handler(req, res) {
 };
 
 async function handleListTasks(sp, res) {
-  let tasks    = await kv.get(TASKS_KEY) || [];
+  let tasks    = await ensureAssignedResponsibilityTasks();
   const cat    = sp.get('category');
   const stat   = sp.get('status');
   const assign = sp.get('assignee');
@@ -62,6 +83,41 @@ async function handleListTasks(sp, res) {
       completed:  tasks.filter(t => t.status === 'completed').length
     }
   });
+}
+
+async function ensureAssignedResponsibilityTasks() {
+  const tasks = await kv.get(TASKS_KEY) || [];
+  const migrationComplete = await kv.get(ASSIGNED_TASKS_MIGRATION_KEY);
+  if (migrationComplete) return tasks;
+
+  const now = new Date().toISOString();
+  ASSIGNED_RESPONSIBILITY_TASKS.forEach(template => {
+    const alreadyExists = tasks.some(task =>
+      task.id === template.id ||
+      (
+        String(task.title || '').trim().toLowerCase() === template.title.toLowerCase() &&
+        task.assignees?.includes(template.assignees[0])
+      )
+    );
+
+    if (!alreadyExists) {
+      tasks.push({
+        ...template,
+        weddingId: WEDDING_ID,
+        dueDate: '',
+        priority: 'medium',
+        status: 'pending',
+        notes: 'Added from Assigned Tasks',
+        subtasks: [],
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+  });
+
+  await kv.set(TASKS_KEY, tasks);
+  await kv.set(ASSIGNED_TASKS_MIGRATION_KEY, { completedAt: now });
+  return tasks;
 }
 
 async function handleAddTask(req, res) {
