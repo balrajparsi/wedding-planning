@@ -45,8 +45,6 @@ module.exports = async (req, res) => {
       return res.status(200).json(await getAssignments());
     }
 
-    if (!requireDashboardEditPassword(req, res)) return;
-
     if (method === 'POST') {
       const assignment = normalizeAssignment(req.body || {});
       if (!assignment.name || assignment.tasks.length === 0) {
@@ -66,6 +64,7 @@ module.exports = async (req, res) => {
     }
 
     if (method === 'DELETE' && id) {
+      if (!requireDashboardEditPassword(req, res)) return;
       const assignments = await getAssignments();
       const nextAssignments = assignments.filter(assignment => assignment.id !== id);
       if (nextAssignments.length === assignments.length) {

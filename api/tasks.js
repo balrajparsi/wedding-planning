@@ -1,5 +1,5 @@
 /**
- * Task Management API — dashboard edits require the shared edit password
+ * Task Management API — only deletions require the shared edit password
  * Uses ?id= query param for all ID-based operations
  */
 
@@ -33,7 +33,7 @@ const ASSIGNED_RESPONSIBILITY_TASKS = [
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+    if (req.method === 'DELETE' && !requireDashboardEditPassword(req, res)) return;
 
     const url    = new URL(req.url, 'http://localhost');
     const sp     = url.searchParams;

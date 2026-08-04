@@ -8,6 +8,8 @@ const DASHBOARD_EDIT_PASSWORD_KEY = 'dashboardEditPassword';
 function isProtectedDashboardMutation(endpoint, method) {
   const normalizedMethod = String(method || 'GET').toUpperCase();
   if (['GET', 'HEAD', 'OPTIONS'].includes(normalizedMethod)) return false;
+  const isTaskEndpoint = endpoint.includes('/api/tasks') || endpoint.includes('/api/assigned-tasks');
+  if (isTaskEndpoint) return normalizedMethod === 'DELETE';
   return !(normalizedMethod === 'POST' && endpoint.includes('/api/backups') && endpoint.includes('action=create'));
 }
 
