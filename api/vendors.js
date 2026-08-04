@@ -1,8 +1,9 @@
 /**
- * Vendor Management API — No Auth
+ * Vendor Management API — dashboard edits require the shared edit password
  */
 
 const kv = require('../lib/kv');
+const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const WEDDING_ID = 'akhila-akshay-2026';
 const BUDGET_KEY = `wedding:${WEDDING_ID}:budget`;
 const EVENT_TYPES = [
@@ -193,6 +194,7 @@ module.exports = async (req, res) => {
   const key    = `wedding:${WEDDING_ID}:vendors`;
 
   try {
+    if (method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
     // GET — list vendors
     if (method === 'GET') {
       let vendors = (await kv.get(key) || []).map(normalizeVendorRecord);

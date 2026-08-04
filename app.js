@@ -174,6 +174,10 @@ class WeddingPlanningApp {
       options.headers.Authorization = `Bearer ${token}`;
     }
 
+    if (window.isProtectedDashboardMutation?.(endpoint, method)) {
+      options.headers['X-Dashboard-Edit-Password'] = window.getDashboardEditPassword();
+    }
+
     if (data) {
       options.body = JSON.stringify(data);
     }
@@ -181,6 +185,9 @@ class WeddingPlanningApp {
     const response = await fetch(endpoint, options);
 
     if (!response.ok) {
+      if (response.status === 403 && window.isProtectedDashboardMutation?.(endpoint, method)) {
+        sessionStorage.removeItem('dashboardEditPassword');
+      }
       throw new Error(`API error: ${response.status}`);
     }
 
@@ -390,6 +397,7 @@ class WeddingPlanningApp {
   async restoreDashboardBackup() {
     const passcode = window.prompt('Enter the restore passcode:');
     if (passcode === null) return;
+    window.rememberDashboardEditPassword?.(passcode);
     if (!window.confirm('Restore the most recent earlier version of ALL wedding data? The current version will also be backed up first.')) return;
 
     try {

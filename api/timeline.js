@@ -1,8 +1,9 @@
 /**
- * Timeline Management API — No Auth
+ * Timeline Management API — dashboard edits require the shared edit password
  */
 
 const kv = require('../lib/kv');
+const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const WEDDING_ID = 'akhila-akshay-2026';
 
 function parseCentralDateOnly(value) {
@@ -19,6 +20,8 @@ module.exports = async (req, res) => {
   const key    = `wedding:${WEDDING_ID}:timeline`;
 
   try {
+    if (method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+
     if (method === 'GET') {
       let milestones = await kv.get(key) || [];
       const type = sp.get('type');

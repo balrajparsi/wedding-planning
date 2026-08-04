@@ -5,12 +5,12 @@
  */
 
 const kv = require('../lib/kv');
+const { getEditPassword, requireDashboardEditPassword } = require('../lib/dashboard-edit');
 
 const WEDDING_ID = 'akhila-akshay-2026';
 const DATA_PREFIX = `wedding:${WEDDING_ID}`;
 const SNAPSHOTS_KEY = `backup:${WEDDING_ID}:full-snapshots`;
 const MAX_SNAPSHOTS = 10;
-const RESTORE_PASSCODE = '291097';
 
 function cleanReason(value) {
   return String(value || 'manual').replace(/\s+/g, ' ').trim().slice(0, 80) || 'manual';
@@ -95,7 +95,8 @@ module.exports = async (req, res) => {
     }
 
     if (method === 'POST' && action === 'restore') {
-      if (String(req.body?.passcode || '').trim() !== RESTORE_PASSCODE) {
+      if (!requireDashboardEditPassword(req, res)) return;
+      if (String(req.body?.passcode || '').trim() !== getEditPassword()) {
         return res.status(403).json({ error: 'Invalid restore passcode' });
       }
 

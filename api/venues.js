@@ -1,9 +1,10 @@
 /**
- * Venue Management API — No Auth
+ * Venue Management API — dashboard edits require the shared edit password
  */
 
 const kv = require('../lib/kv');
 const { RSVP_EVENTS } = require('../lib/rsvp');
+const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const WEDDING_ID = 'akhila-akshay-2026';
 
 function isPlaceholderVenue(value) {
@@ -91,6 +92,8 @@ module.exports = async (req, res) => {
   const key    = `wedding:${WEDDING_ID}:venues`;
 
   try {
+    if (method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+
     if (method === 'GET') {
       let venues = await getStoredVenues(key);
       const evt  = sp.get('eventType');

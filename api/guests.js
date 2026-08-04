@@ -1,5 +1,5 @@
 /**
- * Guest Management API Endpoints (No Authentication)
+ * Guest Management API Endpoints (dashboard edits require the shared edit password)
  * GET /api/guests - List guests with filters/search
  * POST /api/guests - Add new guest
  * PUT /api/guests/:id - Update guest or RSVP status
@@ -11,6 +11,7 @@
 
 const crypto = require('crypto');
 const kv = require('../lib/kv');
+const { getEditPassword, requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const {
   EVENT_TIMEZONE,
   RSVP_EVENTS,
@@ -59,6 +60,8 @@ function enforceEventMealPolicies(eventResponses) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+
     if (req.method === 'GET' && (req.url.includes('action=export') || req.url.includes('/export'))) {
       return handleExportGuests(req, res);
     }
@@ -626,7 +629,7 @@ async function handleDeleteGuest(req, res) {
 async function handleBulkReminder(req, res) {
   const body = req.body || {};
   const reminderPasscode = String(body.passcode || '').trim();
-  if (reminderPasscode !== '291097') {
+  if (reminderPasscode !== getEditPassword()) {
     return res.status(403).json({ error: 'Invalid bulk reminder passcode' });
   }
 
@@ -1056,7 +1059,7 @@ ${eventRows}
 
 async function handleResetGuests(req, res) {
   const resetPasscode = String(req.body?.passcode || '').trim();
-  if (resetPasscode !== '291097') {
+  if (resetPasscode !== getEditPassword()) {
     return res.status(403).json({ error: 'Invalid reset passcode' });
   }
 

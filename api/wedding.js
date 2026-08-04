@@ -5,6 +5,7 @@
  */
 
 const kv = require('../lib/kv');
+const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 
 const WEDDING_ID = 'akhila-akshay-2026';
 
@@ -19,6 +20,8 @@ const DEFAULT_CONFIG = {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+
     if (req.method === 'GET') {
       const config = await kv.get(`wedding:${WEDDING_ID}:config`);
       return res.status(200).json(config || DEFAULT_CONFIG);

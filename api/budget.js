@@ -10,6 +10,7 @@
 
 const crypto = require('crypto');
 const kv     = require('../lib/kv');
+const { requireDashboardEditPassword } = require('../lib/dashboard-edit');
 
 const WEDDING_ID = 'akhila-akshay-2026';
 const BUDGET_KEY = `wedding:${WEDDING_ID}:budget`;
@@ -47,6 +48,8 @@ function computeExpense(item) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
+
     const url    = new URL(req.url, 'http://localhost');
     const sp     = url.searchParams;
     const id     = sp.get('id')     || '';

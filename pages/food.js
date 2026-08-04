@@ -847,7 +847,7 @@ const foodPage = {
     const passcode = prompt('Enter the passcode to reset the entire food menu:');
     if (passcode === null) return;
 
-    if (passcode.trim() !== '291097') {
+    if (passcode.trim() !== '29101997') {
       showNotification('Incorrect passcode. Food menu was not reset.', 'error');
       return;
     }
@@ -859,6 +859,7 @@ const foodPage = {
     if (!confirm(message)) return;
 
     try {
+      window.rememberDashboardEditPassword?.(passcode);
       await foodModule.resetMenuItems(passcode.trim());
       this.currentFilters = { eventType: '', courseType: '', search: '' };
       const foodView = document.querySelector('[data-view="food"]');

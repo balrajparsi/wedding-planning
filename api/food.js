@@ -1,8 +1,9 @@
 /**
- * Food & Menu Management API — No Auth
+ * Food & Menu Management API — dashboard edits require the shared edit password
  */
 
 const kv = require('../lib/kv');
+const { getEditPassword, requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const WEDDING_ID = 'akhila-akshay-2026';
 
 const EVENT_TYPES = [
@@ -135,6 +136,7 @@ module.exports = async (req, res) => {
   const key    = `wedding:${WEDDING_ID}:food`;
 
   try {
+    if (method !== 'GET' && !requireDashboardEditPassword(req, res)) return;
     if (method === 'GET') {
       let items = await kv.get(key) || [];
       const normalized = normalizeStoredItems(items);
@@ -227,7 +229,7 @@ module.exports = async (req, res) => {
 
     if (method === 'DELETE' && action === 'reset') {
       const resetPasscode = String(req.body?.passcode || '').trim();
-      if (resetPasscode !== '291097') {
+      if (resetPasscode !== getEditPassword()) {
         return res.status(403).json({ error: 'Invalid reset passcode' });
       }
 

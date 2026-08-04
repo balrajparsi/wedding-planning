@@ -654,13 +654,14 @@ const guestListPage = {
     const passcode = prompt('Enter the passcode to reset the entire guest list:');
     if (passcode === null) return;
 
-    if (passcode.trim() !== '291097') {
+    if (passcode.trim() !== '29101997') {
       showNotification('Incorrect passcode. Guest list was not reset.', 'error');
       return;
     }
 
     if (!confirm('⚠️ Reset ALL guests? This will permanently delete all guest data.')) return;
     try {
+      window.rememberDashboardEditPassword?.(passcode);
       await apiCall('/api/guests?action=reset', 'DELETE', { passcode: passcode.trim() });
       guestModule.guests = [];
       guestModule.filteredGuests = [];
@@ -700,12 +701,13 @@ const guestListPage = {
     const passcode = prompt('Enter the passcode to send bulk reminders:');
     if (passcode === null) return;
 
-    if (passcode.trim() !== '291097') {
+    if (passcode.trim() !== '29101997') {
       showNotification('Incorrect passcode. Bulk reminders were not sent.', 'error');
       return;
     }
 
     try {
+      window.rememberDashboardEditPassword?.(passcode);
       const res = await apiCall('/api/guests?action=bulk-reminder', 'POST', { filterStatus, subject, message, passcode: passcode.trim() });
       const hasFailures = !res.success || !res.sendingEnabled || Number(res.failed || 0) > 0;
       const firstErrorItem = res.errors?.[0] || {};

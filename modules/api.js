@@ -3,6 +3,31 @@
  * Provides global apiCall function for all modules
  */
 
+const DASHBOARD_EDIT_PASSWORD_KEY = 'dashboardEditPassword';
+
+function isProtectedDashboardMutation(endpoint, method) {
+  const normalizedMethod = String(method || 'GET').toUpperCase();
+  if (['GET', 'HEAD', 'OPTIONS'].includes(normalizedMethod)) return false;
+  return !(normalizedMethod === 'POST' && endpoint.includes('/api/backups') && endpoint.includes('action=create'));
+}
+
+function getDashboardEditPassword() {
+  let password = sessionStorage.getItem(DASHBOARD_EDIT_PASSWORD_KEY);
+  if (password) return password;
+
+  password = window.prompt('Enter the dashboard password to make changes');
+  if (password === null) throw new Error('Dashboard change cancelled');
+  password = password.trim();
+  if (!password) throw new Error('Dashboard password is required');
+  sessionStorage.setItem(DASHBOARD_EDIT_PASSWORD_KEY, password);
+  return password;
+}
+
+function rememberDashboardEditPassword(password) {
+  const normalized = String(password || '').trim();
+  if (normalized) sessionStorage.setItem(DASHBOARD_EDIT_PASSWORD_KEY, normalized);
+}
+
 async function apiCall(endpoint, method = 'GET', data = null) {
   const options = {
     method,
@@ -12,6 +37,10 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     }
   };
 
+  if (isProtectedDashboardMutation(endpoint, method)) {
+    options.headers['X-Dashboard-Edit-Password'] = getDashboardEditPassword();
+  }
+
   if (data) {
     options.body = JSON.stringify(data);
   }
@@ -19,6 +48,9 @@ async function apiCall(endpoint, method = 'GET', data = null) {
   const response = await fetch(endpoint, options);
 
   if (!response.ok) {
+    if (response.status === 403 && isProtectedDashboardMutation(endpoint, method)) {
+      sessionStorage.removeItem(DASHBOARD_EDIT_PASSWORD_KEY);
+    }
     if (response.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
@@ -60,4 +92,7 @@ function showNotification(message, type = 'info') {
 if (typeof window !== 'undefined') {
   window.apiCall = apiCall;
   window.showNotification = showNotification;
+  window.getDashboardEditPassword = getDashboardEditPassword;
+  window.rememberDashboardEditPassword = rememberDashboardEditPassword;
+  window.isProtectedDashboardMutation = isProtectedDashboardMutation;
 }
