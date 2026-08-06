@@ -3,6 +3,7 @@
  * GET  /api/budget               - List all expenses
  * POST /api/budget               - Add expense
  * PUT  /api/budget?id=:id        - Update expense details
+ * PUT  /api/budget?id=:id&action=payment&paymentId=:paymentId - Update a payment
  * DELETE /api/budget?id=:id      - Delete expense
  * POST /api/budget?id=:id&action=payment  - Log a payment
  * GET  /api/budget?action=export - Export CSV
@@ -59,6 +60,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET')                           return handleList(res);
     if (req.method === 'POST'   && id && action === 'payment') return handleAddPayment(id, req, res);
     if (req.method === 'POST'   && !id)                 return handleAdd(req, res);
+    if (req.method === 'PUT'    && id && action === 'payment') return handleUpdatePayment(id, sp.get('paymentId') || '', req, res);
     if (req.method === 'PUT'    && id)                  return handleUpdate(id, req, res);
     if (req.method === 'DELETE' && id)                  return handleDelete(id, res);
 
@@ -103,8 +105,10 @@ async function handleAdd(req, res) {
 }
 
 async function handleAddPayment(id, req, res) {
-  const { amount, date, notes } = req.body || {};
-  if (!amount || !date) return res.status(400).json({ error: 'Amount and date required' });
+  const { amount, date, notes, paidBy } = req.body || {};
+  const parsedAmount = parseFloat(amount);
+  if (!Number.isFinite(parsedAmount) || parsedAmount <= 0 || !date) return res.status(400).json({ error: 'Valid amount and date required' });
+  if (!['Akshay', 'Akhila'].includes(paidBy)) return res.status(400).json({ error: 'Select who paid' });
 
   const items = (await kv.get(BUDGET_KEY)) || [];
   const item  = items.find(i => i.id === id);
@@ -113,11 +117,37 @@ async function handleAddPayment(id, req, res) {
   item.payments = item.payments || [];
   item.payments.push({
     id:     crypto.randomBytes(4).toString('hex'),
-    amount: parseFloat(amount),
+    amount: parsedAmount,
     date,
     notes: notes || '',
+    paidBy,
     loggedAt: new Date().toISOString()
   });
+  item.updatedAt = new Date().toISOString();
+  await kv.set(BUDGET_KEY, items);
+  res.json(computeExpense(item));
+}
+
+async function handleUpdatePayment(expenseId, paymentId, req, res) {
+  if (!paymentId) return res.status(400).json({ error: 'Payment ID required' });
+
+  const { amount, date, notes, paidBy } = req.body || {};
+  const parsedAmount = parseFloat(amount);
+  if (!Number.isFinite(parsedAmount) || parsedAmount <= 0 || !date) return res.status(400).json({ error: 'Valid amount and date required' });
+  if (!['Akshay', 'Akhila'].includes(paidBy)) return res.status(400).json({ error: 'Select who paid' });
+
+  const items = (await kv.get(BUDGET_KEY)) || [];
+  const item = items.find(i => i.id === expenseId);
+  if (!item) return res.status(404).json({ error: 'Expense not found' });
+
+  const payment = (item.payments || []).find(p => p.id === paymentId);
+  if (!payment) return res.status(404).json({ error: 'Payment not found' });
+
+  payment.amount = parsedAmount;
+  payment.date = date;
+  payment.notes = notes || '';
+  payment.paidBy = paidBy;
+  payment.updatedAt = new Date().toISOString();
   item.updatedAt = new Date().toISOString();
   await kv.set(BUDGET_KEY, items);
   res.json(computeExpense(item));

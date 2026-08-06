@@ -41,6 +41,18 @@ const budgetModule = {
     }
   },
 
+  async updatePayment(expenseId, paymentId, paymentData) {
+    try {
+      const response = await apiCall(`/api/budget?id=${expenseId}&action=payment&paymentId=${paymentId}`, 'PUT', paymentData);
+      const idx = this.expenses.findIndex(e => e.id === expenseId);
+      if (idx !== -1) this.expenses[idx] = response;
+      return response;
+    } catch (error) {
+      console.error('Failed to update payment:', error);
+      throw error;
+    }
+  },
+
   async updateExpense(itemId, updates) {
     try {
       const response = await apiCall(`/api/budget?id=${itemId}`, 'PUT', updates);

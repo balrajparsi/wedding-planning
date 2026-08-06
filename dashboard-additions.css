@@ -1476,4 +1476,14 @@ tr:hover {
   .assigned-task-list {
     grid-template-columns: 1fr;
   }
+
+  .payment-fields-grid,
+  .payment-history-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .payment-fields-grid button,
+  .payment-history-row button {
+    width: 100%;
+  }
 }

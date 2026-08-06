@@ -5,6 +5,7 @@
 
 const budgetPage = {
   listenersSetup: false,
+  editingPayment: null,
   currentFilters: { category: '', status: '' },
   categoryLabels: {
     venue: 'Venue',
@@ -223,20 +224,14 @@ const budgetPage = {
           <div class="payment-history" style="margin-bottom:0.75rem;">
             ${(expense.payments||[]).length > 0 ? `
               <div style="font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:0.4rem;">Payment History</div>
-              ${(expense.payments||[]).map(p => `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0.6rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;font-size:0.82rem;">
-                  <span style="color:#555;">${formatCentralDate(p.date, 'en-US', {month:'short',day:'numeric',year:'numeric'})}</span>
-                  <span style="font-weight:600;color:#27ae60;">+$${(p.amount||0).toFixed(2)}</span>
-                  ${p.notes ? `<span style="color:#888;font-style:italic;">${this.escapeHtml(p.notes)}</span>` : ''}
-                </div>
-              `).join('')}
+              ${(expense.payments||[]).map(p => this.renderPaymentHistoryItem(expense, p)).join('')}
             ` : '<div style="font-size:0.8rem;color:#aaa;">No payments logged yet.</div>'}
           </div>
 
           <!-- Log new payment -->
           <div class="log-payment-form" style="background:#f8f9fa;border-radius:0.5rem;padding:0.75rem;margin-bottom:0.75rem;">
             <div style="font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:0.5rem;">+ Log a Payment</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:0.5rem;align-items:end;">
+            <div class="payment-fields-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr auto;gap:0.5rem;align-items:end;">
               <div>
                 <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Amount ($)</label>
                 <input type="number" class="pay-amount" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;">
@@ -244,6 +239,14 @@ const budgetPage = {
               <div>
                 <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Date</label>
                 <input type="date" class="pay-date" value="${new Date().toISOString().split('T')[0]}" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Paid by</label>
+                <select class="pay-paid-by" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;font-size:0.85rem;background:white;">
+                  <option value="">Select</option>
+                  <option value="Akshay">Akshay</option>
+                  <option value="Akhila">Akhila</option>
+                </select>
               </div>
               <div>
                 <label style="font-size:0.75rem;color:#666;display:block;margin-bottom:0.2rem;">Notes (optional)</label>
@@ -265,7 +268,34 @@ const budgetPage = {
         const amount = card.querySelector('.pay-amount').value;
         const date   = card.querySelector('.pay-date').value;
         const notes  = card.querySelector('.pay-notes').value;
-        this.logPayment(expense.id, { amount, date, notes });
+        const paidBy = card.querySelector('.pay-paid-by').value;
+        this.logPayment(expense.id, { amount, date, notes, paidBy });
+      });
+
+      card.querySelectorAll('.edit-payment-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          this.editingPayment = { expenseId: expense.id, paymentId: button.dataset.paymentId };
+          this.renderExpenseList();
+        });
+      });
+
+      card.querySelectorAll('.cancel-payment-edit-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          this.editingPayment = null;
+          this.renderExpenseList();
+        });
+      });
+
+      card.querySelectorAll('.save-payment-edit-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const row = button.closest('.payment-edit-form');
+          this.updatePayment(expense.id, button.dataset.paymentId, {
+            amount: row.querySelector('.edit-pay-amount').value,
+            date: row.querySelector('.edit-pay-date').value,
+            paidBy: row.querySelector('.edit-pay-paid-by').value,
+            notes: row.querySelector('.edit-pay-notes').value
+          });
+        });
       });
 
       // Edit
@@ -281,6 +311,50 @@ const budgetPage = {
 
     tableEl.innerHTML = '';
     tableEl.appendChild(wrapper);
+  },
+
+  renderPaymentHistoryItem(expense, payment) {
+    const isEditing = this.editingPayment?.expenseId === expense.id && this.editingPayment?.paymentId === payment.id;
+    if (isEditing) {
+      return `
+        <div class="payment-edit-form payment-fields-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr auto;gap:0.5rem;align-items:end;padding:0.65rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;">
+          <div>
+            <label style="font-size:0.72rem;color:#666;display:block;margin-bottom:0.2rem;">Amount ($)</label>
+            <input type="number" class="edit-pay-amount" value="${Number(payment.amount) || 0}" step="0.01" min="0.01" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;">
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:#666;display:block;margin-bottom:0.2rem;">Date</label>
+            <input type="date" class="edit-pay-date" value="${this.escapeHtml(payment.date || '')}" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;">
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:#666;display:block;margin-bottom:0.2rem;">Paid by</label>
+            <select class="edit-pay-paid-by" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;background:white;">
+              <option value="">Select</option>
+              <option value="Akshay" ${payment.paidBy === 'Akshay' ? 'selected' : ''}>Akshay</option>
+              <option value="Akhila" ${payment.paidBy === 'Akhila' ? 'selected' : ''}>Akhila</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:#666;display:block;margin-bottom:0.2rem;">Notes (optional)</label>
+            <input type="text" class="edit-pay-notes" value="${this.escapeHtml(payment.notes || '')}" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #ddd;border-radius:0.3rem;">
+          </div>
+          <div style="display:flex;gap:0.35rem;">
+            <button class="save-payment-edit-btn" data-payment-id="${payment.id}" style="background:var(--blue);color:white;border:none;padding:0.4rem 0.65rem;border-radius:0.3rem;cursor:pointer;">Save</button>
+            <button class="cancel-payment-edit-btn" type="button" style="background:white;color:#555;border:1px solid #bbb;padding:0.4rem 0.65rem;border-radius:0.3rem;cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="payment-history-row" style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(90px,1fr) minmax(110px,1fr) minmax(140px,2fr) auto;gap:0.65rem;align-items:center;padding:0.4rem 0.6rem;background:#f8f9fa;border-radius:0.3rem;margin-bottom:0.3rem;font-size:0.82rem;">
+        <span style="color:#555;">${formatCentralDate(payment.date, 'en-US', {month:'short',day:'numeric',year:'numeric'})}</span>
+        <span style="font-weight:600;color:#27ae60;">+$${(Number(payment.amount)||0).toFixed(2)}</span>
+        <span style="color:var(--blue);">${payment.paidBy ? `Paid by ${this.escapeHtml(payment.paidBy)}` : '<span style="color:#aaa;">Payer not set</span>'}</span>
+        <span style="color:#888;font-style:italic;">${payment.notes ? this.escapeHtml(payment.notes) : '—'}</span>
+        <button class="edit-payment-btn" data-payment-id="${payment.id}" style="background:none;border:1px solid var(--blue);color:var(--blue);padding:0.25rem 0.55rem;border-radius:0.3rem;cursor:pointer;font-size:0.75rem;">✎ Edit</button>
+      </div>
+    `;
   },
 
   openAddExpenseModal() {
@@ -364,6 +438,7 @@ const budgetPage = {
   async logPayment(expenseId, paymentData) {
     if (!paymentData.amount || paymentData.amount <= 0) { showNotification('Enter a valid amount', 'error'); return; }
     if (!paymentData.date)  { showNotification('Select a payment date', 'error'); return; }
+    if (!paymentData.paidBy) { showNotification('Select who paid', 'error'); return; }
     try {
       await budgetModule.addPayment(expenseId, paymentData);
       showNotification('Payment logged!', 'success');
@@ -371,6 +446,21 @@ const budgetPage = {
       this.render();
     } catch (error) {
       showNotification('Failed to log payment', 'error');
+    }
+  },
+
+  async updatePayment(expenseId, paymentId, paymentData) {
+    if (!paymentData.amount || paymentData.amount <= 0) { showNotification('Enter a valid amount', 'error'); return; }
+    if (!paymentData.date) { showNotification('Select a payment date', 'error'); return; }
+    if (!paymentData.paidBy) { showNotification('Select who paid', 'error'); return; }
+    try {
+      await budgetModule.updatePayment(expenseId, paymentId, paymentData);
+      this.editingPayment = null;
+      showNotification('Payment updated!', 'success');
+      await this.loadBudget();
+      this.render();
+    } catch (error) {
+      showNotification('Failed to update payment', 'error');
     }
   },
 
