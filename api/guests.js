@@ -982,7 +982,7 @@ function buildReminderHtml(guest, customMessage, links) {
           </p>
           ${extra}
           <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#4f3a28;text-align:left;margin:20px 0;">
-            <strong>Video invitation:</strong> <a href="${escapeHtml(VIDEO_INVITATION_URL)}" style="color:#8c151a;font-weight:700;">Watch on YouTube</a>
+            <strong>Invitation:</strong> <a href="${escapeHtml(VIDEO_INVITATION_URL)}" style="color:#8c151a;font-weight:700;">Akhila &amp; Akshay Invitation #TheAATales</a>
           </p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 24px;border-top:1px solid rgba(184,134,11,0.18);">
 ${eventRows}
