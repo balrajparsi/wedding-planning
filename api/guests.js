@@ -10,8 +10,6 @@
  */
 
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 const kv = require('../lib/kv');
 const { getEditPassword, requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const {
@@ -26,6 +24,7 @@ const { buildGmailRawMessage } = require('../lib/rsvp-confirmations');
 
 // Fixed wedding ID for Akhila & Akshay's wedding
 const WEDDING_ID = 'akhila-akshay-2026';
+const VIDEO_INVITATION_URL = 'https://youtube.com/shorts/NTmWTfgvA7s?feature=share';
 
 function allGuestEventNames() {
   return RSVP_EVENTS.map(event => event.name);
@@ -586,15 +585,6 @@ async function getGmailAccessToken(config) {
   return payload.access_token;
 }
 
-function getReminderAttachments() {
-  const videoPath = path.join(process.cwd(), 'assets', 'video', 'invitation-video.mp4');
-  return [{
-    filename: 'Invitation video.mp4',
-    mimeType: 'video/mp4',
-    content: fs.readFileSync(videoPath)
-  }];
-}
-
 async function sendGmailInviteEmail({ accessToken, config, guest, subject, html, attachments = [] }) {
   const senderName = config.senderName.replace(/[\r\n<>]/g, '').trim() || 'Akhila & Akshay';
   const sender = `${senderName} <${config.senderEmail}>`;
@@ -678,7 +668,6 @@ async function handleBulkReminder(req, res) {
   if (sendingEnabled && withEmail.length > 0) {
     try {
       const accessToken = await getGmailAccessToken(gmailConfig);
-      const attachments = getReminderAttachments();
       for (const guest of withEmail) {
         const finalSubject = subject || `Wedding details reminder - Akhila & Akshay`;
         const calendarUrl = buildCalendarUrl(SITE_URL, guest);
@@ -689,8 +678,7 @@ async function handleBulkReminder(req, res) {
             config: gmailConfig,
             guest,
             subject: finalSubject,
-            html,
-            attachments
+            html
           });
           sent++;
           sentGuestIds.add(guest.id);
@@ -907,7 +895,7 @@ function eventVenueText(event) {
   if (!locations.length) return event.venue || 'Location to be confirmed';
   return locations
     .map(location => `${location.label}: ${location.venue || 'Location to be confirmed'}`)
-    .join(' | ');
+    .join('\n');
 }
 
 function eventMapText(event) {
@@ -967,7 +955,7 @@ function buildReminderHtml(guest, customMessage, links) {
       <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);vertical-align:top;">
         <strong style="font-family:Georgia,serif;font-size:22px;color:#281309;">${escapeHtml(eventDisplayName(event))}</strong><br>
         <span style="font-family:Arial,sans-serif;font-size:13px;line-height:1.65;color:#705843;">${escapeHtml(event.subtitle || '')}</span><br>
-        <span style="display:block;margin-top:10px;font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#4f3a28;">${escapeHtml(eventVenueText(event))}</span>
+        <span style="display:block;margin-top:10px;font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#4f3a28;">${escapeHtml(eventVenueText(event)).replace(/\n/g, '<br>')}</span>
       </td>
       <td style="padding:18px 0;border-bottom:1px solid rgba(184,134,11,0.18);font-family:Arial,sans-serif;font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:#8c5f11;text-align:right;vertical-align:top;white-space:nowrap;">
         ${escapeHtml(event.displayDate)}<br>${escapeHtml(event.time)}
@@ -993,6 +981,9 @@ function buildReminderHtml(guest, customMessage, links) {
             This is a warm reminder for the wedding celebrations you confirmed for Akhila and Akshay.
           </p>
           ${extra}
+          <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#4f3a28;text-align:left;margin:20px 0;">
+            <strong>Video invitation:</strong> <a href="${escapeHtml(VIDEO_INVITATION_URL)}" style="color:#8c151a;font-weight:700;">Watch on YouTube</a>
+          </p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 24px;border-top:1px solid rgba(184,134,11,0.18);">
 ${eventRows}
           </table>

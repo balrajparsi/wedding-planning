@@ -2,8 +2,7 @@
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
-      "maxDuration": 60,
-      "includeFiles": "assets/video/invitation-video.mp4"
+      "maxDuration": 60
     }
   }
 }
