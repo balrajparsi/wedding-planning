@@ -4,14 +4,17 @@ const WEDDING_ID = 'akhila-akshay-2026';
 const EVENT_TIMEZONE = process.env.WEDDING_TIMEZONE || 'America/Chicago';
 const DEFAULT_BRIDE_SIDE_ADDRESS = '510 Peach Ave, Centerton, AR 72719';
 const DEFAULT_BRIDE_SIDE_MAP_URL = 'https://maps.app.goo.gl/Nx2cUKVUo1EL6Tgx6';
+const DEFAULT_PELLIKODUKU_MAP_URL = 'https://www.google.com/maps/search/?api=1&query=1404%20Robinhood%20Road%2C%20Bentonville%2C%20AR%2072712';
 const SANGEETH_EVENT_ADDRESS = process.env.SANGEETH_EVENT_ADDRESS || 'Metroplex Event Center, 2305 S. 8th St., Rogers, AR 72758';
 const SANGEETH_MAP_URL = process.env.SANGEETH_MAP_URL || 'https://maps.app.goo.gl/mthgUzW9rQT5HZrF9';
 const PELLIKUTHURU_ADDRESS = resolveBrideSideAddress(process.env.PELLIKUTHURU_ADDRESS);
 const PELLIKUTHURU_MAP_URL = resolveMapUrl(process.env.PELLIKUTHURU_MAP_URL, DEFAULT_BRIDE_SIDE_MAP_URL);
-const PELLIKODUKU_ADDRESS = resolvePellikodukuAddress(process.env.PELLIKODUKU_ADDRESS);
+const PELLIKODUKU_ADDRESS = resolvePellikodukuAddress(
+  process.env.PELLIKODUKU_ADDRESS || '1404 Robinhood Road, Bentonville, AR 72712'
+);
 const PELLIKODUKU_MAP_URL = PELLIKODUKU_ADDRESS === 'Location to be confirmed'
   ? ''
-  : resolveMapUrl(process.env.PELLIKODUKU_MAP_URL, '');
+  : resolveMapUrl(process.env.PELLIKODUKU_MAP_URL, DEFAULT_PELLIKODUKU_MAP_URL);
 const MARRIAGE_ADDRESS = process.env.MARRIAGE_ADDRESS || 'Osage House, 243 Pace Ln, Cave Springs, AR 72718';
 const MARRIAGE_MAP_URL = process.env.MARRIAGE_MAP_URL || 'https://maps.app.goo.gl/d8EAYPSXMwXVF8jL7';
 const RAW_COMMON_EVENT_ADDRESS = process.env.COMMON_EVENT_ADDRESS || process.env.WEDDING_COMMON_ADDRESS || '';
@@ -102,9 +105,9 @@ const RSVP_EVENTS = [
     subtitle: 'Nalugu and blessings',
     date: '2026-08-29',
     displayDate: '29 August 2026',
-    time: 'Time To Be Decided',
-    startTime: null,
-    durationMinutes: null,
+    time: '8:00 AM',
+    startTime: '08:00:00',
+    durationMinutes: 180,
     venue: PELLIKUTHURU_ADDRESS,
     mapUrl: PELLIKUTHURU_MAP_URL,
     locations: [
@@ -140,9 +143,9 @@ const RSVP_EVENTS = [
     subtitle: 'Post-wedding pooja',
     date: '2026-08-31',
     displayDate: '31 August 2026',
-    time: 'Time To Be Decided',
-    startTime: null,
-    durationMinutes: null,
+    time: '10:00 AM',
+    startTime: '10:00:00',
+    durationMinutes: 120,
     venue: SATYANARAYANA_ADDRESS,
     mapUrl: SATYANARAYANA_MAP_URL
   }

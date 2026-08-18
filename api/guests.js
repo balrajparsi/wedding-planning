@@ -10,6 +10,8 @@
  */
 
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const kv = require('../lib/kv');
 const { getEditPassword, requireDashboardEditPassword } = require('../lib/dashboard-edit');
 const {
@@ -584,7 +586,16 @@ async function getGmailAccessToken(config) {
   return payload.access_token;
 }
 
-async function sendGmailInviteEmail({ accessToken, config, guest, subject, html }) {
+function getReminderAttachments() {
+  const videoPath = path.join(process.cwd(), 'assets', 'video', 'invitation-video.mp4');
+  return [{
+    filename: 'Invitation video.mp4',
+    mimeType: 'video/mp4',
+    content: fs.readFileSync(videoPath)
+  }];
+}
+
+async function sendGmailInviteEmail({ accessToken, config, guest, subject, html, attachments = [] }) {
   const senderName = config.senderName.replace(/[\r\n<>]/g, '').trim() || 'Akhila & Akshay';
   const sender = `${senderName} <${config.senderEmail}>`;
   const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
@@ -598,7 +609,8 @@ async function sendGmailInviteEmail({ accessToken, config, guest, subject, html 
         from: sender,
         to: guest.email,
         subject,
-        html
+        html,
+        attachments
       })
     })
   });
@@ -666,6 +678,7 @@ async function handleBulkReminder(req, res) {
   if (sendingEnabled && withEmail.length > 0) {
     try {
       const accessToken = await getGmailAccessToken(gmailConfig);
+      const attachments = getReminderAttachments();
       for (const guest of withEmail) {
         const finalSubject = subject || `Wedding details reminder - Akhila & Akshay`;
         const calendarUrl = buildCalendarUrl(SITE_URL, guest);
@@ -676,7 +689,8 @@ async function handleBulkReminder(req, res) {
             config: gmailConfig,
             guest,
             subject: finalSubject,
-            html
+            html,
+            attachments
           });
           sent++;
           sentGuestIds.add(guest.id);
